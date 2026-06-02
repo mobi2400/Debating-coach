@@ -188,36 +188,77 @@ def quiz_mode(state: dict) -> dict:
     return state
 
 
-def bedtime_mode(state: dict) -> dict:
-    state["task_type"] = "bedtime"
-    today_log = get_today_log()
-
+def _heuristic_bedtime(today_log: list[dict]) -> str:
     if today_log:
         entry = today_log[0]
-        fact_list = entry.get("key_facts") or ["Remember one core fact from the digest."]
-        for_list = entry.get("arguments", {}).get("for") or ["Have one clean affirmative line ready."]
-        against_list = entry.get("arguments", {}).get("against") or ["Have one clean negative line ready."]
-        vocab_list = entry.get("vocab_words") or ["lucid"]
-        fact = fact_list[0]
-        argument_for = for_list[0]
-        argument_against = against_list[0]
-        phrase = entry.get("debate_angle", "Keep your framing tight and comparative.")[:140]
-        english_word = vocab_list[0]
+        fact = (entry.get("key_facts") or ["Remember one core fact from the digest."])[0]
+        argument_for = (entry.get("arguments", {}).get("for") or ["Have one clean affirmative line ready."])[0]
+        argument_against = (entry.get("arguments", {}).get("against") or ["Have one clean negative line ready."])[0]
+        vocab = (entry.get("vocab_words") or ["lucid"])[0]
+        phrase = (entry.get("debate_angle") or "Keep your framing tight and comparative.")[:140]
     else:
         fact = "No daily digest was stored today."
         argument_for = "Support the side with the clearest mechanism."
         argument_against = "Challenge the side with the weakest tradeoff analysis."
+        vocab = "lucid"
         phrase = "Sleep on the framing, not just the headlines."
-        english_word = "lucid"
 
-    message = (
+    return (
         "BEDTIME RECAP\n\n"
         f"Fact: {fact}\n"
         f"For: {argument_for}\n"
         f"Against: {argument_against}\n"
-        f"English: Use '{english_word}' once in a debate sentence tomorrow.\n"
+        f"English: Use '{vocab}' once in a debate sentence tomorrow.\n"
         f"Line: {phrase}"
     )
+
+
+def _llm_bedtime_compression(state: dict, today_log: list[dict]) -> str | None:
+    if not today_log:
+        return None
+
+    combined = "\n\n".join(
+        f"Topic: {entry.get('topic', '')}\n"
+        f"Summaries: {entry.get('summaries', '')}\n"
+        f"Facts: {entry.get('key_facts', [])}\n"
+        f"For: {entry.get('arguments', {}).get('for', [])}\n"
+        f"Against: {entry.get('arguments', {}).get('against', [])}\n"
+        f"Angle: {entry.get('debate_angle', '')}"
+        for entry in today_log
+    )
+
+    prompt = (
+        "The debate student did NOT read today's digest. They are in bed.\n"
+        "Compress it into a max 100-word recap. Casual, friendly tone, like a friend texting.\n\n"
+        f"Content:\n{combined}\n\n"
+        "Include ONLY:\n"
+        "1. The single most important fact (one sentence)\n"
+        "2. One argument FOR (one sentence)\n"
+        "3. One argument AGAINST (one sentence)\n"
+        "4. One killer debate line they can use tomorrow (one sentence)\n\n"
+        "Max 100 words total. No bullet symbols. No markdown. Plain text."
+    )
+
+    try:
+        llm = get_llm_with_fallback(state)
+        response = llm.invoke(prompt)
+        text = str(getattr(response, "content", response)).strip()
+        return text or None
+    except Exception as exc:
+        print(f"[Bedtime] LLM compression failed: {exc}")
+        return None
+
+
+def bedtime_mode(state: dict) -> dict:
+    state["task_type"] = "bedtime"
+    today_log = get_today_log()
+
+    llm_text = _llm_bedtime_compression(state, today_log)
+    if llm_text:
+        message = "No worries — here's the 2-min version:\n\n" + llm_text + "\n\nSleep well."
+    else:
+        message = _heuristic_bedtime(today_log)
+
     send_message(message)
     mark_as_studied(str(date.today()), False)
     state["studied_today"] = False
