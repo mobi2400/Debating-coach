@@ -1,9 +1,11 @@
 import argparse
 import json
+import os
 
 from agents.argue_node import argue_node
 from agents.coach_node import coach_node
 from agents.format_node import format_node
+from agents.night_agent import night_agent_node
 from agents.summarize_node import summarize_node
 from delivery.whatsapp import send_digest
 from graph import build_daily_graph
@@ -118,9 +120,17 @@ def run_format_smoke():
     print(f"Contains TOPIC header: {'TOPIC:' in result['final_doc']}")
 
 
+def run_night_smoke():
+    os.environ["DEV_MODE"] = "true"
+    state = _initial_state("night")
+    result = night_agent_node(state)
+    print(f"Studied today: {result['studied_today']}")
+    print(f"Quiz score: {result['quiz_score']}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["daily", "summarize-smoke", "argue-smoke", "coach-smoke", "format-smoke"], required=True)
+    parser.add_argument("--mode", choices=["daily", "summarize-smoke", "argue-smoke", "coach-smoke", "format-smoke", "night-smoke"], required=True)
     parser.add_argument("--topic", type=str, default=None)
     args = parser.parse_args()
 
@@ -134,3 +144,5 @@ if __name__ == "__main__":
         run_coach_smoke()
     elif args.mode == "format-smoke":
         run_format_smoke()
+    elif args.mode == "night-smoke":
+        run_night_smoke()

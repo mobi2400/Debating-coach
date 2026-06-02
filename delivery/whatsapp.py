@@ -70,3 +70,26 @@ def send_message(text: str):
 
 def send_digest(final_doc: str):
     send_message(final_doc)
+
+
+def wait_for_reply(timeout_minutes: int = 30) -> str:
+    if DEV_MODE or client is None or not FROM_NUMBER or not TO_NUMBER:
+        return "timeout"
+
+    deadline = time.time() + (timeout_minutes * 60)
+    last_check_sid = None
+
+    while time.time() < deadline:
+        try:
+            messages = client.messages.list(to=FROM_NUMBER, from_=TO_NUMBER, limit=1)
+            if messages:
+                message = messages[0]
+                if message.sid != last_check_sid:
+                    last_check_sid = message.sid
+                    return message.body.strip()
+        except Exception as exc:
+            print(f"[WhatsApp] Poll error: {exc}")
+
+        time.sleep(30)
+
+    return "timeout"
