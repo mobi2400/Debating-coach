@@ -2,6 +2,7 @@ import argparse
 import json
 
 from agents.argue_node import argue_node
+from agents.coach_node import coach_node
 from agents.summarize_node import summarize_node
 from graph import build_daily_graph
 
@@ -75,9 +76,24 @@ def run_argue_smoke():
     print(f"Middle present: {bool(result['arguments'].get('middle'))}")
 
 
+def run_coach_smoke():
+    state = _initial_state("feminism")
+    state["summaries"] = [
+        "- Equality debates turn on access to opportunity.\n- Economic autonomy strengthens broader freedom."
+    ]
+    state["arguments"] = {
+        "for": ["Feminism expands access and voice.", "It reduces structural barriers.", "It improves autonomy."],
+        "against": ["Implementation can create backlash.", "Bad policy design can misfire.", "Tradeoffs still matter."],
+        "middle": "Support the principle but scrutinize mechanisms.",
+    }
+    result = coach_node(state)
+    print(f"Coaching chars: {len(result['debate_angle'])}")
+    print(f"Contains UNIQUE ANGLE: {'UNIQUE ANGLE' in result['debate_angle']}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["daily", "summarize-smoke", "argue-smoke"], required=True)
+    parser.add_argument("--mode", choices=["daily", "summarize-smoke", "argue-smoke", "coach-smoke"], required=True)
     parser.add_argument("--topic", type=str, default=None)
     args = parser.parse_args()
 
@@ -87,3 +103,5 @@ if __name__ == "__main__":
         run_summarize_smoke()
     elif args.mode == "argue-smoke":
         run_argue_smoke()
+    elif args.mode == "coach-smoke":
+        run_coach_smoke()
