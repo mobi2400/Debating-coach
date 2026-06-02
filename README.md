@@ -268,17 +268,69 @@ debate-agent/
  
 ---
  
-## Build Order (10 Days)
- 
-| Days | What You Build |
-|---|---|
-| 1–2 | RAG pipeline — ingest PDFs, YouTube, websites. Build all 3 ChromaDB stores. |
-| 3 | Research tools — Tavily, Wikipedia, RSS, DuckDuckGo wrappers. |
-| 4 | Core infra — AgentState schema, LLM pool, router, fallback chain. |
-| 5 | Daily pipeline — all 8 nodes connected in LangGraph. |
-| 6 | WhatsApp delivery — Twilio sandbox, test digest formatting. |
-| 7 | Night Agent — yes/no detection, Quiz Agent, Bedtime Agent. |
-| 8 | Memory system — weekly_store.py, connect all agents to log. |
-| 9 | Weekend Agent — DeepSeek R1 filtering, Brain Upload format. |
-| 10 | GitHub Actions cron — all 3 schedules. End-to-end test + prompt tuning. |
- 
+```mermaid
+flowchart TD
+    A["Scheduler / Manual Run<br/>main.py --mode daily | night | weekend"] --> B{"Mode?"}
+
+    B -->|daily| D1["Load topic(s)<br/>topics.json or --topic override"]
+    B -->|night| N1["Night Agent"]
+    B -->|weekend| W1["Weekend Agent"]
+
+    D1 --> D2["Initialize AgentState"]
+    D2 --> D3["Research Node"]
+    D3 --> T1["Tavily"]
+    D3 --> T2["Wikipedia"]
+    D3 --> T3["RSS Feeds"]
+    D3 --> T4["DuckDuckGo"]
+
+    D3 --> D4["RAG Enrich Node"]
+    D4 --> K1["knowledge_db retrieval"]
+    D4 --> K2["reasoning_db retrieval"]
+
+    D4 --> D5["Filter Node"]
+    D5 --> R1["LLM Router + Fallback"]
+
+    D5 --> D6["Rank Node"]
+    D6 --> R1
+
+    D6 --> D7["Summarize Node"]
+    D7 --> R1
+    D7 --> M1["Save digest pieces to weekly memory"]
+
+    D7 --> D8["Argue Node"]
+    D8 --> R1
+    D8 --> G1["reasoning_db + knowledge_db"]
+
+    D8 --> D9["Coach Node"]
+    D9 --> R1
+    D9 --> S1["style_db retrieval"]
+
+    D9 --> D10["Format Node"]
+    D10 --> R1
+    D10 --> D11["WhatsApp Digest"]
+    D11 --> WA["Twilio WhatsApp Delivery"]
+
+    N1 --> N2["Send check-in:<br/>Did you study today?"]
+    N2 --> WA
+    N2 --> N3["Wait for reply"]
+
+    N3 --> Q{"Reply means yes?"}
+    Q -->|yes| N4["Quiz Mode"]
+    N4 --> L1["Load today's memory log"]
+    N4 --> R1
+    N4 --> WA
+    N4 --> N5["Score answers + mark studied"]
+
+    Q -->|no or timeout| N6["Bedtime Mode"]
+    N6 --> L1
+    N6 --> R1
+    N6 --> WA
+    N6 --> N7["Mark not studied"]
+
+    W1 --> W2["Load last 7 days from memory"]
+    W2 --> W3["Deep filtering of week content"]
+    W3 --> R1
+    W3 --> W4["Keep only:<br/>concepts, frameworks, stats, argument patterns"]
+    W4 --> W5["Build Weekly Brain Upload"]
+    W5 --> WA
+```
