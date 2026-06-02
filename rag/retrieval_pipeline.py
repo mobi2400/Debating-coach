@@ -1,10 +1,16 @@
 from pathlib import Path
 
 try:
-    from langchain.retrievers import EnsembleRetriever
+    from langchain_classic.retrievers import EnsembleRetriever
+except ImportError:  # pragma: no cover - exercised in bootstrap environments
+    try:
+        from langchain.retrievers import EnsembleRetriever
+    except ImportError:
+        EnsembleRetriever = None
+
+try:
     from langchain_community.retrievers import BM25Retriever
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
-    EnsembleRetriever = None
     BM25Retriever = None
 
 try:
@@ -71,6 +77,36 @@ def _load_vector_store(store_name: str):
     return None
 
 
+STORE_SECTION_LABELS = {
+    "knowledge_db": "DOMAIN KNOWLEDGE",
+    "reasoning_db": "DEBATE THEORY AND REASONING",
+    "style_db": "YOUR DEBATE STYLE",
+    "english_db": "ENGLISH VOCABULARY (Word Power Made Easy)",
+}
+
+
+def _vector_store_corpus(vector_store) -> tuple[list[str], list[dict]]:
+    """Pull (texts, metadatas) from a FAISS or Chroma vector store for BM25."""
+    # FAISS — read from docstore
+    docstore = getattr(vector_store, "docstore", None)
+    if docstore is not None and hasattr(docstore, "_dict"):
+        texts, metadatas = [], []
+        for document in docstore._dict.values():
+            texts.append(document.page_content)
+            metadatas.append(getattr(document, "metadata", {}) or {})
+        return texts, metadatas
+
+    # Chroma — get() returns {documents, metadatas}
+    if hasattr(vector_store, "get"):
+        try:
+            data = vector_store.get()
+            return list(data.get("documents") or []), list(data.get("metadatas") or [])
+        except Exception:
+            return [], []
+
+    return [], []
+
+
 def build_hybrid_retriever(store_name: str, k: int = 6):
     if EnsembleRetriever is None or BM25Retriever is None:
         return None
@@ -83,7 +119,13 @@ def build_hybrid_retriever(store_name: str, k: int = 6):
         search_type="similarity",
         search_kwargs={"k": k},
     )
-    bm25_retriever = BM25Retriever.from_texts([])
+
+    texts, metadatas = _vector_store_corpus(vector_store)
+    if not texts:
+        # No corpus available — degrade gracefully to vector-only retrieval.
+        return vector_retriever
+
+    bm25_retriever = BM25Retriever.from_texts(texts, metadatas=metadatas or None)
     bm25_retriever.k = k
     return EnsembleRetriever(
         retrievers=[bm25_retriever, vector_retriever],
@@ -104,9 +146,14 @@ def _build_retriever(store_name: str, config: dict):
     return vector_store.as_retriever(search_type=mode, search_kwargs=search_kwargs)
 
 
-def retrieve_for_node(node_name: str, query: str) -> list:
+def retrieve_for_node(node_name: str, query: str) -> dict:
+    """Returns {store_name: [chunks, ...]} so callers can preserve lane labels.
+
+    Plain list iteration still works because `format_retrieved_context` accepts
+    either a dict-of-lanes or a flat list.
+    """
     node_config = RETRIEVAL_CONFIG.get(node_name, {})
-    retrieved_chunks = []
+    retrieved: dict[str, list] = {}
 
     for store_name, config in node_config.items():
         retriever = _build_retriever(store_name, config)
@@ -114,24 +161,50 @@ def retrieve_for_node(node_name: str, query: str) -> list:
             continue
 
         try:
-            retrieved_chunks.extend(retriever.invoke(query))
+            retrieved[store_name] = retriever.invoke(query)
         except Exception as exc:
             print(f"[Retrieval] {store_name} failed for {node_name}: {exc}")
+            retrieved[store_name] = []
 
-    return retrieved_chunks
+    return retrieved
 
 
-def format_retrieved_context(chunks: list) -> str:
-    formatted = []
-    for index, chunk in enumerate(chunks, start=1):
-        if hasattr(chunk, "page_content"):
-            content = chunk.page_content
-            metadata = getattr(chunk, "metadata", {}) or {}
-        else:
-            content = chunk.get("page_content", "")
-            metadata = chunk.get("metadata", {}) or {}
-        source_label = metadata.get("source_path") or metadata.get("url") or metadata.get(
-            "video_id", "unknown"
+def _chunk_content(chunk) -> tuple[str, dict]:
+    if hasattr(chunk, "page_content"):
+        return chunk.page_content, getattr(chunk, "metadata", {}) or {}
+    return chunk.get("page_content", ""), chunk.get("metadata", {}) or {}
+
+
+def _format_lane(label: str, chunks: list) -> str:
+    if not chunks:
+        return ""
+    lines = [f"{label}:"]
+    for chunk in chunks:
+        content, metadata = _chunk_content(chunk)
+        source = (
+            metadata.get("source_path")
+            or metadata.get("url")
+            or metadata.get("video_id")
+            or "unknown"
         )
-        formatted.append(f"[Chunk {index}] Source: {source_label}\n{content}")
-    return "\n\n".join(formatted)
+        lines.append(f"[source: {source}]\n{content}")
+    return "\n---\n".join(lines)
+
+
+def format_retrieved_context(chunks) -> str:
+    """Format retrieved chunks for LLM prompts.
+
+    Accepts the dict shape returned by `retrieve_for_node` (preferred — it
+    keeps the per-lane DOMAIN KNOWLEDGE / DEBATE THEORY / YOUR DEBATE STYLE
+    headers the prompts depend on) or a flat list (legacy callers).
+    """
+    if isinstance(chunks, dict):
+        sections = []
+        for store_name, store_chunks in chunks.items():
+            label = STORE_SECTION_LABELS.get(store_name, store_name.upper())
+            block = _format_lane(label, store_chunks)
+            if block:
+                sections.append(block)
+        return "\n\n".join(sections).strip()
+
+    return _format_lane("RETRIEVED CONTEXT", list(chunks)).strip()

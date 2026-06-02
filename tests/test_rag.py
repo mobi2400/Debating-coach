@@ -36,7 +36,11 @@ def run_rag_smoke_test():
     print(f"Source validation issues: {len(issues)}")
 
     chunks = retrieve_for_node("coach_node", "feminism argument")
-    print(f"Retrieved chunks in current environment: {len(chunks)}")
+    total = sum(len(v) for v in chunks.values()) if isinstance(chunks, dict) else len(chunks)
+    print(f"Retrieved chunks in current environment: {total}")
+    if isinstance(chunks, dict):
+        for store, store_chunks in chunks.items():
+            print(f"  {store}: {len(store_chunks)} chunks")
 
     sample_context = format_retrieved_context(
         [
