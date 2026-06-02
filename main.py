@@ -3,6 +3,7 @@ import json
 
 from agents.argue_node import argue_node
 from agents.coach_node import coach_node
+from agents.format_node import format_node
 from agents.summarize_node import summarize_node
 from graph import build_daily_graph
 
@@ -91,9 +92,30 @@ def run_coach_smoke():
     print(f"Contains UNIQUE ANGLE: {'UNIQUE ANGLE' in result['debate_angle']}")
 
 
+def run_format_smoke():
+    state = _initial_state("feminism")
+    state["enriched_context"] = "Sample background context for the topic."
+    state["ranked_articles"] = [
+        {"title": "Sample article one", "url": "", "content": "", "source": "sample", "published": ""},
+        {"title": "Sample article two", "url": "", "content": "", "source": "sample", "published": ""},
+    ]
+    state["summaries"] = ["- Equality and access matter.\n- Framing determines the round."]
+    state["arguments"] = {
+        "for": ["It expands autonomy.", "It improves access.", "It changes institutions."],
+        "against": ["It can trigger backlash.", "Bad design has costs.", "Tradeoffs matter."],
+        "middle": "Support the principle, scrutinize the mechanism.",
+    }
+    state["debate_angle"] = "UNIQUE ANGLE: Win on implementation quality."
+    state["key_facts"] = ["Participation rates shape autonomy."]
+    state["concepts"] = ["Structural inequality"]
+    result = format_node(state)
+    print(f"Final doc chars: {len(result['final_doc'])}")
+    print(f"Contains TOPIC header: {'TOPIC:' in result['final_doc']}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["daily", "summarize-smoke", "argue-smoke", "coach-smoke"], required=True)
+    parser.add_argument("--mode", choices=["daily", "summarize-smoke", "argue-smoke", "coach-smoke", "format-smoke"], required=True)
     parser.add_argument("--topic", type=str, default=None)
     args = parser.parse_args()
 
@@ -105,3 +127,5 @@ if __name__ == "__main__":
         run_argue_smoke()
     elif args.mode == "coach-smoke":
         run_coach_smoke()
+    elif args.mode == "format-smoke":
+        run_format_smoke()
