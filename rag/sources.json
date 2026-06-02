@@ -13,11 +13,55 @@
     {
       "url": "https://www.idebate.net/",
       "site_type": "debate_theory"
+    },
+    {
+      "url": "https://aeon.co/",
+      "site_type": "news"
+    },
+    {
+      "url": "https://www.theatlantic.com/world/",
+      "site_type": "news"
+    },
+    {
+      "url": "https://www.epw.in/",
+      "site_type": "news"
+    },
+    {
+      "url": "https://medium.com/",
+      "site_type": "news"
+    },
+    {
+      "url": "https://www.aljazeera.com/",
+      "site_type": "news"
+    },
+    {
+      "url": "https://www.thehindu.com/",
+      "site_type": "news"
+    },
+    {
+      "url": "https://www.nytimes.com/",
+      "site_type": "news"
+    },
+    {
+      "url": "https://www.bbc.com/news",
+      "site_type": "news"
     }
   ],
   "youtube": [
     {
       "video_id": "dQw4w9WgXcQ",
+      "channel_type": "youtube_debate"
+    },
+    {
+      "channel_url": "https://www.youtube.com/@structural.reasons",
+      "channel_type": "youtube_debate"
+    },
+    {
+      "channel_url": "https://www.youtube.com/@TEDx",
+      "channel_type": "youtube_ted"
+    },
+    {
+      "channel_url": "https://www.youtube.com/@westernaustraliandebatingl4328/videos",
       "channel_type": "youtube_debate"
     }
   ]
