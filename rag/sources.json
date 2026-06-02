@@ -1,0 +1,24 @@
+{
+  "pdfs": [
+    {
+      "path": "knowledge_base/pdfs/debate_frameworks/sample_framework.pdf",
+      "doc_type": "debate_format"
+    },
+    {
+      "path": "knowledge_base/pdfs/topic_pdfs/sample_topic.pdf",
+      "doc_type": "topic_pdf"
+    }
+  ],
+  "websites": [
+    {
+      "url": "https://www.idebate.net/",
+      "site_type": "debate_theory"
+    }
+  ],
+  "youtube": [
+    {
+      "video_id": "dQw4w9WgXcQ",
+      "channel_type": "youtube_debate"
+    }
+  ]
+}
