@@ -83,12 +83,12 @@ LLM_POOL = {
         max_tokens=4096,
     ),
     "long_ctx": _gemini_model(
-        model="gemini-1.5-flash",
+        model="gemini-flash-latest",
         temperature=0.2,
         max_output_tokens=4096,
     ),
     "best": _gemini_model(
-        model="gemini-1.5-pro",
+        model="gemini-pro-latest",
         temperature=0.5,
         max_output_tokens=4096,
     ),

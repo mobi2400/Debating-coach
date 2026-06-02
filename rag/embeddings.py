@@ -6,7 +6,7 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
     GoogleGenerativeAIEmbeddings = None
 
 
-GEMINI_EMBED_MODEL = "models/text-embedding-004"
+GEMINI_EMBED_MODEL = "models/gemini-embedding-001"
 
 
 class MissingEmbeddings:
