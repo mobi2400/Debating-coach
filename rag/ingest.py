@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 try:
@@ -83,6 +84,38 @@ def ingest_pdf(path: str, doc_type: str) -> list:
         return []
 
 
+CHANNEL_VIDEO_LIMIT = 25
+
+
+def list_channel_videos(channel_url: str, limit: int = CHANNEL_VIDEO_LIMIT) -> list[str]:
+    if requests is None:
+        return []
+
+    url = channel_url.rstrip("/")
+    if not url.endswith("/videos"):
+        url = f"{url}/videos"
+
+    try:
+        response = requests.get(
+            url,
+            timeout=20,
+            headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "en-US,en;q=0.9"},
+        )
+        response.raise_for_status()
+    except Exception as exc:
+        print(f"[Ingest YouTube] Channel fetch failed for {channel_url}: {exc}")
+        return []
+
+    seen = []
+    for match in re.finditer(r'"videoId":"([A-Za-z0-9_-]{11})"', response.text):
+        vid = match.group(1)
+        if vid not in seen:
+            seen.append(vid)
+        if len(seen) >= limit:
+            break
+    return seen
+
+
 def ingest_youtube(video_id: str, channel_type: str) -> list:
     if YouTubeTranscriptApi is None:
         return []
@@ -164,7 +197,10 @@ def validate_sources(sources: dict) -> list[str]:
             issues.append(f"Invalid website source entry: {website}")
 
     for video in sources.get("youtube", []):
-        if "video_id" not in video or "channel_type" not in video:
+        if "channel_type" not in video:
+            issues.append(f"Invalid YouTube source entry: {video}")
+            continue
+        if "video_id" not in video and "channel_url" not in video:
             issues.append(f"Invalid YouTube source entry: {video}")
 
     return issues
@@ -195,12 +231,26 @@ def run_ingest() -> dict:
         )
 
     for video in sources.get("youtube", []):
-        all_docs.append(
-            {
-                "doc_type": video["channel_type"],
-                "documents": ingest_youtube(video["video_id"], video["channel_type"]),
-            }
-        )
+        channel_type = video.get("channel_type")
+        if not channel_type:
+            continue
+
+        if "video_id" in video:
+            video_ids = [video["video_id"]]
+        elif "channel_url" in video:
+            video_ids = list_channel_videos(video["channel_url"])
+            if not video_ids:
+                print(f"[Sources] No videos found for channel {video['channel_url']}")
+        else:
+            continue
+
+        for vid in video_ids:
+            all_docs.append(
+                {
+                    "doc_type": channel_type,
+                    "documents": ingest_youtube(vid, channel_type),
+                }
+            )
 
     return build_knowledge_base(all_docs)
 

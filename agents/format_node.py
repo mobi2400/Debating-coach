@@ -58,7 +58,10 @@ def format_node(state: dict) -> dict:
     prompt = (
         "Format the debate digest for WhatsApp.\n"
         "Do not use markdown symbols like # or **.\n"
-        "Use clean all-caps section labels, readable spacing, and concise phone-friendly output.\n\n"
+        "Use clean all-caps section labels, readable spacing, and concise phone-friendly output.\n"
+        "The very first line MUST be exactly: TOPIC: <TOPIC IN UPPERCASE>\n"
+        "Use these section headers verbatim and in this order: TOPIC:, BACKGROUND, TOP ARTICLES, "
+        "SUMMARY BULLETS, ARGUMENTS FOR, ARGUMENTS AGAINST, MIDDLE GROUND, COACH SECTION, KEY FACTS, CONCEPTS TO REMEMBER.\n\n"
         f"Topic: {state['topic']}\n"
         f"Ranked articles: {state.get('ranked_articles', [])}\n"
         f"Summaries: {state.get('summaries', [])}\n"

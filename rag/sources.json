@@ -1,11 +1,15 @@
 {
   "pdfs": [
     {
-      "path": "knowledge_base/pdfs/debate_frameworks/sample_framework.pdf",
+      "path": "knowledge_base/pdfs/debate_frameworks/BP_Terms_and_Phrases_2.pdf",
       "doc_type": "debate_format"
     },
     {
-      "path": "knowledge_base/pdfs/topic_pdfs/sample_topic.pdf",
+      "path": "knowledge_base/pdfs/debate_frameworks/1615811485Lewis, Norman  Word Power Made EasyKno.pdf",
+      "doc_type": "rhetoric"
+    },
+    {
+      "path": "knowledge_base/pdfs/topic_pdfs/FIRSTPRINCIPLESMADTrainingHandbook.pdf",
       "doc_type": "topic_pdf"
     }
   ],
@@ -49,10 +53,6 @@
   ],
   "youtube": [
     {
-      "video_id": "dQw4w9WgXcQ",
-      "channel_type": "youtube_debate"
-    },
-    {
       "channel_url": "https://www.youtube.com/@structural.reasons",
       "channel_type": "youtube_debate"
     },
@@ -61,7 +61,7 @@
       "channel_type": "youtube_ted"
     },
     {
-      "channel_url": "https://www.youtube.com/@westernaustraliandebatingl4328/videos",
+      "channel_url": "https://www.youtube.com/@westernaustraliandebatingl4328",
       "channel_type": "youtube_debate"
     }
   ]

@@ -50,10 +50,12 @@ style_splitter = _recursive_splitter(
     is_separator_regex=False,
 )
 
-reasoning_splitter = _token_splitter(
-    chunk_overlap=30,
-    tokens_per_chunk=180,
-    model_name="sentence-transformers/all-MiniLM-L6-v2",
+reasoning_splitter = _recursive_splitter(
+    chunk_size=720,
+    chunk_overlap=120,
+    separators=["\n\n", "\n", ". ", "! ", "? ", ", ", " "],
+    length_function=len,
+    is_separator_regex=False,
 )
 
 youtube_splitter = _recursive_splitter(

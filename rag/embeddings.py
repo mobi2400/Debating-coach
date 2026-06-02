@@ -1,7 +1,12 @@
+import os
+
 try:
-    from langchain_community.embeddings import HuggingFaceEmbeddings
+    from langchain_google_genai import GoogleGenerativeAIEmbeddings
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
-    HuggingFaceEmbeddings = None
+    GoogleGenerativeAIEmbeddings = None
+
+
+GEMINI_EMBED_MODEL = "models/text-embedding-004"
 
 
 class MissingEmbeddings:
@@ -10,29 +15,34 @@ class MissingEmbeddings:
 
     def embed_documents(self, _: list[str]):
         raise RuntimeError(
-            f"Embeddings model '{self.model_name}' is unavailable. Install the sentence "
-            "transformer dependencies from requirements.txt before building the vector stores."
+            f"Embeddings model '{self.model_name}' is unavailable. Install "
+            "langchain-google-genai and set GOOGLE_API_KEY to enable Gemini embeddings."
         )
 
     def embed_query(self, _: str):
         raise RuntimeError(
-            f"Embeddings model '{self.model_name}' is unavailable. Install the sentence "
-            "transformer dependencies from requirements.txt before querying the vector stores."
+            f"Embeddings model '{self.model_name}' is unavailable. Install "
+            "langchain-google-genai and set GOOGLE_API_KEY to enable Gemini embeddings."
         )
 
 
-def _hf_embeddings(model_name: str):
-    if HuggingFaceEmbeddings is None:
-        return MissingEmbeddings(model_name)
+def _gemini_embeddings(task_type: str | None = None):
+    if GoogleGenerativeAIEmbeddings is None:
+        return MissingEmbeddings(f"{GEMINI_EMBED_MODEL} ({task_type or 'default'})")
+    if not os.getenv("GOOGLE_API_KEY"):
+        return MissingEmbeddings(f"{GEMINI_EMBED_MODEL} (GOOGLE_API_KEY not set)")
     try:
-        return HuggingFaceEmbeddings(model_name=model_name)
+        kwargs = {"model": GEMINI_EMBED_MODEL}
+        if task_type:
+            kwargs["task_type"] = task_type
+        return GoogleGenerativeAIEmbeddings(**kwargs)
     except Exception as exc:  # pragma: no cover - environment-specific bootstrap failure
-        return MissingEmbeddings(f"{model_name} ({exc})")
+        return MissingEmbeddings(f"{GEMINI_EMBED_MODEL} ({exc})")
 
 
-quality_embeddings = _hf_embeddings("sentence-transformers/all-mpnet-base-v2")
-fast_embeddings = _hf_embeddings("sentence-transformers/all-MiniLM-L6-v2")
-qa_embeddings = _hf_embeddings("sentence-transformers/multi-qa-mpnet-base-dot-v1")
+quality_embeddings = _gemini_embeddings(task_type="retrieval_document")
+fast_embeddings = _gemini_embeddings(task_type="semantic_similarity")
+qa_embeddings = _gemini_embeddings(task_type="retrieval_query")
 
 EMBEDDING_MAP = {
     "knowledge_db": quality_embeddings,

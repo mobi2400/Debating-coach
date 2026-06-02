@@ -73,12 +73,12 @@ LLM_POOL = {
         max_tokens=4096,
     ),
     "structured": _groq_model(
-        model="mixtral-8x7b-32768",
+        model="llama-3.3-70b-versatile",
         temperature=0.1,
         max_tokens=4096,
     ),
     "reasoning": _groq_model(
-        model="deepseek-r1-distill-llama-70b",
+        model="llama-3.3-70b-versatile",
         temperature=0.4,
         max_tokens=4096,
     ),

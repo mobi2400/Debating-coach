@@ -10,7 +10,7 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
 
 load_dotenv()
 
-MAX_CHARS = 4000
+MAX_CHARS = 1500
 
 
 def _account_sid() -> str | None:
