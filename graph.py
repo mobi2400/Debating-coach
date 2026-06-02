@@ -13,6 +13,7 @@ from agents.rag_enrich_node import rag_enrich_node
 from agents.rank_node import rank_node
 from agents.research_node import research_node
 from agents.summarize_node import summarize_node
+from agents.weekend_agent import weekend_agent_node
 from core.state import AgentState
 
 
@@ -72,4 +73,15 @@ def build_night_graph():
     graph.add_node("night", night_agent_node)
     graph.set_entry_point("night")
     graph.add_edge("night", END)
+    return graph.compile()
+
+
+def build_weekend_graph():
+    if StateGraph is None:
+        return LocalSequentialGraph([weekend_agent_node])
+
+    graph = StateGraph(AgentState)
+    graph.add_node("weekend", weekend_agent_node)
+    graph.set_entry_point("weekend")
+    graph.add_edge("weekend", END)
     return graph.compile()

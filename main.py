@@ -7,8 +7,9 @@ from agents.coach_node import coach_node
 from agents.format_node import format_node
 from agents.night_agent import night_agent_node
 from agents.summarize_node import summarize_node
+from agents.weekend_agent import weekend_agent_node
 from delivery.whatsapp import send_digest
-from graph import build_daily_graph, build_night_graph
+from graph import build_daily_graph, build_night_graph, build_weekend_graph
 
 
 def _initial_state(topic: str) -> dict:
@@ -135,9 +136,22 @@ def run_night():
     print(f"Quiz score: {result['quiz_score']}")
 
 
+def run_weekend():
+    graph = build_weekend_graph()
+    result = graph.invoke(_initial_state("weekend"))
+    print(f"Weekend output chars: {len(result['final_doc'])}")
+
+
+def run_weekend_smoke():
+    state = _initial_state("weekend")
+    result = weekend_agent_node(state)
+    print(f"Weekend output chars: {len(result['final_doc'])}")
+    print(f"Contains weekly header: {'WEEKLY BRAIN UPLOAD' in result['final_doc']}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["daily", "night", "summarize-smoke", "argue-smoke", "coach-smoke", "format-smoke", "night-smoke"], required=True)
+    parser.add_argument("--mode", choices=["daily", "night", "weekend", "summarize-smoke", "argue-smoke", "coach-smoke", "format-smoke", "night-smoke", "weekend-smoke"], required=True)
     parser.add_argument("--topic", type=str, default=None)
     args = parser.parse_args()
 
@@ -145,6 +159,8 @@ if __name__ == "__main__":
         run_daily(args.topic)
     elif args.mode == "night":
         run_night()
+    elif args.mode == "weekend":
+        run_weekend()
     elif args.mode == "summarize-smoke":
         run_summarize_smoke()
     elif args.mode == "argue-smoke":
@@ -155,3 +171,5 @@ if __name__ == "__main__":
         run_format_smoke()
     elif args.mode == "night-smoke":
         run_night_smoke()
+    elif args.mode == "weekend-smoke":
+        run_weekend_smoke()
