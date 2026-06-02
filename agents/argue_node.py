@@ -1,0 +1,66 @@
+import json
+
+from core.fallback import get_llm_with_fallback
+from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
+
+
+def _heuristic_arguments(topic: str, summaries: list[str], rag_context: str) -> dict:
+    first_summary = summaries[0] if summaries else f"The topic {topic} has multiple legitimate framings."
+    second_summary = summaries[1] if len(summaries) > 1 else first_summary
+    context_hint = (
+        "Use the stored debate theory context to add warrants and weighing."
+        if rag_context
+        else "Support this with examples, mechanisms, and comparative impact."
+    )
+
+    return {
+        "for": [
+            f"{topic.title()} can be defended on fairness and access grounds.",
+            f"{first_summary.splitlines()[0].lstrip('- ').strip()}",
+            context_hint,
+        ],
+        "against": [
+            f"{topic.title()} can be challenged on implementation cost or tradeoff grounds.",
+            f"{second_summary.splitlines()[0].lstrip('- ').strip()}",
+            "Interrogate second-order effects, incentives, and unintended consequences.",
+        ],
+        "middle": (
+            f"A strong middle ground on {topic} accepts the principle but disputes scale, speed, "
+            "or institutional design."
+        ),
+    }
+
+
+def argue_node(state: dict) -> dict:
+    state["task_type"] = "argue"
+    summaries = state.get("summaries", [])
+    rag_chunks = retrieve_for_node("argue_node", state["topic"])
+    rag_context = format_retrieved_context(rag_chunks)
+
+    default_arguments = _heuristic_arguments(state["topic"], summaries, rag_context)
+
+    prompt = (
+        "You are generating debate arguments.\n"
+        "Return JSON only with keys: for, against, middle.\n"
+        "'for' and 'against' must each be arrays of exactly 3 arguments.\n"
+        "'middle' must be one nuanced bridging position.\n\n"
+        f"Topic: {state['topic']}\n"
+        f"Summaries: {json.dumps(summaries, ensure_ascii=False)}\n"
+        f"RAG context: {rag_context[:5000]}"
+    )
+
+    try:
+        llm = get_llm_with_fallback(state)
+        response = llm.invoke(prompt)
+        content = getattr(response, "content", response)
+        parsed = json.loads(str(content))
+
+        state["arguments"] = {
+            "for": parsed.get("for") or default_arguments["for"],
+            "against": parsed.get("against") or default_arguments["against"],
+            "middle": parsed.get("middle") or default_arguments["middle"],
+        }
+    except Exception:
+        state["arguments"] = default_arguments
+
+    return state

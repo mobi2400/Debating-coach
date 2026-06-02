@@ -1,6 +1,7 @@
 import argparse
 import json
 
+from agents.argue_node import argue_node
 from agents.summarize_node import summarize_node
 from graph import build_daily_graph
 
@@ -63,9 +64,20 @@ def run_summarize_smoke():
     print(f"Concepts: {len(result['concepts'])}")
 
 
+def run_argue_smoke():
+    state = _initial_state("feminism")
+    state["summaries"] = [
+        "- Equality claims often hinge on access to opportunity.\n- Economic participation shapes autonomy."
+    ]
+    result = argue_node(state)
+    print(f"FOR arguments: {len(result['arguments'].get('for', []))}")
+    print(f"AGAINST arguments: {len(result['arguments'].get('against', []))}")
+    print(f"Middle present: {bool(result['arguments'].get('middle'))}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["daily", "summarize-smoke"], required=True)
+    parser.add_argument("--mode", choices=["daily", "summarize-smoke", "argue-smoke"], required=True)
     parser.add_argument("--topic", type=str, default=None)
     args = parser.parse_args()
 
@@ -73,3 +85,5 @@ if __name__ == "__main__":
         run_daily(args.topic)
     elif args.mode == "summarize-smoke":
         run_summarize_smoke()
+    elif args.mode == "argue-smoke":
+        run_argue_smoke()
