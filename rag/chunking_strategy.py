@@ -28,7 +28,10 @@ def _recursive_splitter(**kwargs):
 def _token_splitter(**kwargs):
     if SentenceTransformersTokenTextSplitter is None:
         return MissingSplitter("SentenceTransformersTokenTextSplitter")
-    return SentenceTransformersTokenTextSplitter(**kwargs)
+    try:
+        return SentenceTransformersTokenTextSplitter(**kwargs)
+    except Exception as exc:  # pragma: no cover - environment-specific bootstrap failure
+        return MissingSplitter(f"SentenceTransformersTokenTextSplitter ({exc})")
 
 
 knowledge_splitter = _recursive_splitter(

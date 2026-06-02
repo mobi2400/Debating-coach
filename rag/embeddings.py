@@ -24,7 +24,10 @@ class MissingEmbeddings:
 def _hf_embeddings(model_name: str):
     if HuggingFaceEmbeddings is None:
         return MissingEmbeddings(model_name)
-    return HuggingFaceEmbeddings(model_name=model_name)
+    try:
+        return HuggingFaceEmbeddings(model_name=model_name)
+    except Exception as exc:  # pragma: no cover - environment-specific bootstrap failure
+        return MissingEmbeddings(f"{model_name} ({exc})")
 
 
 quality_embeddings = _hf_embeddings("sentence-transformers/all-mpnet-base-v2")
