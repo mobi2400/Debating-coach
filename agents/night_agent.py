@@ -1,3 +1,5 @@
+import json
+import re
 from datetime import date
 
 from core.fallback import get_llm_with_fallback
@@ -18,37 +20,80 @@ def _looks_like_yes(reply: str) -> bool:
     return any(token in value for token in YES_TOKENS)
 
 
-def _build_quiz_from_memory(today_log: list[dict]) -> list[str]:
+def _build_quiz_from_memory(today_log: list[dict]) -> list[dict]:
     topic = today_log[0]["topic"] if today_log else "today's debate topic"
     facts = today_log[0].get("key_facts", []) if today_log else []
     concepts = today_log[0].get("concepts", []) if today_log else []
 
     return [
-        f"1. What was the main topic studied today? Answer: {topic}",
-        f"2. Name one key fact from today. Hint: {facts[0] if facts else 'Use the strongest fact you remember.'}",
-        f"3. Name one concept worth remembering. Hint: {concepts[0] if concepts else 'Recall the core concept from the digest.'}",
-        "4. Give one argument in favor of the topic.",
-        "5. Give one argument against the topic.",
+        {"question": f"What was the main topic studied today?", "answer_hint": topic, "type": "factual"},
+        {
+            "question": "Name one key fact from today.",
+            "answer_hint": facts[0] if facts else "Use the strongest fact you remember.",
+            "type": "factual",
+        },
+        {
+            "question": "Name one concept worth remembering.",
+            "answer_hint": concepts[0] if concepts else "Recall the core concept from the digest.",
+            "type": "concept",
+        },
+        {"question": "Give one argument in favor of the topic.", "answer_hint": "Use a clear warrant.", "type": "argument"},
+        {"question": "Give one argument against the topic.", "answer_hint": "Challenge impact or mechanism.", "type": "argument"},
     ]
 
 
-def _score_quiz_response(reply: str) -> int:
+def _generate_quiz_with_llm(state: dict, today_log: list[dict], fallback_quiz: list[dict]) -> list[dict]:
+    prompt = (
+        "Generate a 5-question debate revision quiz.\n"
+        "Return JSON only as an array of objects with keys: question, answer_hint, type.\n"
+        "Include 2 factual, 2 argument, and 1 concept/application style question.\n\n"
+        f"Today's memory: {json.dumps(today_log, ensure_ascii=False)}"
+    )
+
+    try:
+        llm = get_llm_with_fallback(state)
+        response = llm.invoke(prompt)
+        content = getattr(response, "content", response)
+        parsed = json.loads(str(content))
+        if isinstance(parsed, list) and parsed:
+            return parsed[:5]
+    except Exception:
+        pass
+
+    return fallback_quiz
+
+
+def _render_quiz(questions: list[dict]) -> str:
+    lines = ["QUIZ MODE", ""]
+    for index, item in enumerate(questions, start=1):
+        lines.append(f"{index}. {item['question']}")
+        lines.append(f"   Hint: {item['answer_hint']}")
+    return "\n".join(lines)
+
+
+def _score_quiz_response(reply: str, questions: list[dict]) -> int:
     normalized = _normalize_reply(reply)
     if not normalized:
         return 0
-    return 80 if len(normalized.split()) >= 5 else 60
+
+    answer_lines = [line.strip() for line in re.split(r"[\n;]+", normalized) if line.strip()]
+    coverage = min(len(answer_lines), len(questions))
+    length_bonus = 1 if len(normalized.split()) >= 15 else 0
+    score = min(100, int((coverage / max(len(questions), 1)) * 80) + (length_bonus * 10))
+    return max(score, 20)
 
 
 def quiz_mode(state: dict) -> dict:
     state["task_type"] = "quiz"
     today_log = get_today_log()
-    questions = _build_quiz_from_memory(today_log)
-    send_message("QUIZ MODE\n\n" + "\n".join(questions))
+    fallback_quiz = _build_quiz_from_memory(today_log)
+    questions = _generate_quiz_with_llm(state, today_log, fallback_quiz)
+    send_message(_render_quiz(questions))
     answer_reply = wait_for_reply(10)
-    score = _score_quiz_response(answer_reply)
+    score = _score_quiz_response(answer_reply, questions)
     send_message(
         f"QUIZ RESULT\n\nScore: {score}%\n"
-        "Review both sides of the motion and tighten your warranting."
+        "Review both sides of the motion, tighten your warranting, and answer with clearer structure next time."
     )
     mark_as_studied(str(date.today()), True, score)
     state["studied_today"] = True
