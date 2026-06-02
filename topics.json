@@ -1,28 +1,558 @@
 {
-  "study_scope": "Study all topics available across the uploaded PDFs and knowledge base, but prioritize the topics listed below first.",
+  "version": "1.0",
+  "study_scope": "Study all topics available across the uploaded PDFs and knowledge base. Prioritize the priority_topics list first, then expand into subtopics and cross-domain intersections found in the PDFs. Every piece of content selected must serve either debate readiness or deep intellectual understanding.",
   "selection_lens": {
-    "primary_goal": "debate perspective",
-    "secondary_goal": "personal growth",
-    "pdf_guidance": "Look into the uploaded PDFs and their subtopics for directional guidance when selecting articles and news.",
-    "pdf_usage_rule": "Treat the PDF topics and subtopics as inspiration and a relevance map, not as a hard restriction.",
-    "article_policy": "Only keep fresh articles that help with argument building, framing, comparative analysis, values analysis, institutional critique, stronger speaking points, or intellectual growth.",
-    "learning_goal": "Use external news and essays to improve debate perspective, argument skill, and deep specification knowledge around the chosen domains."
+    "primary_goal": "debate perspective — argument construction, rebuttal preparation, framing, clash identification",
+    "secondary_goal": "personal growth — intellectual depth, values clarity, systems thinking, cross-domain pattern recognition",
+    "pdf_guidance": "Scan uploaded PDFs and their subtopics as a relevance map. Use them to identify which angles, frameworks, and sub-debates matter most within each priority topic.",
+    "pdf_usage_rule": "PDFs set the direction, not the ceiling. Go beyond them when external articles add argument value, comparative depth, or newer data.",
+    "article_selection_policy": {
+      "keep_if": [
+        "Directly helps build or refute a debate argument",
+        "Introduces a named concept, framework, or philosophical position worth knowing",
+        "Provides a statistic or data point that can be quoted in a debate",
+        "Offers a comparative angle (country vs country, policy vs policy, era vs era)",
+        "Reveals institutional critique or systemic pattern useful for analysis",
+        "Challenges a common assumption or popular narrative",
+        "Adds a values-based dimension (liberty vs equality, justice vs mercy, individual vs collective)",
+        "Gives historical context that keeps resurfacing in modern debates",
+        "Represents a perspective from a region or demographic underrepresented in mainstream debate prep"
+      ],
+      "discard_if": [
+        "Pure news report with no transferable insight",
+        "Event-specific with no broader implication",
+        "Repeats what is already covered by another selected article",
+        "Celebrity or entertainment content with no policy or values angle",
+        "Opinion piece with no evidence or reasoning structure",
+        "Anything that will be irrelevant in 6 months"
+      ]
+    },
+    "argument_quality_lens": {
+      "always_look_for": [
+        "The strongest version of the opposing argument (steelman, not strawman)",
+        "The value conflict at the root of the debate (not just the surface policy)",
+        "Who benefits and who loses — always run a stakeholder analysis",
+        "Historical precedent — has this been tried before, what happened",
+        "Comparative examples — how do different countries or systems handle this",
+        "Unintended consequences — what does the other side ignore",
+        "Definitional disputes — debates are often won by controlling definitions"
+      ]
+    },
+    "learning_goal": "Build an argument architecture, not just information. Every topic should leave the student with: a clear position they can defend, a clear position they can oppose, the 2-3 values in tension, and at least one argument the other side cannot easily dismiss."
   },
   "priority_topics": [
-    "international relations",
-    "geopolitics",
-    "finance",
-    "economics",
-    "feminism",
-    "tech and AI",
-    "relationships",
-    "free speech",
-    "state power",
-    "politics",
-    "free will",
-    "education",
-    "social justice",
-    "justice system",
-    "religion"
-  ]
+    {
+      "topic": "international relations",
+      "debate_frames": [
+        "sovereignty vs humanitarian intervention",
+        "multilateralism vs unilateralism",
+        "hard power vs soft power",
+        "global institutions — do they work or are they captured by powerful states"
+      ],
+      "key_concepts_to_know": [
+        "Westphalian sovereignty",
+        "Responsibility to Protect (R2P)",
+        "Realism vs Liberalism vs Constructivism",
+        "Balance of power theory",
+        "Hegemonic stability theory"
+      ],
+      "recurring_debate_motions": [
+        "This house believes the UN Security Council is no longer fit for purpose",
+        "This house would allow humanitarian intervention without UNSC approval",
+        "This house believes small states should align with regional powers not global ones"
+      ],
+      "watch_for": [
+        "Gaza, Ukraine, Taiwan as live case studies",
+        "Global South vs Western framing of any conflict",
+        "How sanctions work and when they fail"
+      ]
+    },
+    {
+      "topic": "geopolitics",
+      "debate_frames": [
+        "US-China competition — decoupling vs engagement",
+        "Rise of the Global South — new world order or old dependency",
+        "Resource geopolitics — energy, water, rare earth minerals",
+        "Technology as geopolitical weapon — chips, AI, satellites"
+      ],
+      "key_concepts_to_know": [
+        "Thucydides Trap",
+        "Monroe Doctrine and its modern equivalents",
+        "BRICS expansion and what it signals",
+        "Geoeconomics — using trade as foreign policy",
+        "Heartland theory vs Rimland theory"
+      ],
+      "recurring_debate_motions": [
+        "This house believes China's rise is a threat to the liberal world order",
+        "This house would sanction nations that undermine democratic norms",
+        "This house believes the era of American hegemony is over"
+      ],
+      "watch_for": [
+        "Any story about supply chain reshoring",
+        "Semiconductor and chip politics",
+        "Africa as a new arena of great power competition"
+      ]
+    },
+    {
+      "topic": "finance and economics",
+      "debate_frames": [
+        "free market vs state intervention",
+        "austerity vs stimulus — who does each protect",
+        "inequality — is it inevitable in capitalism",
+        "debt — when is government debt good vs dangerous",
+        "central bank independence — myth or reality"
+      ],
+      "key_concepts_to_know": [
+        "Keynesian vs Austrian vs MMT economics",
+        "Gini coefficient and how to read it",
+        "Moral hazard",
+        "Comparative advantage",
+        "Externalities — negative and positive",
+        "Purchasing power parity",
+        "Fiscal vs monetary policy — what each can and cannot do"
+      ],
+      "recurring_debate_motions": [
+        "This house would implement a Universal Basic Income",
+        "This house believes central banks should be democratically accountable",
+        "This house would abolish the IMF",
+        "This house believes free trade does more harm than good to developing nations"
+      ],
+      "watch_for": [
+        "Inflation and interest rate stories — understand the mechanism not just the number",
+        "Any story about a country defaulting on debt",
+        "Crypto regulation debates",
+        "Tax haven and wealth tax discussions"
+      ]
+    },
+    {
+      "topic": "feminism",
+      "debate_frames": [
+        "liberal feminism vs radical feminism vs intersectional feminism",
+        "gender equality vs gender equity — different goals different tools",
+        "feminism in the Global South — is western feminism colonial",
+        "men and masculinity — is feminism for everyone",
+        "legal equality vs social equality — laws exist but do they work"
+      ],
+      "key_concepts_to_know": [
+        "Intersectionality (Kimberle Crenshaw)",
+        "Patriarchy as a system vs individual sexism",
+        "Second vs third vs fourth wave feminism — what changed",
+        "Gender pay gap — different from earnings gap, know the distinction",
+        "Unpaid care work and how economists measure it",
+        "CEDAW — the international treaty on women's rights"
+      ],
+      "recurring_debate_motions": [
+        "This house believes affirmative action for women does more harm than good",
+        "This house would criminalise the purchase of sex",
+        "This house believes feminism has failed working-class women",
+        "This house supports gender quotas in corporate boardrooms"
+      ],
+      "watch_for": [
+        "Any supreme court ruling on reproductive rights globally",
+        "Honour-based violence debates",
+        "Women in conflict zones — as victims and as combatants",
+        "Pay transparency laws"
+      ]
+    },
+    {
+      "topic": "technology and AI",
+      "debate_frames": [
+        "AI regulation — who regulates, how, and who enforces",
+        "automation and jobs — displacement vs creation",
+        "surveillance capitalism — data as the new oil",
+        "open source vs closed AI — who controls the technology",
+        "AI in warfare — autonomous weapons, drones, decision-making"
+      ],
+      "key_concepts_to_know": [
+        "Alignment problem in AI",
+        "Algorithmic bias and how it compounds inequality",
+        "Network effects and why big tech becomes monopolistic",
+        "Digital public infrastructure vs private platform dominance",
+        "Turing Test and its limitations as a benchmark",
+        "Existential risk vs near-term harm — two different AI debates"
+      ],
+      "recurring_debate_motions": [
+        "This house would ban the development of artificial general intelligence",
+        "This house believes social media companies should be treated as publishers",
+        "This house would impose a global moratorium on autonomous weapons",
+        "This house believes big tech should be broken up"
+      ],
+      "watch_for": [
+        "Any AI regulation bill passing anywhere in the world",
+        "Deepfake and misinformation policy debates",
+        "AI in healthcare and who owns medical AI decisions",
+        "Copyright and AI-generated content disputes"
+      ]
+    },
+    {
+      "topic": "free speech",
+      "debate_frames": [
+        "absolute free speech vs harm-based limits — where is the line",
+        "who decides what is harmful — the state, platforms, or communities",
+        "hate speech laws — do they protect the vulnerable or silence dissent",
+        "deplatforming — censorship or community standards",
+        "academic freedom vs safe spaces on campus"
+      ],
+      "key_concepts_to_know": [
+        "Mill's harm principle",
+        "Marketplace of ideas — the liberal argument for free speech",
+        "Chilling effect — how vague laws suppress more than just bad speech",
+        "Brandenburg test (US) vs reasonable person test",
+        "Positive vs negative liberty as applied to speech",
+        "Seditious speech and how governments abuse the category"
+      ],
+      "recurring_debate_motions": [
+        "This house would ban hate speech",
+        "This house believes social media platforms should not moderate political speech",
+        "This house would hold platforms legally liable for user content",
+        "This house believes cancel culture is a threat to free society"
+      ],
+      "watch_for": [
+        "Any platform moderation policy change — X, Meta, YouTube",
+        "Government attempts to regulate speech online",
+        "Press freedom index releases",
+        "Whistleblower cases"
+      ]
+    },
+    {
+      "topic": "state power",
+      "debate_frames": [
+        "surveillance state — security vs privacy",
+        "emergency powers — when does the exception become the rule",
+        "state monopoly on violence — legitimate vs illegitimate use",
+        "federalism vs centralisation — who governs best",
+        "democratic backsliding — how democracies die slowly"
+      ],
+      "key_concepts_to_know": [
+        "Weber's definition of the state — monopoly on legitimate violence",
+        "Social contract theory — Hobbes vs Locke vs Rousseau",
+        "Separation of powers and why it erodes",
+        "Totalitarianism vs authoritarianism — different mechanisms",
+        "Rule of law vs rule by law — the critical distinction",
+        "Civil disobedience — Thoreau, Gandhi, MLK — the theory"
+      ],
+      "recurring_debate_motions": [
+        "This house believes mass surveillance is justified for national security",
+        "This house would limit emergency powers to 30 days without parliamentary renewal",
+        "This house believes civil disobedience is always justified against unjust laws",
+        "This house supports a constitutional right to bear arms"
+      ],
+      "watch_for": [
+        "Any country invoking emergency powers",
+        "Protests that governments label as security threats",
+        "Judicial independence cases",
+        "Sedition and anti-terror law misuse"
+      ]
+    },
+    {
+      "topic": "politics and democracy",
+      "debate_frames": [
+        "electoral systems — FPTP vs proportional representation vs ranked choice",
+        "political polarisation — causes and who benefits",
+        "populism — symptom of democratic failure or democracy working",
+        "money in politics — lobbying, campaign finance, oligarchy",
+        "compulsory voting — democratic duty or coercive participation"
+      ],
+      "key_concepts_to_know": [
+        "Duverger's Law — why FPTP produces two-party systems",
+        "Median voter theorem",
+        "Elite theory of democracy vs participatory theory",
+        "Overton window — how acceptable positions shift over time",
+        "Epistocracy — the argument for restricting voting to informed citizens",
+        "Deliberative democracy vs representative democracy"
+      ],
+      "recurring_debate_motions": [
+        "This house would introduce compulsory voting",
+        "This house believes political parties do more harm than good",
+        "This house would lower the voting age to 16",
+        "This house believes lobbying should be completely banned"
+      ],
+      "watch_for": [
+        "Any major election result and its systemic implications",
+        "Electoral reform movements",
+        "Authoritarian governments winning elections legitimately",
+        "Disinformation campaigns and election integrity"
+      ]
+    },
+    {
+      "topic": "free will and moral philosophy",
+      "debate_frames": [
+        "hard determinism vs compatibilism vs libertarian free will",
+        "moral responsibility — can we blame people if free will is limited",
+        "criminal justice implications — punishment vs rehabilitation",
+        "neuroscience vs philosophy — what brain scans actually prove",
+        "social determinism — does your background determine your choices"
+      ],
+      "key_concepts_to_know": [
+        "Hard determinism — every event including human choice is caused",
+        "Compatibilism — free will and determinism can both be true",
+        "Frankfurt cases — moral responsibility without alternative possibilities",
+        "Consequentialism vs deontology vs virtue ethics — the three frameworks",
+        "Trolley problem and what it actually tests",
+        "Is-ought problem (Hume)",
+        "Moral luck — why it matters for blame and praise"
+      ],
+      "recurring_debate_motions": [
+        "This house believes free will is an illusion",
+        "This house would abolish retributive punishment",
+        "This house believes we are not morally responsible for our actions",
+        "This house believes consequentialism is the correct moral framework"
+      ],
+      "watch_for": [
+        "Neuroscience studies on decision-making",
+        "Criminal sentencing reform debates",
+        "AI moral agency discussions — can an AI be responsible",
+        "Addiction and criminal justice intersection"
+      ]
+    },
+    {
+      "topic": "education",
+      "debate_frames": [
+        "purpose of education — economic productivity vs citizenship vs self-actualisation",
+        "private vs public education — who benefits from each",
+        "standardised testing — what it measures and what it misses",
+        "university education — credential vs knowledge vs class marker",
+        "curriculum wars — who decides what is taught and why it matters"
+      ],
+      "key_concepts_to_know": [
+        "Human capital theory — education as investment",
+        "Hidden curriculum — what schools teach without saying it",
+        "Credentialism vs actual skills — the gap",
+        "Freire's Pedagogy of the Oppressed — education as liberation",
+        "School-to-prison pipeline",
+        "PISA rankings — what they measure and their limitations"
+      ],
+      "recurring_debate_motions": [
+        "This house would abolish private schools",
+        "This house believes university education should be free",
+        "This house would replace standardised exams with continuous assessment",
+        "This house believes schools should teach financial literacy as a core subject"
+      ],
+      "watch_for": [
+        "Any country reforming its exam system",
+        "Student debt policy debates",
+        "AI in classrooms — personalized learning vs surveillance",
+        "Book banning and curriculum censorship cases"
+      ]
+    },
+    {
+      "topic": "social justice",
+      "debate_frames": [
+        "formal equality vs substantive equality — same rules vs same outcomes",
+        "affirmative action — remedy for historical injustice or new discrimination",
+        "reparations — who owes what to whom and how to calculate",
+        "identity politics — solidarity tool or division engine",
+        "privilege — useful concept or conversation-stopper"
+      ],
+      "key_concepts_to_know": [
+        "Rawls' veil of ignorance — the fairness test",
+        "Nozick's entitlement theory — the libertarian counter",
+        "Structural racism vs individual racism — why the distinction matters",
+        "Cultural appropriation vs cultural exchange — where the line is",
+        "Restorative justice vs retributive justice",
+        "The difference between equity, equality, and justice"
+      ],
+      "recurring_debate_motions": [
+        "This house believes affirmative action does more harm than good",
+        "This house would pay reparations for historical injustices",
+        "This house believes identity politics is tearing society apart",
+        "This house supports safe spaces in universities"
+      ],
+      "watch_for": [
+        "Supreme court rulings on race and gender",
+        "DEI rollbacks in corporations and universities",
+        "Any reparations commission or study",
+        "Hate crime legislation debates"
+      ]
+    },
+    {
+      "topic": "justice system and criminal law",
+      "debate_frames": [
+        "purpose of punishment — retribution vs rehabilitation vs deterrence vs incapacitation",
+        "mass incarceration — who it targets and why",
+        "death penalty — moral, practical, and racial arguments",
+        "prison abolition — radical but increasingly mainstream",
+        "prosecutorial discretion — too much power, too little accountability"
+      ],
+      "key_concepts_to_know": [
+        "Recidivism rates and what reduces them",
+        "Mandatory minimum sentencing — what it was supposed to do vs what it did",
+        "Restorative justice — theory and evidence",
+        "Presumption of innocence and where it breaks down",
+        "Wrongful conviction rate — how common, how preventable",
+        "Broken windows theory — its rise and fall"
+      ],
+      "recurring_debate_motions": [
+        "This house would abolish prisons",
+        "This house supports the death penalty for the most serious crimes",
+        "This house would decriminalise all drugs",
+        "This house believes the criminal justice system is institutionally racist"
+      ],
+      "watch_for": [
+        "Drug decriminalisation experiments worldwide",
+        "Prison reform legislation",
+        "Police accountability cases",
+        "Wrongful conviction exonerations — they carry enormous argument weight"
+      ]
+    },
+    {
+      "topic": "religion and society",
+      "debate_frames": [
+        "secularism vs religious state — who decides the public-private line",
+        "religious freedom vs minority rights — when they conflict",
+        "religion as social cohesion vs religion as control",
+        "blasphemy laws — free speech and religion in conflict",
+        "science and religion — not always in conflict, know the nuance"
+      ],
+      "key_concepts_to_know": [
+        "Secularism — French laïcité vs American wall of separation vs Indian model",
+        "Theocracy vs soft religious states",
+        "Liberation theology — religion as social justice tool",
+        "The secularisation thesis — and why it was wrong",
+        "Religious nationalism — when faith becomes political identity",
+        "Weber's Protestant work ethic — religion shaping economics"
+      ],
+      "recurring_debate_motions": [
+        "This house would ban religious symbols in public institutions",
+        "This house believes religion does more harm than good",
+        "This house would repeal blasphemy laws globally",
+        "This house believes the state should have no role in regulating religion"
+      ],
+      "watch_for": [
+        "Religion and politics intersecting in any election",
+        "Cases of religious exemptions from general laws",
+        "Interfaith conflict and how states respond",
+        "Conversion law debates"
+      ]
+    },
+    {
+      "topic": "relationships and society",
+      "debate_frames": [
+        "marriage as institution — state interest vs personal autonomy",
+        "family structure — nuclear family as norm or as ideological construct",
+        "dating apps and social atomisation — technology changing intimacy",
+        "hookup culture vs loneliness epidemic — connected but alone",
+        "polyamory, open relationships — should the state recognise them"
+      ],
+      "key_concepts_to_know": [
+        "Attachment theory — how early bonds shape adult relationships",
+        "Social capital — how relationships build or erode communities",
+        "Marriage penalty vs marriage bonus in tax systems",
+        "Loneliness as a public health crisis — the data",
+        "Domestic violence — power and control model",
+        "Companionate marriage vs arranged marriage — anthropological view"
+      ],
+      "recurring_debate_motions": [
+        "This house believes the state should not regulate marriage",
+        "This house believes social media is destroying romantic relationships",
+        "This house would legalise polyamorous civil unions",
+        "This house believes the nuclear family is an oppressive institution"
+      ],
+      "watch_for": [
+        "Marriage rate decline studies",
+        "Loneliness policy initiatives",
+        "Domestic violence law reforms",
+        "LGBTQ+ rights and relationship recognition globally"
+      ]
+    }
+  ],
+  "cross_domain_intersections": {
+    "description": "These combinations produce the richest debate arguments. Look for articles that sit at these intersections.",
+    "high_value_pairs": [
+      "technology + state power (surveillance, AI governance)",
+      "economics + social justice (wealth inequality, reparations cost-benefit)",
+      "religion + free speech (blasphemy, religious hate speech)",
+      "feminism + religion (dress codes, marriage law, religious exemptions)",
+      "geopolitics + technology (chip wars, AI arms race, cyber sovereignty)",
+      "criminal justice + social justice (race and incarceration)",
+      "education + economics (student debt, returns on degree)",
+      "free will + criminal justice (responsibility, punishment philosophy)",
+      "politics + finance (regulatory capture, revolving door)",
+      "international relations + human rights (sanctions, intervention)"
+    ]
+  },
+  "argument_building_framework": {
+    "description": "For every article ingested, the system should extract these dimensions.",
+    "dimensions": [
+      {
+        "name": "THE CLAIM",
+        "question": "What is the core argument this article is making?"
+      },
+      {
+        "name": "THE WARRANT",
+        "question": "What evidence or reasoning supports it?"
+      },
+      {
+        "name": "THE IMPACT",
+        "question": "Who is affected and how much does it matter?"
+      },
+      {
+        "name": "THE CLASH",
+        "question": "What value or fact does the opposing side contest?"
+      },
+      {
+        "name": "THE COMPARATIVE",
+        "question": "How does another country or time period handle this differently?"
+      },
+      {
+        "name": "THE STEELMAN",
+        "question": "What is the strongest version of the argument you disagree with?"
+      },
+      {
+        "name": "THE BLIND SPOT",
+        "question": "What does this article not address that a good rebuttal would target?"
+      }
+    ]
+  },
+  "weekly_knowledge_filter": {
+    "description": "Rules for the Weekend Agent when deciding what to keep forever.",
+    "keep_permanently": [
+      "Named concepts with an author or origin (intersectionality, Overton window, Thucydides Trap)",
+      "Philosophical frameworks and what they predict (Rawls says X, Nozick says Y)",
+      "Historical events that keep getting cited in debates",
+      "Statistics that are stable over time (incarceration rates, gender pay gap methodology)",
+      "Argument patterns by name (tu quoque, slippery slope, burden of proof)",
+      "Value hierarchies — when liberty clashes with equality, who wins and why",
+      "Definitions that are disputed — controlling the definition often wins the debate"
+    ],
+    "discard_permanently": [
+      "Specific election results with no broader systemic lesson",
+      "Corporate earnings or stock market movements",
+      "Celebrity controversies with no policy dimension",
+      "News events that are purely procedural with no normative angle"
+    ]
+  },
+  "debate_skill_targets": {
+    "description": "Beyond content, the system should help build these specific debate skills.",
+    "skills": [
+      {
+        "skill": "Definitional control",
+        "how": "For every topic, identify the 2-3 words whose definition controls the debate outcome"
+      },
+      {
+        "skill": "Stakeholder mapping",
+        "how": "Always ask — who benefits, who loses, who is invisible in this framing"
+      },
+      {
+        "skill": "Burden of proof setting",
+        "how": "Identify who carries the burden in each motion and whether that is fair"
+      },
+      {
+        "skill": "Values prioritisation",
+        "how": "Name the two values in tension and argue why yours should win in this context"
+      },
+      {
+        "skill": "Comparative analysis",
+        "how": "Have at least one country or historical example ready per argument"
+      },
+      {
+        "skill": "Concession and rebuild",
+        "how": "Learn to grant the opponent's point partially and show why it does not defeat your case"
+      },
+      {
+        "skill": "Impact calculus",
+        "how": "Argue probability, magnitude, and reversibility — not just that harm exists but how bad it is"
+      }
+    ]
+  }
 }

@@ -39,6 +39,7 @@ def _heuristic_format(state: dict) -> str:
     lines.extend(f"- {item}" for item in arguments.get("against", []))
     lines.extend(["", "MIDDLE GROUND", arguments.get("middle", "No middle-ground argument generated."), ""])
     lines.extend(["COACH SECTION", state.get("debate_angle", "No coaching block generated.")])
+    lines.extend(["", "ENGLISH POWER", state.get("english_lesson", "No English lesson generated.")])
 
     if state.get("key_facts"):
         lines.extend(["", "KEY FACTS"])
@@ -61,12 +62,13 @@ def format_node(state: dict) -> dict:
         "Use clean all-caps section labels, readable spacing, and concise phone-friendly output.\n"
         "The very first line MUST be exactly: TOPIC: <TOPIC IN UPPERCASE>\n"
         "Use these section headers verbatim and in this order: TOPIC:, BACKGROUND, TOP ARTICLES, "
-        "SUMMARY BULLETS, ARGUMENTS FOR, ARGUMENTS AGAINST, MIDDLE GROUND, COACH SECTION, KEY FACTS, CONCEPTS TO REMEMBER.\n\n"
+        "SUMMARY BULLETS, ARGUMENTS FOR, ARGUMENTS AGAINST, MIDDLE GROUND, COACH SECTION, ENGLISH POWER, KEY FACTS, CONCEPTS TO REMEMBER.\n\n"
         f"Topic: {state['topic']}\n"
         f"Ranked articles: {state.get('ranked_articles', [])}\n"
         f"Summaries: {state.get('summaries', [])}\n"
         f"Arguments: {state.get('arguments', {})}\n"
         f"Debate coaching: {state.get('debate_angle', '')}\n"
+        f"English lesson: {state.get('english_lesson', '')}\n"
         f"Key facts: {state.get('key_facts', [])}\n"
         f"Concepts: {state.get('concepts', [])}"
     )
@@ -87,6 +89,9 @@ def format_node(state: dict) -> dict:
             "key_facts": state.get("key_facts", []),
             "concepts": state.get("concepts", []),
             "debate_angle": state.get("debate_angle", ""),
+            "english_lesson": state.get("english_lesson", ""),
+            "vocab_words": state.get("vocab_words", []),
+            "word_roots": state.get("word_roots", []),
         },
     )
 

@@ -24,6 +24,7 @@ def _build_quiz_from_memory(today_log: list[dict]) -> list[dict]:
     topic = today_log[0]["topic"] if today_log else "today's debate topic"
     facts = today_log[0].get("key_facts", []) if today_log else []
     concepts = today_log[0].get("concepts", []) if today_log else []
+    vocab_words = today_log[0].get("vocab_words", []) if today_log else []
 
     return [
         {"question": f"What was the main topic studied today?", "answer_hint": topic, "type": "factual"},
@@ -37,8 +38,12 @@ def _build_quiz_from_memory(today_log: list[dict]) -> list[dict]:
             "answer_hint": concepts[0] if concepts else "Recall the core concept from the digest.",
             "type": "concept",
         },
+        {
+            "question": "Which English word or root was taught today, and what does it help you express?",
+            "answer_hint": vocab_words[0] if vocab_words else "Recall the English Power section.",
+            "type": "english",
+        },
         {"question": "Give one argument in favor of the topic.", "answer_hint": "Use a clear warrant.", "type": "argument"},
-        {"question": "Give one argument against the topic.", "answer_hint": "Challenge impact or mechanism.", "type": "argument"},
     ]
 
 
@@ -110,21 +115,25 @@ def bedtime_mode(state: dict) -> dict:
         fact_list = entry.get("key_facts") or ["Remember one core fact from the digest."]
         for_list = entry.get("arguments", {}).get("for") or ["Have one clean affirmative line ready."]
         against_list = entry.get("arguments", {}).get("against") or ["Have one clean negative line ready."]
+        vocab_list = entry.get("vocab_words") or ["lucid"]
         fact = fact_list[0]
         argument_for = for_list[0]
         argument_against = against_list[0]
         phrase = entry.get("debate_angle", "Keep your framing tight and comparative.")[:140]
+        english_word = vocab_list[0]
     else:
         fact = "No daily digest was stored today."
         argument_for = "Support the side with the clearest mechanism."
         argument_against = "Challenge the side with the weakest tradeoff analysis."
         phrase = "Sleep on the framing, not just the headlines."
+        english_word = "lucid"
 
     message = (
         "BEDTIME RECAP\n\n"
         f"Fact: {fact}\n"
         f"For: {argument_for}\n"
         f"Against: {argument_against}\n"
+        f"English: Use '{english_word}' once in a debate sentence tomorrow.\n"
         f"Line: {phrase}"
     )
     send_message(message)

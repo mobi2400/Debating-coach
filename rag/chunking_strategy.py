@@ -66,6 +66,14 @@ youtube_splitter = _recursive_splitter(
     is_separator_regex=False,
 )
 
+english_splitter = _recursive_splitter(
+    chunk_size=260,
+    chunk_overlap=40,
+    separators=["\n\n", "\n", "; ", ". ", ", ", " "],
+    length_function=len,
+    is_separator_regex=False,
+)
+
 SPLITTER_MAP = {
     "topic_pdf": knowledge_splitter,
     "news": knowledge_splitter,
@@ -76,6 +84,7 @@ SPLITTER_MAP = {
     "debate_theory": reasoning_splitter,
     "rhetoric": reasoning_splitter,
     "argument_theory": reasoning_splitter,
+    "english_vocab": english_splitter,
     "youtube_debate": youtube_splitter,
     "youtube_ted": youtube_splitter,
 }

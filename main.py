@@ -4,6 +4,7 @@ import os
 
 from agents.argue_node import argue_node
 from agents.coach_node import coach_node
+from agents.english_coach_node import english_coach_node
 from agents.format_node import format_node
 from agents.night_agent import night_agent_node
 from agents.summarize_node import summarize_node
@@ -38,6 +39,9 @@ def _initial_state(topic: str) -> dict:
         "concepts": [],
         "arguments": {},
         "debate_angle": "",
+        "english_lesson": "",
+        "vocab_words": [],
+        "word_roots": [],
         "final_doc": "",
         "task_type": "fetch",
         "article_length": 0,
@@ -118,6 +122,13 @@ def run_coach_smoke():
     print(f"Contains UNIQUE ANGLE: {'UNIQUE ANGLE' in result['debate_angle']}")
 
 
+def run_english_smoke():
+    state = _initial_state("geopolitics")
+    result = english_coach_node(state)
+    print(f"English lesson chars: {len(result['english_lesson'])}")
+    print(f"Vocab words: {len(result['vocab_words'])}")
+
+
 def run_format_smoke():
     state = _initial_state("feminism")
     state["enriched_context"] = "Sample background context for the topic."
@@ -132,6 +143,9 @@ def run_format_smoke():
         "middle": "Support the principle, scrutinize the mechanism.",
     }
     state["debate_angle"] = "UNIQUE ANGLE: Win on implementation quality."
+    state["english_lesson"] = "ENGLISH POWER\nWord set: lucid, precise, nuance"
+    state["vocab_words"] = ["lucid", "precise", "nuance"]
+    state["word_roots"] = ["dict", "cred"]
     state["key_facts"] = ["Participation rates shape autonomy."]
     state["concepts"] = ["Structural inequality"]
     result = format_node(state)
@@ -169,7 +183,7 @@ def run_weekend_smoke():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["daily", "night", "weekend", "summarize-smoke", "argue-smoke", "coach-smoke", "format-smoke", "night-smoke", "weekend-smoke"], required=True)
+    parser.add_argument("--mode", choices=["daily", "night", "weekend", "summarize-smoke", "argue-smoke", "coach-smoke", "english-smoke", "format-smoke", "night-smoke", "weekend-smoke"], required=True)
     parser.add_argument("--topic", type=str, default=None)
     args = parser.parse_args()
 
@@ -185,6 +199,8 @@ if __name__ == "__main__":
         run_argue_smoke()
     elif args.mode == "coach-smoke":
         run_coach_smoke()
+    elif args.mode == "english-smoke":
+        run_english_smoke()
     elif args.mode == "format-smoke":
         run_format_smoke()
     elif args.mode == "night-smoke":

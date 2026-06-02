@@ -24,6 +24,9 @@ class AgentState(TypedDict):
 
     # Coach layer
     debate_angle: str
+    english_lesson: str
+    vocab_words: list
+    word_roots: list
 
     # Format layer
     final_doc: str

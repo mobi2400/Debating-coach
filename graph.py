@@ -6,6 +6,7 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
 
 from agents.argue_node import argue_node
 from agents.coach_node import coach_node
+from agents.english_coach_node import english_coach_node
 from agents.filter_node import filter_node
 from agents.format_node import format_node
 from agents.night_agent import night_agent_node
@@ -38,6 +39,7 @@ def build_daily_graph():
                 summarize_node,
                 argue_node,
                 coach_node,
+                english_coach_node,
                 format_node,
             ]
         )
@@ -50,6 +52,7 @@ def build_daily_graph():
     graph.add_node("summarize", summarize_node)
     graph.add_node("argue", argue_node)
     graph.add_node("coach", coach_node)
+    graph.add_node("english_coach", english_coach_node)
     graph.add_node("format", format_node)
 
     graph.set_entry_point("research")
@@ -59,7 +62,8 @@ def build_daily_graph():
     graph.add_edge("rank", "summarize")
     graph.add_edge("summarize", "argue")
     graph.add_edge("argue", "coach")
-    graph.add_edge("coach", "format")
+    graph.add_edge("coach", "english_coach")
+    graph.add_edge("english_coach", "format")
     graph.add_edge("format", END)
 
     return graph.compile()

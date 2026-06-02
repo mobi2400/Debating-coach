@@ -23,14 +23,25 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
     DefaultEmbeddingFunction = None
 
 try:
-    from langchain.schema import Document
+    from langchain_core.documents import Document
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
-    Document = None
+    try:
+        from langchain.schema import Document
+    except ImportError:
+        Document = None
 
 try:
-    from langchain_community.vectorstores import Chroma
+    from langchain_community.vectorstores import FAISS
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
-    Chroma = None
+    FAISS = None
+
+try:
+    from langchain_chroma import Chroma
+except ImportError:  # pragma: no cover - exercised in bootstrap environments
+    try:
+        from langchain_community.vectorstores import Chroma
+    except ImportError:
+        Chroma = None
 
 try:
     from youtube_transcript_api import YouTubeTranscriptApi
@@ -42,6 +53,7 @@ from rag.embeddings import EMBEDDING_MAP
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DIR = BASE_DIR / "chroma"
+FAISS_DIR = BASE_DIR / "faiss"
 SOURCES_FILE = BASE_DIR / "rag" / "sources.json"
 
 STORE_ROUTING = {
@@ -54,6 +66,7 @@ STORE_ROUTING = {
     "debate_theory": "reasoning_db",
     "rhetoric": "reasoning_db",
     "argument_theory": "reasoning_db",
+    "english_vocab": "english_db",
     "youtube_debate": "reasoning_db",
     "youtube_ted": "reasoning_db",
 }
@@ -153,10 +166,10 @@ def _resolve_store_name(doc_type: str) -> str:
 
 
 def build_knowledge_base(all_docs: list[dict]) -> dict:
-    if Chroma is None:
+    if FAISS is None and Chroma is None:
         return {}
 
-    grouped_docs = {"knowledge_db": [], "style_db": [], "reasoning_db": []}
+    grouped_docs = {"knowledge_db": [], "style_db": [], "reasoning_db": [], "english_db": []}
     for doc in all_docs:
         grouped_docs[_resolve_store_name(doc["doc_type"])].extend(doc["documents"])
 
@@ -165,13 +178,23 @@ def build_knowledge_base(all_docs: list[dict]) -> dict:
         if not documents:
             continue
 
-        persist_dir = CHROMA_DIR / store_name
-        persist_dir.mkdir(parents=True, exist_ok=True)
-        stores[store_name] = Chroma.from_documents(
-            documents=documents,
-            embedding=EMBEDDING_MAP[store_name],
-            persist_directory=str(persist_dir),
-        )
+        if FAISS is not None:
+            persist_dir = FAISS_DIR / store_name
+            persist_dir.mkdir(parents=True, exist_ok=True)
+            store = FAISS.from_documents(
+                documents=documents,
+                embedding=EMBEDDING_MAP[store_name],
+            )
+            store.save_local(str(persist_dir))
+            stores[store_name] = store
+        else:
+            persist_dir = CHROMA_DIR / store_name
+            persist_dir.mkdir(parents=True, exist_ok=True)
+            stores[store_name] = Chroma.from_documents(
+                documents=documents,
+                embedding=EMBEDDING_MAP[store_name],
+                persist_directory=str(persist_dir),
+            )
 
     return stores
 

@@ -48,4 +48,5 @@ EMBEDDING_MAP = {
     "knowledge_db": quality_embeddings,
     "style_db": fast_embeddings,
     "reasoning_db": qa_embeddings,
+    "english_db": fast_embeddings,
 }

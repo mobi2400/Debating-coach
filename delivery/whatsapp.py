@@ -1,4 +1,5 @@
 import os
+import re
 import time
 
 from dotenv import load_dotenv
@@ -11,6 +12,7 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
 load_dotenv()
 
 MAX_CHARS = 1500
+SECTION_HEADER_PATTERN = re.compile(r"^(TOPIC:.*|[A-Z][A-Z ]+)$")
 
 
 def _account_sid() -> str | None:
@@ -40,16 +42,67 @@ def _build_client():
     return Client(sid, token)
 
 
-def _split_message(text: str) -> list[str]:
+def _split_oversized_section(section: str) -> list[str]:
     parts = []
-    while len(text) > MAX_CHARS:
-        split_at = text.rfind("\n", 0, MAX_CHARS)
+    remaining = section.strip()
+
+    while len(remaining) > MAX_CHARS:
+        split_at = remaining.rfind("\n", 0, MAX_CHARS)
         if split_at == -1:
             split_at = MAX_CHARS
-        parts.append(text[:split_at])
-        text = text[split_at:].lstrip()
-    if text:
-        parts.append(text)
+        parts.append(remaining[:split_at].strip())
+        remaining = remaining[split_at:].lstrip()
+
+    if remaining:
+        parts.append(remaining)
+
+    return parts
+
+
+def _extract_sections(text: str) -> list[str]:
+    sections = []
+    current_lines = []
+
+    for line in text.splitlines():
+        if SECTION_HEADER_PATTERN.match(line.strip()) and current_lines:
+            sections.append("\n".join(current_lines).strip())
+            current_lines = [line]
+        else:
+            current_lines.append(line)
+
+    if current_lines:
+        sections.append("\n".join(current_lines).strip())
+
+    return [section for section in sections if section]
+
+
+def _split_message(text: str) -> list[str]:
+    sections = _extract_sections(text)
+    if not sections:
+        return _split_oversized_section(text)
+
+    parts = []
+    current_part = ""
+
+    for section in sections:
+        if len(section) > MAX_CHARS:
+            if current_part:
+                parts.append(current_part.strip())
+                current_part = ""
+            parts.extend(_split_oversized_section(section))
+            continue
+
+        candidate = f"{current_part}\n\n{section}".strip() if current_part else section
+        if len(candidate) <= MAX_CHARS:
+            current_part = candidate
+        else:
+            if current_part:
+                parts.append(current_part.strip())
+            current_part = section
+
+    if current_part:
+        parts.append(current_part.strip())
+
     return parts
 
 

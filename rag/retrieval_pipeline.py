@@ -3,16 +3,25 @@ from pathlib import Path
 try:
     from langchain.retrievers import EnsembleRetriever
     from langchain_community.retrievers import BM25Retriever
-    from langchain_community.vectorstores import Chroma
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
     EnsembleRetriever = None
     BM25Retriever = None
+
+try:
+    from langchain_community.vectorstores import FAISS
+except ImportError:  # pragma: no cover - exercised in bootstrap environments
+    FAISS = None
+
+try:
+    from langchain_community.vectorstores import Chroma
+except ImportError:  # pragma: no cover - exercised in bootstrap environments
     Chroma = None
 
 from rag.embeddings import EMBEDDING_MAP
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DIR = BASE_DIR / "chroma"
+FAISS_DIR = BASE_DIR / "faiss"
 
 RETRIEVAL_CONFIG = {
     "rag_enrich_node": {
@@ -29,21 +38,37 @@ RETRIEVAL_CONFIG = {
         "reasoning_db": {"mode": "mmr", "k": 3, "fetch_k": 25, "lambda_mult": 0.65},
         "style_db": {"mode": "similarity_score_threshold", "k": 5, "score_threshold": 0.72},
     },
+    "english_coach_node": {
+        "english_db": {"mode": "similarity", "k": 6},
+    },
 }
 
 
 def _load_vector_store(store_name: str):
-    if Chroma is None:
+    embedding = EMBEDDING_MAP.get(store_name)
+    if embedding is None:
         return None
 
-    persist_directory = CHROMA_DIR / store_name
-    if not persist_directory.exists():
-        return None
+    faiss_dir = FAISS_DIR / store_name
+    if FAISS is not None and faiss_dir.exists() and any(faiss_dir.iterdir()):
+        try:
+            return FAISS.load_local(
+                str(faiss_dir),
+                embedding,
+                allow_dangerous_deserialization=True,
+            )
+        except Exception:
+            pass
 
-    return Chroma(
-        persist_directory=str(persist_directory),
-        embedding_function=EMBEDDING_MAP[store_name],
-    )
+    if Chroma is not None:
+        chroma_dir = CHROMA_DIR / store_name
+        if chroma_dir.exists():
+            return Chroma(
+                persist_directory=str(chroma_dir),
+                embedding_function=embedding,
+            )
+
+    return None
 
 
 def build_hybrid_retriever(store_name: str, k: int = 6):
