@@ -192,6 +192,41 @@ TWILIO_AUTH_TOKEN=      # twilio.com
 TWILIO_WHATSAPP_FROM=   # Twilio sandbox number
 YOUR_WHATSAPP_NUMBER=   # Your number with country code
 ```
+
+## Quick Start
+
+1. Create a virtual environment.
+2. Install dependencies with `uv`:
+
+```bash
+uv pip install --system -r requirements.txt
+```
+
+3. Fill in `.env`.
+4. Run a local smoke path:
+
+```bash
+python main.py --mode daily --topic feminism
+python main.py --mode night
+python main.py --mode weekend
+```
+
+## What Works Right Now
+
+- Daily graph is wired end to end through delivery
+- Night graph is wired end to end through reply handling fallback
+- Weekend graph is wired end to end through weekly upload formatting
+- All three modes degrade safely when live providers are not installed or configured
+
+## Current Validation Commands
+
+```bash
+python tests/test_router.py
+python tests/test_tools.py
+python tests/test_rag.py
+python tests/test_memory.py
+python tests/test_weekend.py
+```
  
 ---
  
