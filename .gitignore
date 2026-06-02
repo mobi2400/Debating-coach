@@ -1,5 +1,6 @@
 .env
 chroma/
+faiss/
 memory/weekly_log.json
 __pycache__/
 *.pyc
