@@ -124,8 +124,12 @@ def retrieve_for_node(node_name: str, query: str) -> list:
 def format_retrieved_context(chunks: list) -> str:
     formatted = []
     for index, chunk in enumerate(chunks, start=1):
-        content = getattr(chunk, "page_content", chunk.get("page_content", ""))
-        metadata = getattr(chunk, "metadata", chunk.get("metadata", {}))
+        if hasattr(chunk, "page_content"):
+            content = chunk.page_content
+            metadata = getattr(chunk, "metadata", {}) or {}
+        else:
+            content = chunk.get("page_content", "")
+            metadata = chunk.get("metadata", {}) or {}
         source_label = metadata.get("source_path") or metadata.get("url") or metadata.get(
             "video_id", "unknown"
         )
