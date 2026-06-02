@@ -20,6 +20,8 @@ on:
 jobs:
   run-agent:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
     steps:
       - name: Checkout repo
@@ -48,6 +50,13 @@ jobs:
           else
             echo "mode=weekend" >> $GITHUB_OUTPUT
           fi
+
+      - name: Print run context
+        run: |
+          echo "event=${{ github.event_name }}"
+          echo "mode=${{ steps.mode.outputs.mode }}"
+          echo "python=$(python --version)"
+          echo "uv=$(uv --version)"
 
       - name: Run DebateIQ
         env:
