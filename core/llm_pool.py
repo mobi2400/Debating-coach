@@ -30,23 +30,35 @@ class MissingDependencyLLM:
 def _groq_model(model: str, temperature: float, max_tokens: int):
     if ChatGroq is None:
         return MissingDependencyLLM("Groq", "langchain-groq")
-    return ChatGroq(
-        model=model,
-        temperature=temperature,
-        max_tokens=max_tokens,
-        groq_api_key=os.getenv("GROQ_API_KEY"),
-    )
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    if not groq_api_key:
+        return MissingDependencyLLM("Groq", "GROQ_API_KEY environment variable")
+    try:
+        return ChatGroq(
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            groq_api_key=groq_api_key,
+        )
+    except Exception as exc:  # pragma: no cover - environment-specific bootstrap failure
+        return MissingDependencyLLM("Groq", f"langchain-groq ({exc})")
 
 
 def _gemini_model(model: str, temperature: float, max_output_tokens: int):
     if ChatGoogleGenerativeAI is None:
         return MissingDependencyLLM("Google Gemini", "langchain-google-genai")
-    return ChatGoogleGenerativeAI(
-        model=model,
-        temperature=temperature,
-        max_output_tokens=max_output_tokens,
-        google_api_key=os.getenv("GOOGLE_API_KEY"),
-    )
+    google_api_key = os.getenv("GOOGLE_API_KEY")
+    if not google_api_key:
+        return MissingDependencyLLM("Google Gemini", "GOOGLE_API_KEY environment variable")
+    try:
+        return ChatGoogleGenerativeAI(
+            model=model,
+            temperature=temperature,
+            max_output_tokens=max_output_tokens,
+            google_api_key=google_api_key,
+        )
+    except Exception as exc:  # pragma: no cover - environment-specific bootstrap failure
+        return MissingDependencyLLM("Google Gemini", f"langchain-google-genai ({exc})")
 
 
 LLM_POOL = {
