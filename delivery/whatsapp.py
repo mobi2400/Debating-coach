@@ -10,22 +10,34 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
 
 load_dotenv()
 
-ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-FROM_NUMBER = os.getenv("TWILIO_WHATSAPP_FROM")
-TO_NUMBER = os.getenv("YOUR_WHATSAPP_NUMBER")
-DEV_MODE = os.getenv("DEV_MODE", "false").lower() == "true"
-
 MAX_CHARS = 4000
 
 
+def _account_sid() -> str | None:
+    return os.getenv("TWILIO_ACCOUNT_SID")
+
+
+def _auth_token() -> str | None:
+    return os.getenv("TWILIO_AUTH_TOKEN")
+
+
+def _from_number() -> str | None:
+    return os.getenv("TWILIO_WHATSAPP_FROM")
+
+
+def _to_number() -> str | None:
+    return os.getenv("YOUR_WHATSAPP_NUMBER")
+
+
+def _dev_mode() -> bool:
+    return os.getenv("DEV_MODE", "false").lower() == "true"
+
+
 def _build_client():
-    if Client is None or not ACCOUNT_SID or not AUTH_TOKEN:
+    sid, token = _account_sid(), _auth_token()
+    if Client is None or not sid or not token:
         return None
-    return Client(ACCOUNT_SID, AUTH_TOKEN)
-
-
-client = _build_client()
+    return Client(sid, token)
 
 
 def _split_message(text: str) -> list[str]:
@@ -42,18 +54,20 @@ def _split_message(text: str) -> list[str]:
 
 
 def _send_single(text: str):
-    if DEV_MODE or client is None or not FROM_NUMBER or not TO_NUMBER:
+    from_number, to_number = _from_number(), _to_number()
+    client = _build_client()
+    if _dev_mode() or client is None or not from_number or not to_number:
         print(f"\n[WhatsApp DEV]\n{text}\n{'=' * 40}")
         return
 
     try:
-        message = client.messages.create(from_=FROM_NUMBER, to=TO_NUMBER, body=text)
+        message = client.messages.create(from_=from_number, to=to_number, body=text)
         print(f"[WhatsApp] Sent: {message.sid}")
     except Exception as exc:
         print(f"[WhatsApp] Send error: {exc}")
         try:
             time.sleep(3)
-            client.messages.create(from_=FROM_NUMBER, to=TO_NUMBER, body=text)
+            client.messages.create(from_=from_number, to=to_number, body=text)
         except Exception as retry_exc:
             print(f"[WhatsApp] Retry failed: {retry_exc}")
 
@@ -73,7 +87,9 @@ def send_digest(final_doc: str):
 
 
 def wait_for_reply(timeout_minutes: int = 30) -> str:
-    if DEV_MODE or client is None or not FROM_NUMBER or not TO_NUMBER:
+    from_number, to_number = _from_number(), _to_number()
+    client = _build_client()
+    if _dev_mode() or client is None or not from_number or not to_number:
         return "timeout"
 
     deadline = time.time() + (timeout_minutes * 60)
@@ -81,7 +97,7 @@ def wait_for_reply(timeout_minutes: int = 30) -> str:
 
     while time.time() < deadline:
         try:
-            messages = client.messages.list(to=FROM_NUMBER, from_=TO_NUMBER, limit=1)
+            messages = client.messages.list(to=from_number, from_=to_number, limit=1)
             if messages:
                 message = messages[0]
                 if message.sid != last_check_sid:
