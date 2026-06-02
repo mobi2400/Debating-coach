@@ -1,5 +1,6 @@
 import json
 import re
+import time
 from pathlib import Path
 
 try:
@@ -88,6 +89,15 @@ def ingest_pdf(path: str, doc_type: str) -> list:
     if fitz is None:
         return []
 
+    if doc_type == "english_vocab":
+        try:
+            from rag.wpm_extractor import extract_word_power
+
+            return extract_word_power(path, doc_type=doc_type)
+        except Exception as exc:
+            print(f"[Ingest PDF] Structured english_vocab extractor failed for {path}: {exc}")
+            # fall through to generic chunking
+
     try:
         pdf = fitz.open(path)
         text = "\n".join(page.get_text() for page in pdf)
@@ -165,6 +175,45 @@ def _resolve_store_name(doc_type: str) -> str:
     return STORE_ROUTING.get(doc_type, "knowledge_db")
 
 
+EMBED_BATCH_SIZE = 50
+EMBED_BACKOFF_SECONDS = 60
+EMBED_MAX_RETRIES = 6
+
+
+def _faiss_from_documents_batched(documents, embedding, batch_size=EMBED_BATCH_SIZE):
+    """Build a FAISS index in batches with quota-aware backoff."""
+    head = documents[:batch_size]
+    tail = documents[batch_size:]
+
+    store = _embed_with_backoff(
+        lambda: FAISS.from_documents(documents=head, embedding=embedding)
+    )
+
+    while tail:
+        batch = tail[:batch_size]
+        tail = tail[batch_size:]
+        _embed_with_backoff(lambda: store.add_documents(batch))
+
+    return store
+
+
+def _embed_with_backoff(call):
+    delay = EMBED_BACKOFF_SECONDS
+    for attempt in range(EMBED_MAX_RETRIES):
+        try:
+            return call()
+        except Exception as exc:
+            msg = str(exc)
+            if "RESOURCE_EXHAUSTED" not in msg and "429" not in msg:
+                raise
+            if attempt == EMBED_MAX_RETRIES - 1:
+                raise
+            print(f"[Ingest] embedding quota hit, sleeping {delay}s (attempt {attempt + 1})")
+            time.sleep(delay)
+            delay = min(delay * 2, 300)
+    return None
+
+
 def build_knowledge_base(all_docs: list[dict]) -> dict:
     if FAISS is None and Chroma is None:
         return {}
@@ -181,7 +230,7 @@ def build_knowledge_base(all_docs: list[dict]) -> dict:
         if FAISS is not None:
             persist_dir = FAISS_DIR / store_name
             persist_dir.mkdir(parents=True, exist_ok=True)
-            store = FAISS.from_documents(
+            store = _faiss_from_documents_batched(
                 documents=documents,
                 embedding=EMBEDDING_MAP[store_name],
             )
