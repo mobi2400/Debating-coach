@@ -202,8 +202,14 @@ YOUR_WHATSAPP_NUMBER=   # Your number with country code
 uv pip install --system -r requirements.txt
 ```
 
-3. Fill in `.env`.
-4. Run a local smoke path:
+3. If you want the local Chroma-backed RAG store, install the optional RAG extra:
+
+```bash
+uv pip install --system -r requirements-rag.txt
+```
+
+4. Fill in `.env`.
+5. Run a local smoke path:
 
 ```bash
 python main.py --mode daily --topic feminism
