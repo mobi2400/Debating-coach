@@ -5,6 +5,7 @@ from agents.argue_node import argue_node
 from agents.coach_node import coach_node
 from agents.format_node import format_node
 from agents.summarize_node import summarize_node
+from delivery.whatsapp import send_digest
 from graph import build_daily_graph
 
 
@@ -43,7 +44,11 @@ def run_daily(topic_override: str | None = None):
         result = graph.invoke(_initial_state(topic))
         print(f"Raw articles: {len(result['raw_articles'])}")
         print(f"Ranked articles: {len(result['ranked_articles'])}")
+        print(f"Summaries: {len(result['summaries'])}")
+        print(f"Arguments FOR: {len(result['arguments'].get('for', []))}")
         print(f"Enriched context chars: {len(result['enriched_context'])}")
+        print(f"Final doc chars: {len(result['final_doc'])}")
+        send_digest(result["final_doc"])
 
 
 def run_summarize_smoke():
