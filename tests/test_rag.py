@@ -9,6 +9,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from rag.chunking_strategy import get_splitter
 from rag.embeddings import EMBEDDING_MAP
+from rag.ingest import load_sources, validate_sources
 from rag.retrieval_pipeline import RETRIEVAL_CONFIG, format_retrieved_context, retrieve_for_node
 
 
@@ -25,6 +26,10 @@ def run_rag_smoke_test():
     print("Retrieval config:")
     for node_name, config in RETRIEVAL_CONFIG.items():
         print(f"  {node_name}: {', '.join(sorted(config.keys()))}")
+
+    sources = load_sources()
+    issues = validate_sources(sources)
+    print(f"Source validation issues: {len(issues)}")
 
     chunks = retrieve_for_node("coach_node", "feminism argument")
     print(f"Retrieved chunks in current environment: {len(chunks)}")

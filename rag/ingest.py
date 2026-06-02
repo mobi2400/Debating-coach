@@ -148,8 +148,34 @@ def load_sources() -> dict:
         return json.load(handle)
 
 
+def validate_sources(sources: dict) -> list[str]:
+    issues = []
+
+    for pdf in sources.get("pdfs", []):
+        if "path" not in pdf or "doc_type" not in pdf:
+            issues.append(f"Invalid PDF source entry: {pdf}")
+            continue
+        pdf_path = BASE_DIR / pdf["path"]
+        if not pdf_path.exists():
+            issues.append(f"Missing PDF source file: {pdf['path']}")
+
+    for website in sources.get("websites", []):
+        if "url" not in website or "site_type" not in website:
+            issues.append(f"Invalid website source entry: {website}")
+
+    for video in sources.get("youtube", []):
+        if "video_id" not in video or "channel_type" not in video:
+            issues.append(f"Invalid YouTube source entry: {video}")
+
+    return issues
+
+
 def run_ingest() -> dict:
     sources = load_sources()
+    issues = validate_sources(sources)
+    for issue in issues:
+        print(f"[Sources] {issue}")
+
     all_docs = []
 
     for pdf in sources.get("pdfs", []):
