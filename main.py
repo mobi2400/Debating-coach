@@ -1,6 +1,7 @@
 import argparse
 import json
 
+from agents.summarize_node import summarize_node
 from graph import build_daily_graph
 
 
@@ -42,11 +43,33 @@ def run_daily(topic_override: str | None = None):
         print(f"Enriched context chars: {len(result['enriched_context'])}")
 
 
+def run_summarize_smoke():
+    state = _initial_state("feminism")
+    state["ranked_articles"] = [
+        {
+            "title": "Sample article",
+            "url": "https://example.com",
+            "content": "Feminism debates often focus on equality, representation, and policy impact. "
+            "Recent coverage discusses economic participation and legal safeguards. "
+            "Debaters can use this to compare principle and outcome based framing.",
+            "source": "sample",
+            "published": "",
+        }
+    ]
+    state["enriched_context"] = "Sample background context."
+    result = summarize_node(state)
+    print(f"Summaries: {len(result['summaries'])}")
+    print(f"Key facts: {len(result['key_facts'])}")
+    print(f"Concepts: {len(result['concepts'])}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["daily"], required=True)
+    parser.add_argument("--mode", choices=["daily", "summarize-smoke"], required=True)
     parser.add_argument("--topic", type=str, default=None)
     args = parser.parse_args()
 
     if args.mode == "daily":
         run_daily(args.topic)
+    elif args.mode == "summarize-smoke":
+        run_summarize_smoke()
