@@ -1,7 +1,13 @@
 import json
 import re
+import sys
 import time
 from pathlib import Path
+
+# Allow `python rag/ingest.py` to import sibling packages.
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 try:
     import fitz
@@ -278,15 +284,32 @@ def validate_sources(sources: dict) -> list[str]:
     return issues
 
 
-def run_ingest() -> dict:
+def run_ingest(only: set[str] | None = None) -> dict:
+    """Ingest sources.json.
+
+    only: set of filters to scope re-ingest. Accepted tokens are
+        doc_type names ("english_vocab", "topic_pdf", ...),
+        source kinds ("pdfs", "websites", "youtube"), or
+        store names ("knowledge_db", "style_db", "reasoning_db", "english_db").
+        None means full re-ingest.
+    """
     sources = load_sources()
     issues = validate_sources(sources)
     for issue in issues:
         print(f"[Sources] {issue}")
 
+    def _wants(kind: str, doc_type: str) -> bool:
+        if not only:
+            return True
+        if kind in only or doc_type in only:
+            return True
+        return _resolve_store_name(doc_type) in only
+
     all_docs = []
 
     for pdf in sources.get("pdfs", []):
+        if not _wants("pdfs", pdf["doc_type"]):
+            continue
         all_docs.append(
             {
                 "doc_type": pdf["doc_type"],
@@ -295,6 +318,8 @@ def run_ingest() -> dict:
         )
 
     for website in sources.get("websites", []):
+        if not _wants("websites", website["site_type"]):
+            continue
         all_docs.append(
             {
                 "doc_type": website["site_type"],
@@ -305,6 +330,8 @@ def run_ingest() -> dict:
     for video in sources.get("youtube", []):
         channel_type = video.get("channel_type")
         if not channel_type:
+            continue
+        if not _wants("youtube", channel_type):
             continue
 
         if "video_id" in video:
@@ -327,6 +354,29 @@ def run_ingest() -> dict:
     return build_knowledge_base(all_docs)
 
 
-if __name__ == "__main__":
-    stores = run_ingest()
+def _cli():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Build the RAG vector stores from sources.json.")
+    parser.add_argument(
+        "--only",
+        action="append",
+        default=[],
+        help=(
+            "Restrict ingest to one or more filters. Accepts doc_type names "
+            "(english_vocab, topic_pdf, debate_format, ...), source kinds "
+            "(pdfs, websites, youtube), or store names (knowledge_db, "
+            "style_db, reasoning_db, english_db). Repeatable."
+        ),
+    )
+    args = parser.parse_args()
+
+    only = set(args.only) if args.only else None
+    if only:
+        print(f"[Ingest] Restricting to: {sorted(only)}")
+    stores = run_ingest(only=only)
     print(f"Built stores: {sorted(stores.keys())}")
+
+
+if __name__ == "__main__":
+    _cli()
