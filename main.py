@@ -5,6 +5,7 @@ import os
 from agents.argue_node import argue_node
 from agents.coach_node import coach_node
 from agents.english_coach_node import english_coach_node
+from agents.english_quiz_node import english_quiz_node
 from agents.format_node import format_node
 from agents.night_agent import night_agent_node
 from agents.summarize_node import summarize_node
@@ -129,6 +130,24 @@ def run_english_smoke():
     print(f"Vocab words: {len(result['vocab_words'])}")
 
 
+def run_english_quiz():
+    state = _initial_state(os.getenv("ENGLISH_QUIZ_TOPIC", "vocabulary roots etymology"))
+    result = english_quiz_node(state)
+    print(f"English quiz score: {result.get('english_quiz_score')}")
+    print(f"Question count: {len(result.get('english_quiz_questions', []))}")
+
+
+def run_english_quiz_smoke():
+    os.environ["DEV_MODE"] = "true"
+    state = _initial_state("feminism")
+    result = english_quiz_node(state)
+    questions = result.get("english_quiz_questions", [])
+    print(f"Questions generated: {len(questions)}")
+    if questions:
+        print(f"First question: {questions[0].get('question', '')[:100]}")
+    print(f"Score (dev reply was 'timeout'): {result.get('english_quiz_score')}")
+
+
 def run_format_smoke():
     state = _initial_state("feminism")
     state["enriched_context"] = "Sample background context for the topic."
@@ -183,7 +202,7 @@ def run_weekend_smoke():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["daily", "night", "weekend", "summarize-smoke", "argue-smoke", "coach-smoke", "english-smoke", "format-smoke", "night-smoke", "weekend-smoke"], required=True)
+    parser.add_argument("--mode", choices=["daily", "night", "weekend", "summarize-smoke", "argue-smoke", "coach-smoke", "english-smoke", "english-quiz", "english-quiz-smoke", "format-smoke", "night-smoke", "weekend-smoke"], required=True)
     parser.add_argument("--topic", type=str, default=None)
     args = parser.parse_args()
 
@@ -201,6 +220,10 @@ if __name__ == "__main__":
         run_coach_smoke()
     elif args.mode == "english-smoke":
         run_english_smoke()
+    elif args.mode == "english-quiz":
+        run_english_quiz()
+    elif args.mode == "english-quiz-smoke":
+        run_english_quiz_smoke()
     elif args.mode == "format-smoke":
         run_format_smoke()
     elif args.mode == "night-smoke":

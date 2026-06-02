@@ -9,6 +9,7 @@ from memory.weekly_store import get_today_log, mark_as_studied
 
 YES_TOKENS = {"yes", "y", "yep", "yeah", "studied", "done"}
 NO_TOKENS = {"no", "n", "nope", "nah", "timeout"}
+ENGLISH_TOKENS = {"english", "vocab", "vocabulary", "word power", "wpm"}
 
 
 def _normalize_reply(reply: str) -> str:
@@ -18,6 +19,11 @@ def _normalize_reply(reply: str) -> str:
 def _looks_like_yes(reply: str) -> bool:
     value = _normalize_reply(reply)
     return any(token in value for token in YES_TOKENS)
+
+
+def _looks_like_english(reply: str) -> bool:
+    value = _normalize_reply(reply)
+    return any(token in value for token in ENGLISH_TOKENS)
 
 
 def _build_quiz_from_memory(today_log: list[dict]) -> list[dict]:
@@ -144,8 +150,16 @@ def bedtime_mode(state: dict) -> dict:
 
 
 def night_agent_node(state: dict) -> dict:
-    send_message("Did you read today's debate digest? Reply yes or no.")
+    send_message(
+        "Did you read today's debate digest? Reply yes for a debate quiz, "
+        "english for a vocabulary quiz, or no for a bedtime recap."
+    )
     reply = wait_for_reply(30)
+
+    if _looks_like_english(reply):
+        from agents.english_quiz_node import english_quiz_node
+
+        return english_quiz_node(state)
 
     if _looks_like_yes(reply):
         return quiz_mode(state)

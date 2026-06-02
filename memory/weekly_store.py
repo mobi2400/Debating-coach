@@ -60,6 +60,15 @@ def mark_as_studied(date_str: str, studied: bool, score: int | None = None):
     save_log(log)
 
 
+def mark_english_quiz(date_str: str, score: int):
+    log = load_log()
+    if date_str not in log:
+        log[date_str] = [{"topic": "english", "timestamp": datetime.now().isoformat()}]
+    for entry in log[date_str]:
+        entry["english_quiz_score"] = score
+    save_log(log)
+
+
 def get_week_log() -> dict:
     log = load_log()
     result = {}
