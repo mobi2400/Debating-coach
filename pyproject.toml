@@ -1,0 +1,32 @@
+[project]
+name = "debate-coach"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp>=3.10.5",
+    "beautifulsoup4>=4.12.3",
+    "ddgs>=9.14.4",
+    "duckduckgo-search>=6.2.13",
+    "faiss-cpu>=1.8.0",
+    "feedparser>=6.0.11",
+    "google-generativeai>=0.8.0",
+    "groq>=0.13.0",
+    "langchain>=0.3.0",
+    "langchain-chroma>=0.1.4",
+    "langchain-classic>=0.1.0",
+    "langchain-community>=0.3.0",
+    "langchain-google-genai>=2.0.0",
+    "langchain-groq>=0.2.3",
+    "langgraph>=0.2.50",
+    "pydantic>=2.8.2",
+    "pymupdf>=1.24.10",
+    "python-dotenv>=1.0.1",
+    "rank-bm25>=0.2.2",
+    "requests>=2.32.3",
+    "tavily-python>=0.3.3",
+    "twilio>=9.2.3",
+    "wikipedia>=1.4.0",
+    "youtube-transcript-api>=0.6.2",
+]
