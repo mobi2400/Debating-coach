@@ -1,7 +1,28 @@
-[
-  "feminism",
-  "geopolitics",
-  "religion and society",
-  "personal finance and economy",
-  "climate change and environment"
-]
+{
+  "study_scope": "Study all topics available across the uploaded PDFs and knowledge base, but prioritize the topics listed below first.",
+  "selection_lens": {
+    "primary_goal": "debate perspective",
+    "secondary_goal": "personal growth",
+    "pdf_guidance": "Look into the uploaded PDFs and their subtopics for directional guidance when selecting articles and news.",
+    "pdf_usage_rule": "Treat the PDF topics and subtopics as inspiration and a relevance map, not as a hard restriction.",
+    "article_policy": "Only keep fresh articles that help with argument building, framing, comparative analysis, values analysis, institutional critique, stronger speaking points, or intellectual growth.",
+    "learning_goal": "Use external news and essays to improve debate perspective, argument skill, and deep specification knowledge around the chosen domains."
+  },
+  "priority_topics": [
+    "international relations",
+    "geopolitics",
+    "finance",
+    "economics",
+    "feminism",
+    "tech and AI",
+    "relationships",
+    "free speech",
+    "state power",
+    "politics",
+    "free will",
+    "education",
+    "social justice",
+    "justice system",
+    "religion"
+  ]
+}

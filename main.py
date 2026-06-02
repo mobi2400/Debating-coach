@@ -12,6 +12,21 @@ from delivery.whatsapp import send_digest
 from graph import build_daily_graph, build_night_graph, build_weekend_graph
 
 
+def _load_topics_config() -> tuple[list[str], dict]:
+    with open("topics.json", "r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+
+    if isinstance(payload, list):
+        return payload, {}
+
+    topics = payload.get("priority_topics", [])
+    metadata = {
+        "study_scope": payload.get("study_scope", ""),
+        "selection_lens": payload.get("selection_lens", {}),
+    }
+    return topics, metadata
+
+
 def _initial_state(topic: str) -> dict:
     return {
         "topic": topic,
@@ -32,13 +47,16 @@ def _initial_state(topic: str) -> dict:
 
 
 def run_daily(topic_override: str | None = None):
-    with open("topics.json", "r", encoding="utf-8") as handle:
-        topics = json.load(handle)
+    topics, topics_metadata = _load_topics_config()
 
     if topic_override:
         topics = [topic_override]
 
     graph = build_daily_graph()
+
+    if topics_metadata:
+        print("Study scope loaded.")
+        print(topics_metadata.get("study_scope", ""))
 
     for topic in topics:
         print(f"\n{'=' * 40}")

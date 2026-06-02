@@ -4,6 +4,25 @@ from datetime import datetime
 from core.fallback import get_llm_with_fallback
 
 
+DEBATE_PRIORITY_TERMS = {
+    "debate",
+    "policy",
+    "rights",
+    "justice",
+    "freedom",
+    "speech",
+    "power",
+    "state",
+    "economy",
+    "ethics",
+    "law",
+    "governance",
+    "institution",
+    "technology",
+    "ai",
+}
+
+
 def _recency_score(article: dict) -> int:
     published = article.get("published", "")
     if not published:
@@ -23,7 +42,8 @@ def _heuristic_rank(topic: str, articles: list[dict]) -> list[dict]:
     def score(article: dict):
         content = f"{article.get('title', '')} {article.get('content', '')}".lower()
         relevance = sum(1 for term in topic_terms if term in content)
-        return (relevance * 5) + _recency_score(article)
+        debate_value = sum(1 for term in DEBATE_PRIORITY_TERMS if term in content)
+        return (relevance * 5) + (debate_value * 2) + _recency_score(article)
 
     return sorted(articles, key=score, reverse=True)[:7]
 
@@ -40,7 +60,11 @@ def rank_node(state: dict) -> dict:
     prompt = (
         "You are ranking debate research results.\n"
         "Return JSON only: an array of the best article indexes in descending order.\n"
-        "Score for relevance and recency.\n\n"
+        "Score for topical relevance, recency, debate usefulness, and personal intellectual growth.\n"
+        "Prefer articles that help with argument building, framing, institutional analysis, value clashes, policy tradeoffs, or worldview expansion.\n"
+        "Use the uploaded PDFs and their subtopics as a relevance map, but not as a hard boundary.\n"
+        "Reward articles that deepen the chosen topic, surface strong debate angles, and expand the user's specification knowledge beyond the immediate PDF wording.\n"
+        "Deprioritize shallow updates unless they create strong debate angles.\n\n"
         f"Topic: {state['topic']}\n"
         f"Articles: {json.dumps(articles, ensure_ascii=False)}"
     )
