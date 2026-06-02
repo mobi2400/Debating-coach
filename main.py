@@ -8,7 +8,7 @@ from agents.format_node import format_node
 from agents.night_agent import night_agent_node
 from agents.summarize_node import summarize_node
 from delivery.whatsapp import send_digest
-from graph import build_daily_graph
+from graph import build_daily_graph, build_night_graph
 
 
 def _initial_state(topic: str) -> dict:
@@ -128,14 +128,23 @@ def run_night_smoke():
     print(f"Quiz score: {result['quiz_score']}")
 
 
+def run_night():
+    graph = build_night_graph()
+    result = graph.invoke(_initial_state("night"))
+    print(f"Studied today: {result['studied_today']}")
+    print(f"Quiz score: {result['quiz_score']}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["daily", "summarize-smoke", "argue-smoke", "coach-smoke", "format-smoke", "night-smoke"], required=True)
+    parser.add_argument("--mode", choices=["daily", "night", "summarize-smoke", "argue-smoke", "coach-smoke", "format-smoke", "night-smoke"], required=True)
     parser.add_argument("--topic", type=str, default=None)
     args = parser.parse_args()
 
     if args.mode == "daily":
         run_daily(args.topic)
+    elif args.mode == "night":
+        run_night()
     elif args.mode == "summarize-smoke":
         run_summarize_smoke()
     elif args.mode == "argue-smoke":

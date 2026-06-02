@@ -8,6 +8,7 @@ from agents.argue_node import argue_node
 from agents.coach_node import coach_node
 from agents.filter_node import filter_node
 from agents.format_node import format_node
+from agents.night_agent import night_agent_node
 from agents.rag_enrich_node import rag_enrich_node
 from agents.rank_node import rank_node
 from agents.research_node import research_node
@@ -60,4 +61,15 @@ def build_daily_graph():
     graph.add_edge("coach", "format")
     graph.add_edge("format", END)
 
+    return graph.compile()
+
+
+def build_night_graph():
+    if StateGraph is None:
+        return LocalSequentialGraph([night_agent_node])
+
+    graph = StateGraph(AgentState)
+    graph.add_node("night", night_agent_node)
+    graph.set_entry_point("night")
+    graph.add_edge("night", END)
     return graph.compile()
