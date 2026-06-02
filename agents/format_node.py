@@ -1,4 +1,5 @@
 from core.fallback import get_llm_with_fallback
+from memory.weekly_store import save_daily_digest
 
 
 def _join_lines(lines: list[str]) -> str:
@@ -74,5 +75,16 @@ def format_node(state: dict) -> dict:
         state["final_doc"] = str(content).strip() or default_output
     except Exception:
         state["final_doc"] = default_output
+
+    save_daily_digest(
+        state["topic"],
+        {
+            "summaries": state.get("summaries", []),
+            "arguments": state.get("arguments", {}),
+            "key_facts": state.get("key_facts", []),
+            "concepts": state.get("concepts", []),
+            "debate_angle": state.get("debate_angle", ""),
+        },
+    )
 
     return state
