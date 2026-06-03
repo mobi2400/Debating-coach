@@ -1,3 +1,0 @@
-# Optional fallback vector store. Default is FAISS (see requirements.txt).
-# Install this only if you need to use chromadb instead.
-chromadb>=0.5.20

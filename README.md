@@ -29,18 +29,20 @@ Weekend Agent reads the full week → filters out news, keeps only concepts and 
  
 | Agent | LLM Used | What It Does |
 |---|---|---|
-| Research Agent | Gemini 1.5 Flash | Pulls articles from RSS, Tavily, Wikipedia, DuckDuckGo |
-| RAG Enrich Agent | Gemini 1.5 Flash | Enriches research with your personal knowledge base |
-| Filter Agent | Llama 3.1 8B | Deduplicates and removes low-quality sources |
-| Rank Agent | Llama 3.1 8B | Scores and picks top 5–7 articles per topic |
-| Summarize Agent | Llama 3.3 70B | Bullet summaries in simple layman language |
-| Argue Agent | DeepSeek R1 | Generates 3 FOR, 3 AGAINST, 1 middle-ground argument |
-| Coach Agent | Gemini 1.5 Pro | Personalised coaching in YOUR debate style via RAG |
-| Format Agent | Mixtral 8x7B | Compiles everything into a clean WhatsApp document |
-| Night Agent | — | Checks if you studied, routes to quiz or bedtime mode |
-| Quiz Agent | Mixtral 8x7B | 5-question quiz, scores you, saves to memory |
-| Bedtime Agent | Llama 3.3 70B | Compresses digest to 100 words for reading in bed |
-| Weekend Agent | DeepSeek R1 | Extracts only memory-worthy knowledge from the week |
+| Research Agent | — (tool calls) | Pulls articles from RSS, Tavily, Wikipedia, DuckDuckGo |
+| RAG Enrich Agent | — (FAISS retrieval) | Enriches research with your personal knowledge base |
+| Filter Agent | Llama 3.1 8B (`fast`) | Deduplicates and removes low-quality sources |
+| Rank Agent | Llama 3.1 8B (`fast`) | Scores and picks top 5–7 articles per topic |
+| Summarize Agent | Llama 3.3 70B (`balanced`) | Bullet summaries in simple layman language |
+| Argue Agent | Qwen3 32B (`reasoning`) | Generates 3 FOR, 3 AGAINST, 1 middle-ground argument |
+| Coach Agent | Gemini Pro Latest (`best`) | Personalised coaching in YOUR debate style via RAG |
+| English Coach Agent | GPT-OSS 20B (`structured`) | Pulls Word Power Made Easy roots/vocab for the day |
+| Format Agent | GPT-OSS 20B (`structured`) | Compiles everything into a clean WhatsApp document |
+| Night Agent | — | yes → debate MCQ quiz, english → vocab quiz, no → bedtime |
+| Quiz Agent | GPT-OSS 20B (`structured`) | 5-question MCQ, scores you, saves to memory |
+| English Quiz Agent | GPT-OSS 20B (`structured`) | Vocabulary quiz from Word Power Made Easy |
+| Bedtime Agent | Llama 3.3 70B (`balanced`) | Compresses digest to ~100 words for reading in bed |
+| Weekend Agent | Qwen3 32B (`reasoning`) | Extracts only memory-worthy knowledge from the week |
  
 ---
  
@@ -59,15 +61,16 @@ All four tools run per topic. Each serves a different layer — recency, depth, 
  
 ## RAG System
  
-The RAG system is what makes this personal, not generic. Three separate vector stores, three different retrieval strategies, three different embedding models.
+The RAG system is what makes this personal, not generic. Four vector stores, four retrieval strategies, all served by Gemini `gemini-embedding-001` (3072-dim). FAISS on disk.
  
 ### Vector Stores
  
-| Store | What's In It | Retrieval Type | Embedding Model |
-|---|---|---|---|
-| `knowledge_db` | Topic PDFs, news archives, Wikipedia | Hybrid: BM25 40% + Vector 60% | all-mpnet-base-v2 |
-| `style_db` | Your speeches, debate scripts, notes | Pure Semantic (cosine, threshold 0.72) | all-MiniLM-L6-v2 |
-| `reasoning_db` | Debate theory, rhetoric books, YT transcripts | MMR (λ=0.65, fetch_k=25) | multi-qa-mpnet-base-dot-v1 |
+| Store | What's In It | Retrieval Type |
+|---|---|---|
+| `knowledge_db` | Topic PDFs, news archives, Wikipedia | Hybrid: BM25 40% + Vector 60% |
+| `style_db` | Your speeches, debate scripts, notes | Similarity-score-threshold (0.72) |
+| `reasoning_db` | Debate theory, rhetoric, YT transcripts | MMR (λ=0.65, fetch_k=25) |
+| `english_db` | Word Power Made Easy (session-aware extractor) | Similarity, structured metadata on each chunk |
  
 ### Why Three Retrieval Types
  
@@ -202,13 +205,14 @@ YOUR_WHATSAPP_NUMBER=   # Your number with country code
 uv pip install --system -r requirements.txt
 ```
 
-3. If you want the local Chroma-backed RAG store, install the optional RAG extra:
+3. Fill in `.env`.
+4. Build the vector stores:
 
 ```bash
-uv pip install --system -r requirements-rag.txt
+python rag/ingest.py            # full build
+python rag/ingest.py --only english_vocab    # one source only
 ```
 
-4. Fill in `.env`.
 5. Run a local smoke path:
 
 ```bash
