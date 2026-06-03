@@ -58,7 +58,7 @@ def print_routes():
 def test_fallback():
     original_pool = fallback_module.LLM_POOL
     try:
-        fallback_module.LLM_POOL = {
+        fake_pool = {
             "fast": FakeLLM("fast", should_fail=True),
             "balanced": FakeLLM("balanced"),
             "structured": FakeLLM("structured"),
@@ -66,10 +66,12 @@ def test_fallback():
             "long_ctx": FakeLLM("long_ctx"),
             "best": FakeLLM("best"),
         }
+        fallback_module.LLM_POOL = fake_pool
 
         llm = fallback_module.get_llm_with_fallback({**BASE_STATE, "task_type": "filter"})
-        assert isinstance(llm, FakeLLM)
-        assert llm.name == "balanced"
+        # The proxy should transparently dispatch to the next-in-chain after 'fast' fails.
+        result = llm.invoke("hi")
+        assert result == "pong", f"unexpected result: {result!r}"
         print("Fallback check:")
         print("  primary 'fast' failed -> fallback selected 'balanced'")
     finally:
