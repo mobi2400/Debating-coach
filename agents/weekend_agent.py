@@ -66,6 +66,19 @@ def _heuristic_weekend_knowledge(week_log: dict) -> dict:
     }
 
 
+def _line_from(item, primary_keys: list[str], detail_keys: list[str]) -> str:
+    """Render an item that might be a dict (preferred) or a plain string."""
+    if isinstance(item, str):
+        return f"- {item}"
+    if not isinstance(item, dict):
+        return f"- {item!s}"
+    primary = next((str(item.get(k)) for k in primary_keys if item.get(k)), "")
+    detail = next((str(item.get(k)) for k in detail_keys if item.get(k)), "")
+    if primary and detail:
+        return f"- {primary}: {detail}"
+    return f"- {primary or detail or item}"
+
+
 def _format_weekend_message(knowledge: dict, days_studied: int, average_score: int) -> str:
     lines = [
         "WEEKLY BRAIN UPLOAD",
@@ -78,25 +91,25 @@ def _format_weekend_message(knowledge: dict, days_studied: int, average_score: i
     if knowledge.get("concepts"):
         lines.append("CONCEPTS")
         for item in knowledge["concepts"]:
-            lines.append(f"- {item['title']}: {item['remember_this']}")
+            lines.append(_line_from(item, ["title", "name"], ["remember_this", "what_it_is"]))
         lines.append("")
 
     if knowledge.get("frameworks"):
         lines.append("FRAMEWORKS")
         for item in knowledge["frameworks"]:
-            lines.append(f"- {item['title']}: {item['remember_this']}")
+            lines.append(_line_from(item, ["title", "name"], ["remember_this", "what_it_is"]))
         lines.append("")
 
     if knowledge.get("key_stats"):
         lines.append("KEY FACTS")
         for item in knowledge["key_stats"]:
-            lines.append(f"- {item['stat']}")
+            lines.append(_line_from(item, ["stat", "fact"], ["context", "use_in_debate"]))
         lines.append("")
 
     if knowledge.get("argument_patterns"):
         lines.append("ARGUMENT PATTERNS")
         for item in knowledge["argument_patterns"]:
-            lines.append(f"- {item['pattern_name']}: {item['how_it_works']}")
+            lines.append(_line_from(item, ["pattern_name", "name"], ["how_it_works", "example"]))
 
     return "\n".join(lines).strip()
 
@@ -114,13 +127,29 @@ def weekend_agent_node(state: dict) -> dict:
         f"Week log: {json.dumps(week_log, ensure_ascii=False)}"
     )
 
+    knowledge = default_knowledge
     try:
         llm = get_llm_with_fallback(state)
         response = llm.invoke(prompt)
-        content = getattr(response, "content", response)
-        knowledge = json.loads(str(content))
-    except Exception:
-        knowledge = default_knowledge
+        content = str(getattr(response, "content", response)).strip()
+        if content.startswith("```"):
+            content = content.split("```", 2)[1]
+            if content.startswith("json"):
+                content = content[4:]
+        parsed = json.loads(content)
+        # Only accept the parsed object if it has at least one of the lanes the
+        # formatter expects; otherwise keep the heuristic so the digest is never empty.
+        if isinstance(parsed, dict) and any(
+            key in parsed for key in ("concepts", "frameworks", "key_stats", "argument_patterns")
+        ):
+            knowledge = {
+                "concepts": parsed.get("concepts") or default_knowledge["concepts"],
+                "frameworks": parsed.get("frameworks") or default_knowledge["frameworks"],
+                "key_stats": parsed.get("key_stats") or default_knowledge["key_stats"],
+                "argument_patterns": parsed.get("argument_patterns") or default_knowledge["argument_patterns"],
+            }
+    except Exception as exc:
+        print(f"[Weekend] LLM parse failed: {exc}")
 
     final_message = _format_weekend_message(knowledge, days_studied, average_score)
     send_message(final_message)

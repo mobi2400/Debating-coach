@@ -49,18 +49,39 @@ def argue_node(state: dict) -> dict:
         f"RAG context: {rag_context[:5000]}"
     )
 
+    def _normalize_arg_list(value, fallback: list[str]) -> list[str]:
+        if not isinstance(value, list):
+            return fallback
+        cleaned = [str(item).strip() for item in value if str(item).strip()]
+        if len(cleaned) >= 3:
+            return cleaned[:3]
+        # Pad with heuristic so we always have exactly 3 arguments per side.
+        for filler in fallback:
+            if filler not in cleaned:
+                cleaned.append(filler)
+            if len(cleaned) == 3:
+                break
+        return (cleaned + fallback)[:3]
+
     try:
         llm = get_llm_with_fallback(state)
         response = llm.invoke(prompt)
-        content = getattr(response, "content", response)
-        parsed = json.loads(str(content))
+        content = str(getattr(response, "content", response)).strip()
+        if content.startswith("```"):
+            content = content.split("```", 2)[1]
+            if content.startswith("json"):
+                content = content[4:]
+        parsed = json.loads(content)
+        if not isinstance(parsed, dict):
+            raise ValueError("argue LLM returned non-object JSON")
 
         state["arguments"] = {
-            "for": parsed.get("for") or default_arguments["for"],
-            "against": parsed.get("against") or default_arguments["against"],
-            "middle": parsed.get("middle") or default_arguments["middle"],
+            "for": _normalize_arg_list(parsed.get("for"), default_arguments["for"]),
+            "against": _normalize_arg_list(parsed.get("against"), default_arguments["against"]),
+            "middle": str(parsed.get("middle") or default_arguments["middle"]).strip(),
         }
-    except Exception:
+    except Exception as exc:
+        print(f"[Argue] LLM parse failed: {exc}")
         state["arguments"] = default_arguments
 
     return state
