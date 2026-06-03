@@ -13,6 +13,7 @@ import re
 from datetime import date
 
 from core.fallback import get_llm_with_fallback
+from core.topic_utils import topic_name
 from delivery.whatsapp import send_message, wait_for_reply
 from memory.weekly_store import mark_english_quiz
 from rag.retrieval_pipeline import _load_vector_store
@@ -172,7 +173,7 @@ def _score_quiz_response(reply: str, questions: list[dict]) -> int:
 
 def english_quiz_node(state: dict) -> dict:
     state["task_type"] = "quiz"
-    query = state.get("topic") or "vocabulary roots etymology"
+    query = topic_name(state.get("topic")) or "vocabulary roots etymology"
 
     raw_chunks = _gather_english_chunks(query)
     if raw_chunks:

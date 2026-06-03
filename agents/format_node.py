@@ -1,5 +1,6 @@
 from core.fallback import get_llm_with_fallback
 from core.prompt_cache import cached_invoke
+from core.topic_utils import topic_name
 from memory.weekly_store import save_daily_digest
 
 
@@ -8,9 +9,10 @@ def _join_lines(lines: list[str]) -> str:
 
 
 def _heuristic_format(state: dict) -> str:
+    topic = topic_name(state.get("topic"))
     arguments = state.get("arguments", {})
     lines = [
-        f"TOPIC: {state['topic'].upper()}",
+        f"TOPIC: {topic.upper()}",
         "=" * 28,
         "",
         "BACKGROUND",
@@ -55,6 +57,7 @@ def _heuristic_format(state: dict) -> str:
 
 def format_node(state: dict) -> dict:
     state["task_type"] = "format"
+    topic = topic_name(state.get("topic"))
     default_output = _heuristic_format(state)
 
     prompt = (
@@ -64,7 +67,7 @@ def format_node(state: dict) -> dict:
         "The very first line MUST be exactly: TOPIC: <TOPIC IN UPPERCASE>\n"
         "Use these section headers verbatim and in this order: TOPIC:, BACKGROUND, TOP ARTICLES, "
         "SUMMARY BULLETS, ARGUMENTS FOR, ARGUMENTS AGAINST, MIDDLE GROUND, COACH SECTION, ENGLISH POWER, KEY FACTS, CONCEPTS TO REMEMBER.\n\n"
-        f"Topic: {state['topic']}\n"
+        f"Topic: {topic}\n"
         f"Ranked articles: {state.get('ranked_articles', [])}\n"
         f"Summaries: {state.get('summaries', [])}\n"
         f"Arguments: {state.get('arguments', {})}\n"
@@ -83,7 +86,7 @@ def format_node(state: dict) -> dict:
         state["final_doc"] = default_output
 
     save_daily_digest(
-        state["topic"],
+        topic,
         {
             "summaries": state.get("summaries", []),
             "arguments": state.get("arguments", {}),
