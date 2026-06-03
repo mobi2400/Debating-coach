@@ -1,8 +1,12 @@
 import json
+import os
+import tempfile
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-LOG_FILE = Path("memory/weekly_log.json")
+# Absolute path so the log lands in the project regardless of cwd.
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+LOG_FILE = _PROJECT_ROOT / "memory" / "weekly_log.json"
 
 
 def _ensure_log_file():
@@ -13,14 +17,32 @@ def _ensure_log_file():
 
 def load_log() -> dict:
     _ensure_log_file()
-    with open(LOG_FILE, "r", encoding="utf-8") as handle:
-        return json.load(handle)
+    try:
+        with open(LOG_FILE, "r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except (json.JSONDecodeError, OSError) as exc:
+        # Corrupt or unreadable log — fall back to empty rather than crash.
+        print(f"[weekly_store] load_log failed ({exc}); using empty log.")
+        return {}
 
 
 def save_log(log: dict):
+    """Atomic write: serialize to temp file in the same directory, then os.replace."""
     _ensure_log_file()
-    with open(LOG_FILE, "w", encoding="utf-8") as handle:
-        json.dump(log, handle, indent=2)
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(
+        prefix=".weekly_log.", suffix=".json.tmp", dir=str(LOG_FILE.parent)
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(log, handle, indent=2)
+        os.replace(tmp_path, LOG_FILE)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
 
 def save_daily_digest(topic: str, content_dict: dict):
