@@ -27,6 +27,9 @@ def run_memory_test():
             "key_facts": ["Fact"],
             "concepts": ["Concept"],
             "debate_angle": "Angle",
+            "english_lesson": "ENGLISH POWER",
+            "vocab_words": ["lucid"],
+            "word_roots": ["dict"],
         }
 
         weekly_store.save_daily_digest("feminism", payload)
@@ -38,9 +41,15 @@ def run_memory_test():
         updated = weekly_store.load_log()
         assert updated[str(date.today())][0]["studied"] is True
         assert updated[str(date.today())][0]["quiz_score"] == 80
+        assert updated[str(date.today())][0]["english_lesson"] == "ENGLISH POWER"
+        assert updated[str(date.today())][0]["vocab_words"] == ["lucid"]
 
         week_log = weekly_store.get_week_log()
         assert str(date.today()) in week_log
+
+        weekly_store.mark_english_quiz(str(date.today()), 75)
+        updated_again = weekly_store.load_log()
+        assert updated_again[str(date.today())][0]["english_quiz_score"] == 75
 
         print("Memory checks passed.")
     finally:
