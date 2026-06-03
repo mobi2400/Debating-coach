@@ -23,16 +23,35 @@ def _auth_token() -> str | None:
     return os.getenv("TWILIO_AUTH_TOKEN")
 
 
+def _with_whatsapp_prefix(value: str | None) -> str | None:
+    """Twilio routes a message to WhatsApp only when both endpoints carry the
+    'whatsapp:' channel prefix. If the env var is just '+91…' Twilio falls
+    back to SMS — which is why digests were arriving as SMS. Coerce here so
+    the rest of the code can pass the raw number from .env."""
+    if not value:
+        return value
+    value = value.strip()
+    if value.lower().startswith("whatsapp:"):
+        return "whatsapp:" + value.split(":", 1)[1].strip()
+    return f"whatsapp:{value}"
+
+
 def _from_number() -> str | None:
-    return os.getenv("TWILIO_WHATSAPP_FROM")
+    return _with_whatsapp_prefix(os.getenv("TWILIO_WHATSAPP_FROM"))
 
 
 def _to_number() -> str | None:
-    return os.getenv("YOUR_WHATSAPP_NUMBER")
+    return _with_whatsapp_prefix(os.getenv("YOUR_WHATSAPP_NUMBER"))
 
 
 def _dev_mode() -> bool:
     return os.getenv("DEV_MODE", "false").lower() == "true"
+
+
+class WhatsAppDeliveryError(RuntimeError):
+    """Raised when Twilio sends fail after every retry. Lets the scheduler
+    workflow surface the failure instead of silently exiting 0 with no
+    message delivered."""
 
 
 def _build_client():
