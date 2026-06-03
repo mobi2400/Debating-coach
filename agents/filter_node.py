@@ -1,6 +1,7 @@
 import json
 
 from core.fallback import get_llm_with_fallback
+from core.topic_utils import topic_name
 
 
 DEBATE_GROWTH_SIGNALS = {
@@ -47,6 +48,7 @@ def _heuristic_filter(raw_articles: list[dict]) -> list[dict]:
 
 def filter_node(state: dict) -> dict:
     state["task_type"] = "filter"
+    topic = topic_name(state.get("topic"))
     raw_articles = state.get("raw_articles", [])
     default_filtered = _heuristic_filter(raw_articles)
 
@@ -62,7 +64,7 @@ def filter_node(state: dict) -> dict:
         "Use the uploaded PDFs and their subtopics as directional guidance for relevance, but do not restrict selection only to articles that mirror those PDF labels exactly.\n"
         "Keep articles that extend, deepen, challenge, or update the PDF themes when they are useful from a debate perspective.\n"
         "Reject generic lifestyle fluff, low-information summaries, entertainment-heavy pieces, and articles with weak debate value.\n\n"
-        f"Topic: {state['topic']}\n"
+        f"Topic: {topic}\n"
         f"Articles: {json.dumps(raw_articles, ensure_ascii=False)}"
     )
 

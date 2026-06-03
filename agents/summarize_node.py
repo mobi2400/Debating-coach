@@ -2,6 +2,16 @@ import json
 import re
 
 from core.fallback import get_llm_with_fallback
+from core.prompt_cache import cached_invoke
+from core.topic_utils import topic_name
+
+
+# Trim aggressively to stay under the Groq free-tier 100K TPD.
+# 7 articles * 2500 chars ~= 17.5K input chars ~= 4.5K tokens per daily run
+# for summarize, vs 7 * 8000 ~= 14K tokens previously.
+MAX_ARTICLES = 5
+MAX_ARTICLE_CHARS = 2500
+MAX_ENRICHED_CHARS = 1800
 
 
 def _sentence_split(text: str) -> list[str]:
@@ -64,8 +74,9 @@ def _parse_per_article_block(text: str) -> tuple[str, str, str]:
 
 def summarize_node(state: dict) -> dict:
     state["task_type"] = "summarize"
-    ranked_articles = state.get("ranked_articles", [])
-    enriched_context = state.get("enriched_context", "")
+    topic = topic_name(state.get("topic"))
+    ranked_articles = state.get("ranked_articles", [])[:MAX_ARTICLES]
+    enriched_context = state.get("enriched_context", "")[:MAX_ENRICHED_CHARS]
 
     if not ranked_articles:
         state["summaries"] = []
@@ -74,7 +85,7 @@ def summarize_node(state: dict) -> dict:
         return state
 
     default_summaries, default_facts, default_concepts = _heuristic_summaries(
-        state["topic"], ranked_articles, enriched_context
+        topic, ranked_articles, enriched_context
     )
 
     summaries: list[str] = []
@@ -94,14 +105,14 @@ def summarize_node(state: dict) -> dict:
             continue
 
         prompt = _PER_ARTICLE_TEMPLATE.format(
-            topic=state["topic"],
+            topic=topic,
             title=article.get("title", ""),
-            content=article.get("content", "")[:8000],
-            enriched=enriched_context[:4000] if index == 0 else "",
+            content=article.get("content", "")[:MAX_ARTICLE_CHARS],
+            enriched=enriched_context if index == 0 else "",
         )
 
         try:
-            response = llm.invoke(prompt)
+            response = cached_invoke(llm, prompt, scope="summarize")
             text = str(getattr(response, "content", response)).strip()
             summary_text, fact, concept = _parse_per_article_block(text)
             summaries.append(summary_text or default_summaries[index])

@@ -1,4 +1,5 @@
 .env
+.cache/
 chroma/
 faiss/
 memory/weekly_log.json

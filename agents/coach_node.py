@@ -1,5 +1,10 @@
 from core.fallback import get_llm_with_fallback
+from core.prompt_cache import cached_invoke
+from core.topic_utils import topic_name
 from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
+
+
+MAX_RAG_CHARS = 2500
 
 
 def _heuristic_coach(topic: str, arguments: dict, summaries: list[str], rag_context: str) -> str:
@@ -27,11 +32,12 @@ def _heuristic_coach(topic: str, arguments: dict, summaries: list[str], rag_cont
 
 def coach_node(state: dict) -> dict:
     state["task_type"] = "debate"
-    rag_chunks = retrieve_for_node("coach_node", state["topic"])
+    topic = topic_name(state.get("topic"))
+    rag_chunks = retrieve_for_node("coach_node", topic)
     rag_context = format_retrieved_context(rag_chunks)
 
     default_coaching = _heuristic_coach(
-        state["topic"],
+        topic,
         state.get("arguments", {}),
         state.get("summaries", []),
         rag_context,
@@ -41,15 +47,15 @@ def coach_node(state: dict) -> dict:
         "You are a debate coach writing in the user's preferred debate style.\n"
         "Produce a compact coaching block with these sections exactly:\n"
         "UNIQUE ANGLE, OPEN WITH THIS, CLAIM-WARRANT-IMPACT, TOP REBUTTALS, POWER PHRASES.\n\n"
-        f"Topic: {state['topic']}\n"
+        f"Topic: {topic}\n"
         f"Summaries: {state.get('summaries', [])}\n"
         f"Arguments: {state.get('arguments', {})}\n"
-        f"Style RAG context: {rag_context[:5000]}"
+        f"Style RAG context: {rag_context[:MAX_RAG_CHARS]}"
     )
 
     try:
         llm = get_llm_with_fallback(state)
-        response = llm.invoke(prompt)
+        response = cached_invoke(llm, prompt, scope="coach")
         content = getattr(response, "content", response)
         state["debate_angle"] = str(content).strip() or default_coaching
     except Exception:

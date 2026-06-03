@@ -1,4 +1,5 @@
 from core.fallback import get_llm_with_fallback
+from core.prompt_cache import cached_invoke
 from memory.weekly_store import save_daily_digest
 
 
@@ -75,7 +76,7 @@ def format_node(state: dict) -> dict:
 
     try:
         llm = get_llm_with_fallback(state)
-        response = llm.invoke(prompt)
+        response = cached_invoke(llm, prompt, scope="format")
         content = getattr(response, "content", response)
         state["final_doc"] = str(content).strip() or default_output
     except Exception:

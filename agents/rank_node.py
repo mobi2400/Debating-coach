@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 from core.fallback import get_llm_with_fallback
+from core.topic_utils import topic_name
 
 
 DEBATE_PRIORITY_TERMS = {
@@ -50,8 +51,9 @@ def _heuristic_rank(topic: str, articles: list[dict]) -> list[dict]:
 
 def rank_node(state: dict) -> dict:
     state["task_type"] = "rank"
+    topic = topic_name(state.get("topic"))
     articles = state.get("raw_articles", [])
-    default_ranked = _heuristic_rank(state["topic"], articles)
+    default_ranked = _heuristic_rank(topic, articles)
 
     if not articles:
         state["ranked_articles"] = []
@@ -65,7 +67,7 @@ def rank_node(state: dict) -> dict:
         "Use the uploaded PDFs and their subtopics as a relevance map, but not as a hard boundary.\n"
         "Reward articles that deepen the chosen topic, surface strong debate angles, and expand the user's specification knowledge beyond the immediate PDF wording.\n"
         "Deprioritize shallow updates unless they create strong debate angles.\n\n"
-        f"Topic: {state['topic']}\n"
+        f"Topic: {topic}\n"
         f"Articles: {json.dumps(articles, ensure_ascii=False)}"
     )
 

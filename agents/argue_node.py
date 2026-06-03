@@ -1,7 +1,12 @@
 import json
 
 from core.fallback import get_llm_with_fallback
+from core.prompt_cache import cached_invoke
+from core.topic_utils import topic_name
 from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
+
+
+MAX_RAG_CHARS = 2500
 
 
 def _heuristic_arguments(topic: str, summaries: list[str], rag_context: str) -> dict:
@@ -33,20 +38,21 @@ def _heuristic_arguments(topic: str, summaries: list[str], rag_context: str) -> 
 
 def argue_node(state: dict) -> dict:
     state["task_type"] = "argue"
+    topic = topic_name(state.get("topic"))
     summaries = state.get("summaries", [])
-    rag_chunks = retrieve_for_node("argue_node", state["topic"])
+    rag_chunks = retrieve_for_node("argue_node", topic)
     rag_context = format_retrieved_context(rag_chunks)
 
-    default_arguments = _heuristic_arguments(state["topic"], summaries, rag_context)
+    default_arguments = _heuristic_arguments(topic, summaries, rag_context)
 
     prompt = (
         "You are generating debate arguments.\n"
         "Return JSON only with keys: for, against, middle.\n"
         "'for' and 'against' must each be arrays of exactly 3 arguments.\n"
         "'middle' must be one nuanced bridging position.\n\n"
-        f"Topic: {state['topic']}\n"
+        f"Topic: {topic}\n"
         f"Summaries: {json.dumps(summaries, ensure_ascii=False)}\n"
-        f"RAG context: {rag_context[:5000]}"
+        f"RAG context: {rag_context[:MAX_RAG_CHARS]}"
     )
 
     def _normalize_arg_list(value, fallback: list[str]) -> list[str]:
@@ -65,7 +71,7 @@ def argue_node(state: dict) -> dict:
 
     try:
         llm = get_llm_with_fallback(state)
-        response = llm.invoke(prompt)
+        response = cached_invoke(llm, prompt, scope="argue")
         content = str(getattr(response, "content", response)).strip()
         if content.startswith("```"):
             content = content.split("```", 2)[1]

@@ -2,7 +2,12 @@ import json
 import re
 
 from core.fallback import get_llm_with_fallback
+from core.prompt_cache import cached_invoke
+from core.topic_utils import topic_name
 from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
+
+
+MAX_RAG_CHARS = 2500
 
 
 STOPWORDS = {
@@ -87,24 +92,25 @@ def _heuristic_english_lesson(topic: str, rag_context: str) -> tuple[str, list[s
 
 
 def english_coach_node(state: dict) -> dict:
-    rag_chunks = retrieve_for_node("english_coach_node", state["topic"])
+    topic = topic_name(state.get("topic"))
+    rag_chunks = retrieve_for_node("english_coach_node", topic)
     rag_context = format_retrieved_context(rag_chunks)
     default_lesson, default_words, default_roots = _heuristic_english_lesson(
-        state["topic"], rag_context
+        topic, rag_context
     )
 
     prompt = (
         "You are teaching English from Word Power Made Easy for a debate student.\n"
         "Return JSON only with keys: english_lesson, vocab_words, word_roots.\n"
         "Teach 3-5 useful words or roots and connect them to speaking, argument precision, or specification knowledge.\n\n"
-        f"Topic: {state['topic']}\n"
-        f"English RAG context: {rag_context[:5000]}"
+        f"Topic: {topic}\n"
+        f"English RAG context: {rag_context[:MAX_RAG_CHARS]}"
     )
 
     try:
         state["task_type"] = "structured"
         llm = get_llm_with_fallback(state)
-        response = llm.invoke(prompt)
+        response = cached_invoke(llm, prompt, scope="english_coach")
         content = getattr(response, "content", response)
         parsed = json.loads(str(content))
         state["english_lesson"] = parsed.get("english_lesson") or default_lesson

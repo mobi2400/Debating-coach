@@ -10,6 +10,7 @@ from agents.format_node import format_node
 from agents.night_agent import night_agent_node
 from agents.summarize_node import summarize_node
 from agents.weekend_agent import weekend_agent_node
+from core.topic_utils import topic_name
 from delivery.whatsapp import send_digest
 from graph import build_daily_graph, build_night_graph, build_weekend_graph
 
@@ -41,9 +42,10 @@ def _load_topics_config() -> tuple[list[str], dict]:
     return topics, metadata
 
 
-def _initial_state(topic: str) -> dict:
+def _initial_state(topic: str | dict) -> dict:
+    normalized_topic = topic_name(topic)
     return {
-        "topic": topic,
+        "topic": normalized_topic,
         "raw_articles": [],
         "enriched_context": "",
         "ranked_articles": [],
@@ -76,10 +78,11 @@ def run_daily(topic_override: str | None = None):
         print(topics_metadata.get("study_scope", ""))
 
     for topic in topics:
+        normalized_topic = topic_name(topic)
         print(f"\n{'=' * 40}")
-        print(f"Processing topic: {topic}")
+        print(f"Processing topic: {normalized_topic}")
         print(f"{'=' * 40}")
-        result = graph.invoke(_initial_state(topic))
+        result = graph.invoke(_initial_state(normalized_topic))
         print(f"Raw articles: {len(result['raw_articles'])}")
         print(f"Ranked articles: {len(result['ranked_articles'])}")
         print(f"Summaries: {len(result['summaries'])}")
