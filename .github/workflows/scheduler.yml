@@ -2,9 +2,9 @@ name: DebateIQ Scheduler
 
 on:
   schedule:
-    - cron: "30 2 * * 1-5"
-    - cron: "0 17 * * 1-5"
-    - cron: "30 3 * * 0"
+    - cron: "30 2 * * 1-5"   # Daily   — 08:00 IST weekdays
+    - cron: "0 17 * * 1-5"   # Night   — 22:30 IST weekdays
+    - cron: "30 3 * * 0"     # Weekend — 09:00 IST Sundays
   workflow_dispatch:
     inputs:
       mode:
@@ -17,6 +17,13 @@ on:
           - night
           - weekend
 
+permissions:
+  contents: write   # needed to commit weekly_log.json + faiss indexes back
+
+concurrency:
+  group: debateiq-state
+  cancel-in-progress: false   # serialize runs so we never clobber state mid-write
+
 jobs:
   run-agent:
     runs-on: ubuntu-latest
@@ -26,6 +33,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -38,17 +47,35 @@ jobs:
       - name: Install dependencies
         run: uv pip install --system -r requirements.txt
 
+      - name: Restore FAISS vector store cache
+        id: faiss-cache
+        uses: actions/cache@v4
+        with:
+          path: faiss
+          # Source-change-aware key. If sources.json or the extractor changes,
+          # the next run rebuilds from scratch; otherwise it reuses the index.
+          key: faiss-v1-${{ hashFiles('rag/sources.json', 'rag/wpm_extractor.py', 'rag/chunking_strategy.py') }}
+          restore-keys: |
+            faiss-v1-
+
+      - name: Rebuild FAISS index if missing
+        if: steps.faiss-cache.outputs.cache-hit != 'true'
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: python rag/ingest.py
+
       - name: Determine run mode
         id: mode
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
+            echo "mode=${{ github.event.inputs.mode }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ github.event.schedule }}" = "30 2 * * 1-5" ]; then
-            echo "mode=daily" >> $GITHUB_OUTPUT
+            echo "mode=daily" >> "$GITHUB_OUTPUT"
           elif [ "${{ github.event.schedule }}" = "0 17 * * 1-5" ]; then
-            echo "mode=night" >> $GITHUB_OUTPUT
+            echo "mode=night" >> "$GITHUB_OUTPUT"
           else
-            echo "mode=weekend" >> $GITHUB_OUTPUT
+            echo "mode=weekend" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Print run context
@@ -69,3 +96,20 @@ jobs:
           YOUR_WHATSAPP_NUMBER: ${{ secrets.YOUR_WHATSAPP_NUMBER }}
           DEV_MODE: "false"
         run: python main.py --mode ${{ steps.mode.outputs.mode }}
+
+      - name: Persist weekly_log.json
+        if: always()
+        run: |
+          if [ ! -f memory/weekly_log.json ]; then
+            echo "No log to commit."
+            exit 0
+          fi
+          git config user.name "debateiq-bot"
+          git config user.email "debateiq-bot@users.noreply.github.com"
+          git add -f memory/weekly_log.json
+          if git diff --cached --quiet; then
+            echo "Log unchanged; nothing to commit."
+          else
+            git commit -m "chore(memory): update weekly_log [skip ci]"
+            git push
+          fi
