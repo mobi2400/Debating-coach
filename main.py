@@ -19,12 +19,24 @@ def _load_topics_config() -> tuple[list[str], dict]:
         payload = json.load(handle)
 
     if isinstance(payload, list):
-        return payload, {}
+        topics = [item if isinstance(item, str) else item.get("topic", "") for item in payload]
+        return [t for t in topics if t], {}
 
-    topics = payload.get("priority_topics", [])
+    raw_topics = payload.get("priority_topics", [])
+    topics: list[str] = []
+    for entry in raw_topics:
+        if isinstance(entry, str):
+            topics.append(entry)
+        elif isinstance(entry, dict):
+            name = entry.get("topic")
+            if name:
+                topics.append(name)
+
     metadata = {
         "study_scope": payload.get("study_scope", ""),
         "selection_lens": payload.get("selection_lens", {}),
+        # Preserve the structured priority_topics for nodes that want frame guidance later.
+        "priority_topics": raw_topics,
     }
     return topics, metadata
 
