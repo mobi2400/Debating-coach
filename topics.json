@@ -1,557 +1,796 @@
 {
-  "version": "1.0",
-  "study_scope": "Study all topics available across the uploaded PDFs and knowledge base. Prioritize the priority_topics list first, then expand into subtopics and cross-domain intersections found in the PDFs. Every piece of content selected must serve either debate readiness or deep intellectual understanding.",
+  "version": "2.0",
+  "identity": {
+    "who_this_is_for": "An engineering student who debates competitively and wants to become intellectually formidable — not just debate-ready. The goal is to build the kind of mind that sees systems, not stories. That understands why things happen, not just what happened. That can argue any side of any motion with precision, depth, and language that commands a room.",
+    "the_standard": "WUDC level. Every piece of knowledge selected must be able to survive contact with the best debaters in the world. If a fact, concept, or argument would embarrass you in front of a WUDC panel, discard it.",
+    "what_this_is_not": "A news feed. A headline aggregator. A surface-level current affairs digest. This system does not produce people who know lame stories from the news. It produces people who understand the architecture underneath the stories."
+  },
+  "core_philosophy": {
+    "depth_over_breadth": "One topic understood at root level beats ten topics understood at headline level. Always go deeper on fewer things rather than shallower on more.",
+    "mechanisms_over_events": "Never just know what happened. Always know the mechanism that made it happen and the mechanism that could make it happen again. An event is data. A mechanism is knowledge.",
+    "argument_over_information": "Information is not an argument. An argument is a claim plus a warrant plus an impact. Every piece of content must be convertible into at least one of these three. If it cannot, discard it.",
+    "steel_man_everything": "Before you build your case, build the strongest version of the case against you. WUDC is lost by debaters who do not know the best opposing argument. It is won by debaters who know it better than the opposition does.",
+    "language_as_weapon": "In debate, how you say something is not separate from what you say. Precise language signals precise thinking. Vague language signals vague thinking. Every digest, summary, and coaching output must model the English of someone who has read widely and thought carefully.",
+    "intellectual_compounding": "Knowledge compounds. A concept learned this week should connect to a concept learned three weeks ago. The Weekend Agent exists to extract what compounds. The rest is noise."
+  },
   "selection_lens": {
-    "primary_goal": "debate perspective — argument construction, rebuttal preparation, framing, clash identification",
-    "secondary_goal": "personal growth — intellectual depth, values clarity, systems thinking, cross-domain pattern recognition",
-    "pdf_guidance": "Scan uploaded PDFs and their subtopics as a relevance map. Use them to identify which angles, frameworks, and sub-debates matter most within each priority topic.",
-    "pdf_usage_rule": "PDFs set the direction, not the ceiling. Go beyond them when external articles add argument value, comparative depth, or newer data.",
-    "article_selection_policy": {
-      "keep_if": [
-        "Directly helps build or refute a debate argument",
-        "Introduces a named concept, framework, or philosophical position worth knowing",
-        "Provides a statistic or data point that can be quoted in a debate",
-        "Offers a comparative angle (country vs country, policy vs policy, era vs era)",
-        "Reveals institutional critique or systemic pattern useful for analysis",
-        "Challenges a common assumption or popular narrative",
-        "Adds a values-based dimension (liberty vs equality, justice vs mercy, individual vs collective)",
-        "Gives historical context that keeps resurfacing in modern debates",
-        "Represents a perspective from a region or demographic underrepresented in mainstream debate prep"
+    "primary_goal": "Debate excellence — argument construction, value clash identification, rebuttal architecture, definitional control, burden of proof setting, impact calculus",
+    "secondary_goal": "Intellectual formation — systems thinking, cross-domain pattern recognition, values clarity, philosophical grounding, economic literacy, historical awareness",
+    "tertiary_goal": "Language development — exposure to precise, sophisticated, argument-grade English through high-quality long-form writing, not news prose",
+    "content_tier_system": {
+      "tier_1_always_include": [
+        "Long-form essays from publications that argue, not just report — The Economist, Foreign Affairs, Aeon, Boston Review, Dissent, N+1, Current Affairs, The Atlantic (argumentative pieces only)",
+        "Academic papers translated into accessible language — Stanford Encyclopedia of Philosophy entries, NBER working paper summaries",
+        "WUDC and BP motions from the last 5 years — study what the world's best debaters are being asked to debate",
+        "Speeches and arguments from significant public intellectuals — not for agreement, for structure and language",
+        "Books and their core arguments — the argument of a book, not a plot summary"
       ],
-      "discard_if": [
-        "Pure news report with no transferable insight",
-        "Event-specific with no broader implication",
-        "Repeats what is already covered by another selected article",
-        "Celebrity or entertainment content with no policy or values angle",
-        "Opinion piece with no evidence or reasoning structure",
-        "Anything that will be irrelevant in 6 months"
+      "tier_2_include_selectively": [
+        "News articles only when they contain a systemic implication, a named concept in action, or a comparative example that illuminates a debate principle",
+        "Data releases — but only the mechanism and implication, not the raw number",
+        "Court judgments — the reasoning, not the outcome",
+        "Policy documents — the values embedded in the policy, not the procedural details"
+      ],
+      "tier_3_discard_always": [
+        "Breaking news with no analytical follow-through",
+        "Any article whose insight can be summarised as 'X happened today'",
+        "Opinion pieces that assert without reasoning",
+        "Anything that mistakes description for analysis",
+        "Content that a well-read 16-year-old could not learn from",
+        "Celebrity, entertainment, or lifestyle content regardless of framing",
+        "Statistics without methodology or context",
+        "Any article that will be irrelevant in 90 days"
       ]
     },
-    "argument_quality_lens": {
-      "always_look_for": [
-        "The strongest version of the opposing argument (steelman, not strawman)",
-        "The value conflict at the root of the debate (not just the surface policy)",
-        "Who benefits and who loses — always run a stakeholder analysis",
-        "Historical precedent — has this been tried before, what happened",
-        "Comparative examples — how do different countries or systems handle this",
-        "Unintended consequences — what does the other side ignore",
-        "Definitional disputes — debates are often won by controlling definitions"
+    "article_selection_policy": {
+      "keep_if_any_of_these_are_true": [
+        "It introduces a named concept, named theory, or named thinker that recurs in serious debate",
+        "It provides a mechanism — explains why something happens not just that it happened",
+        "It contains a comparative example — how another country, era, or system handled the same problem",
+        "It reveals a values conflict at the root of a debate (liberty vs security, justice vs mercy, individual vs collective)",
+        "It challenges a widely held assumption with evidence and reasoning",
+        "It contains a statistic that is both significant and durable — meaning it will not be outdated in a year",
+        "It models high-quality argumentative English prose that is worth reading for language alone",
+        "It gives historical depth — connects a current issue to its origins",
+        "It represents a perspective from outside the dominant Western liberal frame",
+        "It contains a logical structure worth reverse-engineering — conclusion, premises, objections answered",
+        "It would change how a well-informed debater argues a motion"
+      ],
+      "discard_if_any_of_these_are_true": [
+        "It is a news report with no analytical layer",
+        "Its insight is obvious to anyone who has read one book on the topic",
+        "It is driven by outrage rather than reasoning",
+        "It would embarrass you if you cited it in a WUDC round",
+        "It mistakes correlation for causation without acknowledging it",
+        "It is written to generate clicks, not understanding"
       ]
     },
-    "learning_goal": "Build an argument architecture, not just information. Every topic should leave the student with: a clear position they can defend, a clear position they can oppose, the 2-3 values in tension, and at least one argument the other side cannot easily dismiss."
+    "language_development_policy": {
+      "goal": "Raise the floor of English expression by daily exposure to argument-grade prose. The student should unconsciously absorb sentence structure, vocabulary precision, and rhetorical rhythm from what they read.",
+      "what_counts_as_argument_grade_english": [
+        "Precise vocabulary that eliminates ambiguity — uses the right word, not a nearby word",
+        "Sentences structured around a single clear idea with subordinate clauses that qualify rather than confuse",
+        "Paragraphs with a topic sentence, development, and a pivot — not streams of loosely connected facts",
+        "Transitions that reveal logical relationships — 'however', 'consequently', 'it does not follow that', 'the stronger version of this objection is'",
+        "Hedging that signals intellectual honesty — 'on balance', 'the evidence suggests', 'this holds true in most but not all cases'",
+        "Signposting that guides the reader — 'the first distinction to draw is', 'before addressing that, consider', 'this matters because'"
+      ],
+      "daily_language_practice_embedded_in_digest": "Every coaching output must model this standard. The student learns language by reading language. Every Power Phrase generated must be a sentence they would be proud to say in a WUDC final."
+    }
   },
   "priority_topics": [
     {
       "topic": "international relations",
-      "debate_frames": [
-        "sovereignty vs humanitarian intervention",
-        "multilateralism vs unilateralism",
-        "hard power vs soft power",
-        "global institutions — do they work or are they captured by powerful states"
+      "why_this_matters_for_debate": "IR motions appear in every major competition. They test whether you understand power, legitimacy, and order — not just who is fighting whom. A debater who knows IR theory will always outclass one who only knows current events.",
+      "the_mechanisms_to_understand": [
+        "How the international system produces conflict even when no actor wants war — the security dilemma",
+        "Why states defect from cooperation even when cooperation benefits everyone — collective action problems",
+        "How hegemony is maintained, challenged, and transferred — power transition theory",
+        "Why international institutions persist even when powerful states want to ignore them — liberal institutionalism",
+        "How norms become law and how law becomes norm — the constructivist account"
       ],
-      "key_concepts_to_know": [
-        "Westphalian sovereignty",
-        "Responsibility to Protect (R2P)",
-        "Realism vs Liberalism vs Constructivism",
-        "Balance of power theory",
-        "Hegemonic stability theory"
+      "essential_theoretical_frameworks": [
+        "Realism: states are rational actors pursuing survival in an anarchic system. Morgenthau, Waltz, Mearsheimer.",
+        "Liberalism: institutions, trade, and democracy reduce conflict. Kant's perpetual peace, Keohane, Nye.",
+        "Constructivism: interests are not given, they are constructed by identity and norms. Wendt.",
+        "Marxist IR: the international system is structured to extract from the periphery for the core. Wallerstein.",
+        "Feminist IR: the international system is gendered. War, diplomacy, and security are all shaped by masculinity norms."
       ],
-      "recurring_debate_motions": [
-        "This house believes the UN Security Council is no longer fit for purpose",
-        "This house would allow humanitarian intervention without UNSC approval",
-        "This house believes small states should align with regional powers not global ones"
+      "key_concepts_own_these_precisely": [
+        "Westphalian sovereignty — what it actually means and when it was violated legitimately",
+        "Responsibility to Protect (R2P) — the doctrine, its limits, and how it gets weaponised",
+        "Security dilemma — the mechanism, not just the phrase",
+        "Collective action problem and how institutions try to solve it",
+        "Soft power vs hard power vs smart power — Nye's distinctions and their limits",
+        "Democratic peace theory — the argument and the best objections to it",
+        "Humanitarian intervention — the criteria, the precedents, the abuses"
       ],
-      "watch_for": [
-        "Gaza, Ukraine, Taiwan as live case studies",
-        "Global South vs Western framing of any conflict",
-        "How sanctions work and when they fail"
+      "live_case_studies_with_analytical_value": [
+        "Ukraine — sovereignty norm vs self-determination, NATO expansion debate, nuclear deterrence",
+        "Gaza — humanitarian intervention threshold, international law limits, civilian harm doctrine",
+        "Taiwan — legal ambiguity, deterrence stability, economic interdependence as constraint",
+        "Sudan — R2P failure, African Union vs UN jurisdiction",
+        "AUKUS — minilateralism as alternative to multilateral institutions"
+      ],
+      "recurring_motions_at_wudc_level": [
+        "THW allow humanitarian intervention without UNSC approval",
+        "THBT the UN Security Council veto should be abolished",
+        "THW recognise unilateral declarations of independence",
+        "THBT rising powers have a right to a sphere of influence",
+        "THW condition development aid on democratic governance"
+      ],
+      "reading_for_depth": [
+        "Thucydides — History of the Peloponnesian War (the Melian Dialogue — 4 pages, worth more than any textbook)",
+        "Mearsheimer — The Tragedy of Great Power Politics (the realist case)",
+        "Nye — Bound to Lead (soft power)",
+        "Fukuyama — The End of History (and why he was wrong)"
+      ],
+      "argument_angles_most_debaters_miss": [
+        "The double standard argument — when powerful states violate the norms they enforce on others",
+        "The precedent problem — every intervention sets a norm others will follow",
+        "The capability gap — good intentions cannot substitute for capacity in humanitarian intervention",
+        "The regional vs global governance question — why the AU or ASEAN might govern better than the UN in specific contexts"
       ]
     },
     {
       "topic": "geopolitics",
-      "debate_frames": [
-        "US-China competition — decoupling vs engagement",
-        "Rise of the Global South — new world order or old dependency",
-        "Resource geopolitics — energy, water, rare earth minerals",
-        "Technology as geopolitical weapon — chips, AI, satellites"
+      "why_this_matters_for_debate": "Geopolitics is where economics, history, and power intersect. Debaters who understand it can anchor abstract arguments in concrete structural realities. It also produces the most WUDC-relevant motions about global order.",
+      "the_mechanisms_to_understand": [
+        "How geography shapes foreign policy — why location is destiny for many states",
+        "How economic interdependence both prevents and causes conflict",
+        "How technology is redrawing the map of power — control of chips, data, and satellites",
+        "How demographic decline reshapes the ambitions of great powers",
+        "How resource competition produces alliance structures"
       ],
-      "key_concepts_to_know": [
-        "Thucydides Trap",
-        "Monroe Doctrine and its modern equivalents",
-        "BRICS expansion and what it signals",
-        "Geoeconomics — using trade as foreign policy",
-        "Heartland theory vs Rimland theory"
+      "essential_theoretical_frameworks": [
+        "Mackinder's Heartland Theory — who controls Eurasia controls the world",
+        "Mahan's Sea Power theory — why naval dominance correlates with global power",
+        "Thucydides Trap — Allison's reading of power transitions and their danger",
+        "Geoeconomics — using trade, investment, and finance as instruments of power",
+        "Multipolarity vs bipolarity vs unipolarity — which is most stable and why scholars disagree"
       ],
-      "recurring_debate_motions": [
-        "This house believes China's rise is a threat to the liberal world order",
-        "This house would sanction nations that undermine democratic norms",
-        "This house believes the era of American hegemony is over"
+      "key_concepts_own_these_precisely": [
+        "Thucydides Trap — the mechanism, the historical cases, and the escape routes",
+        "Belt and Road Initiative — what it actually is, what critics actually argue, the evidence",
+        "Monroe Doctrine and its contemporary equivalents in China, Russia, India",
+        "Geoeconomic tools — sanctions, export controls, investment screening, currency weaponisation",
+        "BRICS expansion — what it signals about the non-Western challenge to liberal order",
+        "Rare earth minerals and why they are the oil of the 21st century",
+        "Chip geopolitics — why a semiconductor is now a national security object"
       ],
-      "watch_for": [
-        "Any story about supply chain reshoring",
-        "Semiconductor and chip politics",
-        "Africa as a new arena of great power competition"
+      "live_case_studies_with_analytical_value": [
+        "US-China tech decoupling — mechanisms, costs, and whether it is achievable",
+        "Russia-Europe energy dependency — how a supply chain became a geopolitical weapon",
+        "India's strategic autonomy — why it refuses alignment and what that costs",
+        "Africa's infrastructure financing — China vs West, what the evidence shows",
+        "Arctic geopolitics — resource competition in a melting frontier"
+      ],
+      "recurring_motions_at_wudc_level": [
+        "THBT China's rise is incompatible with the liberal international order",
+        "THW sanction states that undermine democratic norms",
+        "THBT the era of American hegemony is over and that is a bad thing",
+        "THW allow export controls on critical technologies to authoritarian states",
+        "THBT developing nations should reject Western conditionality on aid"
+      ],
+      "argument_angles_most_debaters_miss": [
+        "The middle power argument — states like India, Brazil, Turkey gain most from multipolar disorder",
+        "The economic cost of decoupling — for both sides, measured in actual numbers",
+        "The domestic politics driving foreign policy — why leaders choose confrontation for internal reasons",
+        "The normative framing problem — who gets to define 'rules-based order' and why that framing is contested"
       ]
     },
     {
-      "topic": "finance and economics",
-      "debate_frames": [
-        "free market vs state intervention",
-        "austerity vs stimulus — who does each protect",
-        "inequality — is it inevitable in capitalism",
-        "debt — when is government debt good vs dangerous",
-        "central bank independence — myth or reality"
+      "topic": "economics and finance",
+      "why_this_matters_for_debate": "Almost every motion about policy has an economic dimension. Debaters who cannot engage with economic mechanisms lose to those who can. You do not need to be an economist. You need to understand the three or four mechanisms that drive most economic debates.",
+      "the_mechanisms_to_understand": [
+        "How markets allocate resources and why they fail — the four market failures",
+        "How monetary policy and fiscal policy work and why they conflict",
+        "How inequality compounds across generations — not just income, but wealth and opportunity",
+        "Why free trade creates winners and losers simultaneously and what determines which you are",
+        "How financial crises transmit from one country to another"
       ],
-      "key_concepts_to_know": [
-        "Keynesian vs Austrian vs MMT economics",
-        "Gini coefficient and how to read it",
-        "Moral hazard",
-        "Comparative advantage",
-        "Externalities — negative and positive",
-        "Purchasing power parity",
-        "Fiscal vs monetary policy — what each can and cannot do"
+      "essential_theoretical_frameworks": [
+        "Keynesian economics — aggregate demand, government spending as stimulus, the paradox of thrift",
+        "Monetarism — inflation is always and everywhere a monetary phenomenon, Friedman",
+        "Modern Monetary Theory — governments that issue their own currency cannot go bankrupt, the political controversy",
+        "Austrian economics — the knowledge problem, why central planning fails, Hayek",
+        "Institutional economics — rules, norms, and property rights determine outcomes, North",
+        "Dependency theory — why some nations develop and others are kept underdeveloped, Frank, Wallerstein"
       ],
-      "recurring_debate_motions": [
-        "This house would implement a Universal Basic Income",
-        "This house believes central banks should be democratically accountable",
-        "This house would abolish the IMF",
-        "This house believes free trade does more harm than good to developing nations"
+      "key_concepts_own_these_precisely": [
+        "Comparative advantage — what it actually argues, not just that free trade is good",
+        "Moral hazard — precise definition and three concrete examples across different domains",
+        "Externalities — negative and positive, and why markets cannot price them without intervention",
+        "Gini coefficient — how to read it, what it misses, what the trends actually show",
+        "Purchasing Power Parity — why nominal GDP comparisons mislead",
+        "Fiscal multiplier — when government spending generates more than one dollar of growth per dollar spent",
+        "Dutch disease — how a resource boom destroys the rest of your economy",
+        "Regulatory capture — when the regulator serves the industry it was meant to regulate"
       ],
-      "watch_for": [
-        "Inflation and interest rate stories — understand the mechanism not just the number",
-        "Any story about a country defaulting on debt",
-        "Crypto regulation debates",
-        "Tax haven and wealth tax discussions"
+      "recurring_motions_at_wudc_level": [
+        "THW implement a Universal Basic Income",
+        "THBT central banks should be democratically accountable",
+        "THW abolish the IMF and World Bank",
+        "THBT free trade does more harm than good to developing nations",
+        "THW implement a global wealth tax",
+        "THBT austerity is never the right response to a recession"
+      ],
+      "argument_angles_most_debaters_miss": [
+        "The distributional argument — aggregate growth can be real while most people get poorer",
+        "The time horizon problem — efficient markets are efficient in the long run, but people live in the short run",
+        "The power asymmetry in 'free' trade — when one side has far more leverage than the other",
+        "The difference between what the IMF prescribes and what the evidence supports"
       ]
     },
     {
-      "topic": "feminism",
-      "debate_frames": [
-        "liberal feminism vs radical feminism vs intersectional feminism",
-        "gender equality vs gender equity — different goals different tools",
-        "feminism in the Global South — is western feminism colonial",
-        "men and masculinity — is feminism for everyone",
-        "legal equality vs social equality — laws exist but do they work"
+      "topic": "feminism and gender",
+      "why_this_matters_for_debate": "Gender motions appear at every competition. The debaters who win them are not those who shout louder but those who understand the philosophical distinctions, know the empirical literature, and can argue both sides with equal precision.",
+      "the_mechanisms_to_understand": [
+        "How structural disadvantage compounds across a lifetime even without individual acts of discrimination",
+        "Why legal equality does not produce social equality and what the gap reveals",
+        "How gender norms are reproduced through institutions, language, and culture — not just individual choice",
+        "Why women's economic participation does not automatically translate to women's empowerment",
+        "How feminist theory evolved across waves and why each wave was a response to the previous one's failures"
       ],
-      "key_concepts_to_know": [
-        "Intersectionality (Kimberle Crenshaw)",
-        "Patriarchy as a system vs individual sexism",
-        "Second vs third vs fourth wave feminism — what changed",
-        "Gender pay gap — different from earnings gap, know the distinction",
-        "Unpaid care work and how economists measure it",
-        "CEDAW — the international treaty on women's rights"
+      "essential_theoretical_frameworks": [
+        "Liberal feminism — equal rights and opportunities within existing institutions. Wollstonecraft, Friedan.",
+        "Radical feminism — patriarchy is the root system, not just a set of policies. Dworkin, MacKinnon.",
+        "Socialist feminism — gender oppression and class oppression are inseparable. Engels, Mitchell.",
+        "Intersectional feminism — race, class, gender, sexuality operate simultaneously. Crenshaw.",
+        "Postcolonial feminism — Western feminism often reinforces colonial power. Mohanty, Spivak.",
+        "Care ethics — an alternative moral framework centred on relationships, not rights. Gilligan, Noddings."
       ],
-      "recurring_debate_motions": [
-        "This house believes affirmative action for women does more harm than good",
-        "This house would criminalise the purchase of sex",
-        "This house believes feminism has failed working-class women",
-        "This house supports gender quotas in corporate boardrooms"
+      "key_concepts_own_these_precisely": [
+        "Intersectionality — the actual argument, not just the word. Crenshaw's 1989 paper.",
+        "Patriarchy as a system — what it means structurally, not just individually",
+        "Gender pay gap vs earnings gap — the precise distinction and why it matters for the debate",
+        "Unpaid care work — how economists measure it and what the numbers show",
+        "Reproductive autonomy — the philosophical argument, not just the political position",
+        "CEDAW — what it commits states to and how compliance is monitored",
+        "Feminist jurisprudence — how law encodes gender and how it can be reformed"
       ],
-      "watch_for": [
-        "Any supreme court ruling on reproductive rights globally",
-        "Honour-based violence debates",
-        "Women in conflict zones — as victims and as combatants",
-        "Pay transparency laws"
+      "recurring_motions_at_wudc_level": [
+        "THW implement gender quotas in all political institutions",
+        "THBT affirmative action for women does more harm than good",
+        "THW decriminalise sex work",
+        "THBT Western feminist movements are a form of cultural imperialism",
+        "THW remove the legal distinction between rape within and outside of marriage",
+        "THBT feminism should prioritise economic equality over cultural change"
+      ],
+      "argument_angles_most_debaters_miss": [
+        "The Global South critique — Western feminist priorities often do not map onto non-Western women's actual priorities",
+        "The men's crisis argument — declining male educational attainment and what feminism should say about it",
+        "The class dimension — middle-class feminism and working-class women's often different interests",
+        "The sex worker agency debate — the distinction between choice under constraint and genuine autonomy"
       ]
     },
     {
-      "topic": "technology and AI",
-      "debate_frames": [
-        "AI regulation — who regulates, how, and who enforces",
-        "automation and jobs — displacement vs creation",
-        "surveillance capitalism — data as the new oil",
-        "open source vs closed AI — who controls the technology",
-        "AI in warfare — autonomous weapons, drones, decision-making"
+      "topic": "technology and artificial intelligence",
+      "why_this_matters_for_debate": "Technology motions are increasingly central at WUDC. They require philosophical depth (on consciousness, rights, responsibility), economic literacy (on labour and concentration of power), and political understanding (on governance and sovereignty). Surface knowledge loses.",
+      "the_mechanisms_to_understand": [
+        "How machine learning systems actually work — training data, optimization, emergence — at a conceptual level",
+        "How network effects create monopoly power in digital markets",
+        "How algorithmic systems encode and amplify existing social biases",
+        "How autonomous systems create new challenges for legal responsibility and moral accountability",
+        "How states are weaponising technology in geopolitical competition"
       ],
-      "key_concepts_to_know": [
-        "Alignment problem in AI",
-        "Algorithmic bias and how it compounds inequality",
-        "Network effects and why big tech becomes monopolistic",
-        "Digital public infrastructure vs private platform dominance",
-        "Turing Test and its limitations as a benchmark",
-        "Existential risk vs near-term harm — two different AI debates"
+      "essential_theoretical_frameworks": [
+        "Alignment problem — the technical and philosophical challenge of building AI systems that do what we want",
+        "Effective altruism and longtermism — the philosophical case for treating AI risk as existential",
+        "Surveillance capitalism — Zuboff's argument about data extraction as a new economic logic",
+        "Platform theory — two-sided markets, content moderation, and publisher vs platform liability",
+        "Digital sovereignty — the argument that states must control their digital infrastructure"
       ],
-      "recurring_debate_motions": [
-        "This house would ban the development of artificial general intelligence",
-        "This house believes social media companies should be treated as publishers",
-        "This house would impose a global moratorium on autonomous weapons",
-        "This house believes big tech should be broken up"
+      "key_concepts_own_these_precisely": [
+        "Alignment problem — technical definition and why it is genuinely hard, not just a science fiction concern",
+        "Algorithmic bias — how it enters, how it compounds, three concrete documented cases",
+        "Network effects — why they produce monopoly and why antitrust is hard to apply",
+        "Autonomous weapons — the moral and legal challenges, Lethal Autonomous Weapons Systems debate at UN",
+        "Regulatory capture in tech — when the regulator cannot understand the technology it regulates",
+        "Data as a public good — the argument that data has features of a commons",
+        "Digital divide — not just access, but the capability gap in using technology effectively"
       ],
-      "watch_for": [
-        "Any AI regulation bill passing anywhere in the world",
-        "Deepfake and misinformation policy debates",
-        "AI in healthcare and who owns medical AI decisions",
-        "Copyright and AI-generated content disputes"
+      "recurring_motions_at_wudc_level": [
+        "THW ban the development of Artificial General Intelligence",
+        "THBT social media companies should be legally liable for algorithmic amplification of harmful content",
+        "THW impose a global moratorium on autonomous weapons systems",
+        "THBT large technology companies should be broken up under antitrust law",
+        "THW require algorithmic transparency for consequential decisions",
+        "THBT AI development should be a global commons, not a national competition"
+      ],
+      "argument_angles_most_debaters_miss": [
+        "The epistemic access problem — regulators cannot regulate what they cannot understand",
+        "The competitive dynamics argument — regulation in one country just moves development elsewhere",
+        "The Global South exclusion argument — AI governance conversations are dominated by two countries",
+        "The labour displacement specificity argument — not all jobs, specific jobs, specific communities, specific countries"
       ]
     },
     {
-      "topic": "free speech",
-      "debate_frames": [
-        "absolute free speech vs harm-based limits — where is the line",
-        "who decides what is harmful — the state, platforms, or communities",
-        "hate speech laws — do they protect the vulnerable or silence dissent",
-        "deplatforming — censorship or community standards",
-        "academic freedom vs safe spaces on campus"
+      "topic": "free speech and censorship",
+      "why_this_matters_for_debate": "Free speech motions are philosophical minefields. The debaters who win them are those who can navigate the philosophical landscape precisely — who know Mill from Feinberg, who understand what the harm principle actually says, who can distinguish legal question from moral question.",
+      "the_mechanisms_to_understand": [
+        "How speech causes harm — the causal chain from words to consequences",
+        "How censorship chills more speech than it removes — the chilling effect mechanism",
+        "Why democracies need open public discourse to function — the epistemic argument for free speech",
+        "How hate speech laws get extended beyond their original scope — the slippery slope that actually happens",
+        "Why powerful groups consistently use speech restrictions against less powerful groups historically"
       ],
-      "key_concepts_to_know": [
-        "Mill's harm principle",
-        "Marketplace of ideas — the liberal argument for free speech",
-        "Chilling effect — how vague laws suppress more than just bad speech",
-        "Brandenburg test (US) vs reasonable person test",
-        "Positive vs negative liberty as applied to speech",
-        "Seditious speech and how governments abuse the category"
+      "essential_theoretical_frameworks": [
+        "Mill's harm principle — the precise argument in On Liberty, not the simplified version",
+        "Marketplace of ideas — the epistemic defence of free speech. Mill, Holmes.",
+        "Feinberg's offence principle — why mere offence is not sufficient to justify restriction",
+        "Critical race theory on speech — why the harm principle misses how hate speech actually operates. Matsuda, Delgado.",
+        "Positive and negative liberty — Berlin's distinction and its application to speech",
+        "Counter-speech theory — why the answer to bad speech is more speech, not censorship"
       ],
-      "recurring_debate_motions": [
-        "This house would ban hate speech",
-        "This house believes social media platforms should not moderate political speech",
-        "This house would hold platforms legally liable for user content",
-        "This house believes cancel culture is a threat to free society"
+      "key_concepts_own_these_precisely": [
+        "Harm principle — what it says and what it does not say",
+        "Chilling effect — the mechanism by which vague laws suppress more speech than intended",
+        "Prior restraint — why prohibiting speech before it happens is treated differently from punishing it after",
+        "Brandenburg test — the US legal standard for when incitement can be prosecuted",
+        "Hate speech — the definitional problem and why different countries resolve it differently",
+        "Platform vs publisher distinction — what it means legally and why it is contested"
       ],
-      "watch_for": [
-        "Any platform moderation policy change — X, Meta, YouTube",
-        "Government attempts to regulate speech online",
-        "Press freedom index releases",
-        "Whistleblower cases"
+      "recurring_motions_at_wudc_level": [
+        "THW ban hate speech",
+        "THBT social media platforms should not moderate political speech",
+        "THW hold platforms legally liable for harmful user content",
+        "THBT cancel culture represents a threat to liberal democracy",
+        "THW criminalise Holocaust denial",
+        "THBT the right to offend is essential to free society"
+      ],
+      "argument_angles_most_debaters_miss": [
+        "The power asymmetry argument — speech restrictions historically fall hardest on the powerless",
+        "The definitional instability argument — who defines harmful speech changes as power changes",
+        "The private censorship problem — platform moderation is censorship without democratic accountability",
+        "The epistemic humility argument — we restrict speech partly because we overestimate our ability to identify bad speech"
       ]
     },
     {
-      "topic": "state power",
-      "debate_frames": [
-        "surveillance state — security vs privacy",
-        "emergency powers — when does the exception become the rule",
-        "state monopoly on violence — legitimate vs illegitimate use",
-        "federalism vs centralisation — who governs best",
-        "democratic backsliding — how democracies die slowly"
+      "topic": "state power and democracy",
+      "why_this_matters_for_debate": "This topic sits at the centre of political philosophy. To debate it well you need to understand what the state is, why it exists, what legitimises its power, and when that legitimacy fails. Without this foundation, you are arguing about policies without understanding the architecture underneath.",
+      "the_mechanisms_to_understand": [
+        "How democracies erode — not through coups but through incremental institutional capture",
+        "How emergency powers become permanent — the ratchet effect",
+        "How the rule of law differs from rule by law and why the distinction determines everything",
+        "How states build and maintain legitimacy — and how they lose it",
+        "How separation of powers fails when all three branches are captured simultaneously"
       ],
-      "key_concepts_to_know": [
-        "Weber's definition of the state — monopoly on legitimate violence",
-        "Social contract theory — Hobbes vs Locke vs Rousseau",
-        "Separation of powers and why it erodes",
-        "Totalitarianism vs authoritarianism — different mechanisms",
-        "Rule of law vs rule by law — the critical distinction",
-        "Civil disobedience — Thoreau, Gandhi, MLK — the theory"
+      "essential_theoretical_frameworks": [
+        "Social contract theory — Hobbes (security above all), Locke (property and consent), Rousseau (general will). Know what each one implies for legitimate state power.",
+        "Rawlsian liberalism — the veil of ignorance, the difference principle, what a just state looks like",
+        "Libertarianism — Nozick's minimal state and the entitlement theory of justice",
+        "Republicanism — non-domination as the goal of political institutions. Philip Pettit.",
+        "Democratic backsliding theory — Levitsky and Ziblatt on how democracies die",
+        "Emergency politics — Agamben on the state of exception and how emergencies become the norm"
       ],
-      "recurring_debate_motions": [
-        "This house believes mass surveillance is justified for national security",
-        "This house would limit emergency powers to 30 days without parliamentary renewal",
-        "This house believes civil disobedience is always justified against unjust laws",
-        "This house supports a constitutional right to bear arms"
+      "key_concepts_own_these_precisely": [
+        "Weber's definition of the state — monopoly on legitimate violence in a territory",
+        "Rule of law vs rule by law — the difference that separates liberal from illiberal states",
+        "Democratic backsliding — the precise mechanisms: court-packing, electoral manipulation, media capture",
+        "Separation of powers — why it was designed and how it fails",
+        "Civil disobedience — Rawls's criteria for when it is justified in a nearly just society",
+        "Tyranny of the majority — the problem and the institutional solutions",
+        "Constitutional entrenchment — why some rights are taken out of ordinary democratic politics"
       ],
-      "watch_for": [
-        "Any country invoking emergency powers",
-        "Protests that governments label as security threats",
-        "Judicial independence cases",
-        "Sedition and anti-terror law misuse"
+      "recurring_motions_at_wudc_level": [
+        "THBT mass surveillance is never justified in a liberal democracy",
+        "THW limit emergency powers to 30 days without legislative renewal",
+        "THW require a supermajority to amend constitutional rights",
+        "THBT civil disobedience is always a legitimate response to unjust laws",
+        "THW make voting compulsory",
+        "THBT political parties do more harm than good to democracy"
+      ],
+      "argument_angles_most_debaters_miss": [
+        "The legitimacy without consent argument — what justifies state power over people who never agreed to it",
+        "The institutional design argument — the quality of democracy depends on institutions, not just elections",
+        "The epistocracy challenge — what do you say to someone who argues most voters are not informed enough to govern",
+        "The procedural vs substantive democracy distinction — a state can have all the procedures and still not be democratic"
       ]
     },
     {
-      "topic": "politics and democracy",
-      "debate_frames": [
-        "electoral systems — FPTP vs proportional representation vs ranked choice",
-        "political polarisation — causes and who benefits",
-        "populism — symptom of democratic failure or democracy working",
-        "money in politics — lobbying, campaign finance, oligarchy",
-        "compulsory voting — democratic duty or coercive participation"
+      "topic": "philosophy — free will, moral responsibility, ethics",
+      "why_this_matters_for_debate": "Philosophy motions are the highest-prestige motions at WUDC. They are also the most intellectually demanding. A debater who can navigate compatibilism, distinguish deontology from consequentialism, and deploy Rawls or Nozick with precision will always be in the top bracket.",
+      "the_mechanisms_to_understand": [
+        "Why the free will debate is not about whether you can choose what to have for breakfast — the serious version",
+        "How different metaethical positions produce different practical conclusions — moral realism vs relativism",
+        "How moral intuitions can be systematically wrong and what that implies for how we reason",
+        "Why moral luck is a genuine problem for our practices of praise and blame",
+        "How the trolley problem has been misused and what it actually tests"
       ],
-      "key_concepts_to_know": [
-        "Duverger's Law — why FPTP produces two-party systems",
-        "Median voter theorem",
-        "Elite theory of democracy vs participatory theory",
-        "Overton window — how acceptable positions shift over time",
-        "Epistocracy — the argument for restricting voting to informed citizens",
-        "Deliberative democracy vs representative democracy"
+      "essential_theoretical_frameworks": [
+        "Consequentialism — right action maximises good outcomes. Bentham, Mill, Singer. Know the objections.",
+        "Deontology — some actions are intrinsically right or wrong regardless of outcomes. Kant's categorical imperative.",
+        "Virtue ethics — the right question is not what to do but what kind of person to be. Aristotle, MacIntyre.",
+        "Contractualism — an action is wrong if its principles could not be justified to others. Scanlon.",
+        "Hard determinism — every event including human choice is fully caused. Free will is an illusion.",
+        "Compatibilism — free will and determinism are compatible. Dennett, Frankfurt.",
+        "Libertarian free will (philosophical not political) — we have genuine undetermined agency."
       ],
-      "recurring_debate_motions": [
-        "This house would introduce compulsory voting",
-        "This house believes political parties do more harm than good",
-        "This house would lower the voting age to 16",
-        "This house believes lobbying should be completely banned"
+      "key_concepts_own_these_precisely": [
+        "Categorical imperative — both formulations and how they work",
+        "Veil of ignorance — what it tests and why it is not just a thought experiment but a procedure for justice",
+        "Trolley problem — the actual philosophical point (doctrine of double effect, act vs omission)",
+        "Frankfurt cases — cases where you are responsible even though you could not have done otherwise",
+        "Moral luck — Nagel and Williams, why it undermines our ordinary practices of blame",
+        "Is-ought gap — Hume's point that you cannot derive values from facts",
+        "Supererogation — actions that are praiseworthy but not obligatory, and why this category matters"
       ],
-      "watch_for": [
-        "Any major election result and its systemic implications",
-        "Electoral reform movements",
-        "Authoritarian governments winning elections legitimately",
-        "Disinformation campaigns and election integrity"
+      "recurring_motions_at_wudc_level": [
+        "THW abolish retributive punishment",
+        "THBT moral obligations to strangers are no less than moral obligations to family",
+        "THW require the wealthy to donate a significant portion of their income to effective charities",
+        "THBT free will is an illusion",
+        "THBT consequentialism is the correct moral framework for public policy",
+        "THW hold people morally responsible for beliefs they do not choose"
+      ],
+      "argument_angles_most_debaters_miss": [
+        "The reflective equilibrium method — moral reasoning goes in both directions, not just from principles to cases",
+        "The demandingness objection to consequentialism — it requires too much and may produce worse outcomes if widely adopted",
+        "The separateness of persons objection — utilitarianism treats the boundary between people as morally insignificant",
+        "The integrity objection to consequentialism — Williams on why it alienates you from your own projects"
       ]
     },
     {
-      "topic": "free will and moral philosophy",
-      "debate_frames": [
-        "hard determinism vs compatibilism vs libertarian free will",
-        "moral responsibility — can we blame people if free will is limited",
-        "criminal justice implications — punishment vs rehabilitation",
-        "neuroscience vs philosophy — what brain scans actually prove",
-        "social determinism — does your background determine your choices"
+      "topic": "social justice and equality",
+      "why_this_matters_for_debate": "Social justice motions require you to engage with both empirical evidence and philosophical foundations. The debaters who lose these rounds are those who argue entirely from emotion or entirely from abstraction. The winners anchor values in mechanisms and mechanisms in values.",
+      "the_mechanisms_to_understand": [
+        "How structural disadvantage compounds across generations even without ongoing discrimination",
+        "Why formal equality produces substantive inequality in systems with accumulated disadvantage",
+        "How identity-based coalitions form and dissolve and what determines their political effectiveness",
+        "Why diversity programmes succeed in some contexts and fail in others — the evidence",
+        "How restorative justice actually works in practice and where the evidence supports it"
       ],
-      "key_concepts_to_know": [
-        "Hard determinism — every event including human choice is caused",
-        "Compatibilism — free will and determinism can both be true",
-        "Frankfurt cases — moral responsibility without alternative possibilities",
-        "Consequentialism vs deontology vs virtue ethics — the three frameworks",
-        "Trolley problem and what it actually tests",
-        "Is-ought problem (Hume)",
-        "Moral luck — why it matters for blame and praise"
+      "essential_theoretical_frameworks": [
+        "Rawls vs Nozick — the foundational debate in political philosophy about redistribution",
+        "Structural vs individual racism — the distinction that determines which interventions are appropriate",
+        "Restorative justice — the theory, the evidence, the limits",
+        "Recognition theory — Honneth on why material redistribution is not sufficient for justice",
+        "Capabilities approach — Sen and Nussbaum on what human flourishing actually requires",
+        "Intersectionality as an analytical framework — not just identity politics but a method for analysis"
       ],
-      "recurring_debate_motions": [
-        "This house believes free will is an illusion",
-        "This house would abolish retributive punishment",
-        "This house believes we are not morally responsible for our actions",
-        "This house believes consequentialism is the correct moral framework"
+      "key_concepts_own_these_precisely": [
+        "Rawls' difference principle — inequalities are only just if they benefit the worst-off",
+        "Nozick's entitlement theory — how holdings are just if justly acquired and transferred",
+        "Capabilities approach — freedom as real capability, not just formal absence of restriction",
+        "Cultural recognition vs economic redistribution — Fraser on the two dimensions of justice",
+        "Meritocracy — the argument for it, the empirical evidence against it, and what remains of the ideal",
+        "Intergenerational justice — what we owe to future people and how to argue it"
       ],
-      "watch_for": [
-        "Neuroscience studies on decision-making",
-        "Criminal sentencing reform debates",
-        "AI moral agency discussions — can an AI be responsible",
-        "Addiction and criminal justice intersection"
+      "recurring_motions_at_wudc_level": [
+        "THBT affirmative action does more harm than good",
+        "THW pay reparations for colonialism",
+        "THW implement a maximum income",
+        "THBT identity politics is harmful to progressive movements",
+        "THW prioritise equality of outcome over equality of opportunity"
+      ],
+      "argument_angles_most_debaters_miss": [
+        "The second-order effects of affirmative action — stigma effects, mismatch hypothesis, the evidence and counter-evidence",
+        "The global justice dimension — reparations debates often ignore the global distribution of historical injustice",
+        "The recognition without redistribution trap — symbolic inclusion without material change",
+        "The coalition problem — identity politics can fragment the coalitions needed for economic change"
+      ]
+    },
+    {
+      "topic": "criminal justice",
+      "why_this_matters_for_debate": "Criminal justice motions appear constantly and they all require the same foundation: the four theories of punishment and the empirical evidence for each. Without this, you argue policy without understanding purpose.",
+      "the_mechanisms_to_understand": [
+        "How incarceration rates are driven more by policy choices than by crime rates",
+        "Why recidivism is high and what the evidence shows actually reduces it",
+        "How prosecutorial discretion operates and why it produces unequal outcomes",
+        "How wrongful convictions happen and what systemic features allow them to persist",
+        "How drug criminalisation creates the markets and violence it claims to address"
+      ],
+      "essential_theoretical_frameworks": [
+        "Retributivism — punishment is deserved regardless of consequences. Kant.",
+        "Deterrence — punishment prevents future crime. Bentham. Specific vs general deterrence.",
+        "Rehabilitation — punishment should reform the offender. Positivist criminology.",
+        "Incapacitation — imprisonment prevents crime by removing offenders from society.",
+        "Restorative justice — repair the harm, not just punish the offender.",
+        "Prison abolitionism — the system causes more harm than it prevents and should be dismantled."
+      ],
+      "key_concepts_own_these_precisely": [
+        "Recidivism — rates, what predicts it, what reduces it",
+        "Mandatory minimum sentencing — the policy rationale and the empirical results",
+        "Prosecutorial discretion — how it works and why it produces racial and class disparities",
+        "Wrongful conviction — rate estimates, causes, and systemic features that allow it",
+        "Broken windows theory — the argument, the evidence, why it fell out of favour",
+        "Carceral feminism — the critique from within feminism of using criminal law to address gender violence"
+      ],
+      "recurring_motions_at_wudc_level": [
+        "THW abolish prisons",
+        "THW decriminalise all drugs",
+        "THW abolish the death penalty",
+        "THBT criminal justice systems should prioritise rehabilitation over punishment",
+        "THW make the criminal justice system fully restorative",
+        "THBT the war on drugs has caused more harm than drug use itself"
+      ],
+      "argument_angles_most_debaters_miss": [
+        "The abolitionist concession — even abolitionists agree the system needs something to replace it, the question is what",
+        "The deterrence evidence problem — the evidence for deterrence is much weaker than assumed",
+        "The political economy of incarceration — who profits from mass incarceration and why they resist reform",
+        "The international comparison — US incarceration vs Europe is not just a cultural difference, it is a policy choice"
       ]
     },
     {
       "topic": "education",
-      "debate_frames": [
-        "purpose of education — economic productivity vs citizenship vs self-actualisation",
-        "private vs public education — who benefits from each",
-        "standardised testing — what it measures and what it misses",
-        "university education — credential vs knowledge vs class marker",
-        "curriculum wars — who decides what is taught and why it matters"
+      "why_this_matters_for_debate": "Education motions require you to ask what education is for before you can argue what it should do. The debater who has a clear answer to that prior question will always structure their case better.",
+      "the_mechanisms_to_understand": [
+        "How credentialism inflates educational requirements without improving economic productivity",
+        "Why educational inequality compounds across generations — the mechanism, not just the outcome",
+        "How private schools create social stratification even when they produce good individual outcomes",
+        "Why standardised testing produces the outcomes it measures and suppresses the ones it does not",
+        "How the hidden curriculum transmits social norms that are never explicitly taught"
       ],
-      "key_concepts_to_know": [
-        "Human capital theory — education as investment",
-        "Hidden curriculum — what schools teach without saying it",
-        "Credentialism vs actual skills — the gap",
-        "Freire's Pedagogy of the Oppressed — education as liberation",
-        "School-to-prison pipeline",
-        "PISA rankings — what they measure and their limitations"
+      "essential_theoretical_frameworks": [
+        "Human capital theory — education as investment in productive capacity. Becker.",
+        "Credentialism — the inflation of credentials beyond their productive value. Collins.",
+        "Freire's pedagogy — banking model vs problem-posing education, education as liberation or domestication",
+        "Liberal education — the argument for breadth, critical thinking, and citizenship over vocational preparation",
+        "Effective altruism and education — marginal impact in developing world contexts"
       ],
-      "recurring_debate_motions": [
-        "This house would abolish private schools",
-        "This house believes university education should be free",
-        "This house would replace standardised exams with continuous assessment",
-        "This house believes schools should teach financial literacy as a core subject"
+      "key_concepts_own_these_precisely": [
+        "Human capital vs signalling — two completely different economic explanations for why education pays",
+        "Hidden curriculum — what schools teach without teaching it: compliance, hierarchy, time discipline",
+        "School-to-prison pipeline — the mechanism, the evidence, the critique",
+        "PISA rankings — what they measure, what they miss, how countries game them",
+        "Grade inflation and credential inflation — the mechanism and its economic consequences"
       ],
-      "watch_for": [
-        "Any country reforming its exam system",
-        "Student debt policy debates",
-        "AI in classrooms — personalized learning vs surveillance",
-        "Book banning and curriculum censorship cases"
-      ]
-    },
-    {
-      "topic": "social justice",
-      "debate_frames": [
-        "formal equality vs substantive equality — same rules vs same outcomes",
-        "affirmative action — remedy for historical injustice or new discrimination",
-        "reparations — who owes what to whom and how to calculate",
-        "identity politics — solidarity tool or division engine",
-        "privilege — useful concept or conversation-stopper"
-      ],
-      "key_concepts_to_know": [
-        "Rawls' veil of ignorance — the fairness test",
-        "Nozick's entitlement theory — the libertarian counter",
-        "Structural racism vs individual racism — why the distinction matters",
-        "Cultural appropriation vs cultural exchange — where the line is",
-        "Restorative justice vs retributive justice",
-        "The difference between equity, equality, and justice"
-      ],
-      "recurring_debate_motions": [
-        "This house believes affirmative action does more harm than good",
-        "This house would pay reparations for historical injustices",
-        "This house believes identity politics is tearing society apart",
-        "This house supports safe spaces in universities"
-      ],
-      "watch_for": [
-        "Supreme court rulings on race and gender",
-        "DEI rollbacks in corporations and universities",
-        "Any reparations commission or study",
-        "Hate crime legislation debates"
-      ]
-    },
-    {
-      "topic": "justice system and criminal law",
-      "debate_frames": [
-        "purpose of punishment — retribution vs rehabilitation vs deterrence vs incapacitation",
-        "mass incarceration — who it targets and why",
-        "death penalty — moral, practical, and racial arguments",
-        "prison abolition — radical but increasingly mainstream",
-        "prosecutorial discretion — too much power, too little accountability"
-      ],
-      "key_concepts_to_know": [
-        "Recidivism rates and what reduces them",
-        "Mandatory minimum sentencing — what it was supposed to do vs what it did",
-        "Restorative justice — theory and evidence",
-        "Presumption of innocence and where it breaks down",
-        "Wrongful conviction rate — how common, how preventable",
-        "Broken windows theory — its rise and fall"
-      ],
-      "recurring_debate_motions": [
-        "This house would abolish prisons",
-        "This house supports the death penalty for the most serious crimes",
-        "This house would decriminalise all drugs",
-        "This house believes the criminal justice system is institutionally racist"
-      ],
-      "watch_for": [
-        "Drug decriminalisation experiments worldwide",
-        "Prison reform legislation",
-        "Police accountability cases",
-        "Wrongful conviction exonerations — they carry enormous argument weight"
+      "recurring_motions_at_wudc_level": [
+        "THW abolish private schools",
+        "THBT university education should be free",
+        "THW replace university degrees with skills-based credentials",
+        "THBT standardised testing does more harm than good",
+        "THW teach philosophy and logic as core subjects from primary school"
       ]
     },
     {
       "topic": "religion and society",
-      "debate_frames": [
-        "secularism vs religious state — who decides the public-private line",
-        "religious freedom vs minority rights — when they conflict",
-        "religion as social cohesion vs religion as control",
-        "blasphemy laws — free speech and religion in conflict",
-        "science and religion — not always in conflict, know the nuance"
+      "why_this_matters_for_debate": "Religion motions require philosophical sophistication about the public-private distinction, the limits of liberalism, and the specific contexts where religious and secular values conflict. They also require intellectual honesty — most of the world is deeply religious, and debaters who treat religion as obviously irrational lose.",
+      "the_mechanisms_to_understand": [
+        "How secularism actually operates in different states — France is different from India is different from the US",
+        "How religious nationalism forms and what political conditions produce it",
+        "How religious exemptions from general laws create hierarchies of rights",
+        "Why the secularisation thesis was wrong — religion did not disappear with modernity",
+        "How liberation theology mobilised religious communities for political change"
       ],
-      "key_concepts_to_know": [
-        "Secularism — French laïcité vs American wall of separation vs Indian model",
-        "Theocracy vs soft religious states",
-        "Liberation theology — religion as social justice tool",
-        "The secularisation thesis — and why it was wrong",
-        "Religious nationalism — when faith becomes political identity",
-        "Weber's Protestant work ethic — religion shaping economics"
+      "essential_theoretical_frameworks": [
+        "Secularism — three models: French laïcité (strict separation), American (state neutrality), Indian (state engagement with all)",
+        "Taylor's secular age — how we moved from a world where belief was default to one where it is one option among many",
+        "Rawls on public reason — in a pluralist society, political arguments must be accessible to all citizens regardless of faith",
+        "Religious nationalism — the fusion of religious and national identity as a political project",
+        "Liberation theology — the option for the poor, praxis over doctrine"
       ],
-      "recurring_debate_motions": [
-        "This house would ban religious symbols in public institutions",
-        "This house believes religion does more harm than good",
-        "This house would repeal blasphemy laws globally",
-        "This house believes the state should have no role in regulating religion"
+      "key_concepts_own_these_precisely": [
+        "Laïcité — what it actually means and why it produces specific disputes in France",
+        "Public reason — Rawls's requirement that political arguments be translatable into non-sectarian terms",
+        "Religious exemption — when states carve exceptions to general law for religious practice and the problems this creates",
+        "Blasphemy laws — the philosophical argument against them and the political economy of why states keep them",
+        "Secularisation thesis — what it predicted, why it was wrong, what the revision says"
       ],
-      "watch_for": [
-        "Religion and politics intersecting in any election",
-        "Cases of religious exemptions from general laws",
-        "Interfaith conflict and how states respond",
-        "Conversion law debates"
+      "recurring_motions_at_wudc_level": [
+        "THW ban religious symbols in all public institutions",
+        "THBT religion does more harm than good",
+        "THW repeal all blasphemy laws",
+        "THBT the state should not fund religious schools",
+        "THBT religious belief should be irrelevant in political life"
       ]
     },
     {
-      "topic": "relationships and society",
-      "debate_frames": [
-        "marriage as institution — state interest vs personal autonomy",
-        "family structure — nuclear family as norm or as ideological construct",
-        "dating apps and social atomisation — technology changing intimacy",
-        "hookup culture vs loneliness epidemic — connected but alone",
-        "polyamory, open relationships — should the state recognise them"
+      "topic": "relationships, intimacy, and social structures",
+      "why_this_matters_for_debate": "These motions are increasingly common and are often lost because debaters either argue from personal morality or from pure abstraction without connecting to social mechanisms. The key is understanding the state's interest in regulating intimate life and when that interest is legitimate.",
+      "the_mechanisms_to_understand": [
+        "Why states regulate marriage — the economic, demographic, and social rationales",
+        "How loneliness is a structural phenomenon driven by urban design, work patterns, and digital displacement — not individual failure",
+        "How domestic violence operates as a system of power and control — not as occasional incidents",
+        "How hookup culture and the loneliness epidemic coexist — the paradox and its causes",
+        "How family structure interacts with economic inequality"
       ],
-      "key_concepts_to_know": [
-        "Attachment theory — how early bonds shape adult relationships",
-        "Social capital — how relationships build or erode communities",
-        "Marriage penalty vs marriage bonus in tax systems",
-        "Loneliness as a public health crisis — the data",
-        "Domestic violence — power and control model",
-        "Companionate marriage vs arranged marriage — anthropological view"
+      "key_concepts_own_these_precisely": [
+        "Attachment theory — Bowlby's model and its implications for adult relationships",
+        "Social capital — Putnam's distinction between bridging and bonding capital",
+        "Power and control wheel — Duluth model of domestic violence",
+        "Companionate vs arranged marriage — the anthropological and historical view, not the stereotyped version",
+        "Loneliness epidemic — the data, the health implications, the structural causes"
       ],
-      "recurring_debate_motions": [
-        "This house believes the state should not regulate marriage",
-        "This house believes social media is destroying romantic relationships",
-        "This house would legalise polyamorous civil unions",
-        "This house believes the nuclear family is an oppressive institution"
-      ],
-      "watch_for": [
-        "Marriage rate decline studies",
-        "Loneliness policy initiatives",
-        "Domestic violence law reforms",
-        "LGBTQ+ rights and relationship recognition globally"
+      "recurring_motions_at_wudc_level": [
+        "THBT the state should not regulate marriage",
+        "THW legalise polyamorous civil unions",
+        "THBT social media is making intimate relationships worse",
+        "THW hold parents legally responsible for the crimes of their minor children"
       ]
     }
   ],
   "cross_domain_intersections": {
-    "description": "These combinations produce the richest debate arguments. Look for articles that sit at these intersections.",
-    "high_value_pairs": [
-      "technology + state power (surveillance, AI governance)",
-      "economics + social justice (wealth inequality, reparations cost-benefit)",
-      "religion + free speech (blasphemy, religious hate speech)",
-      "feminism + religion (dress codes, marriage law, religious exemptions)",
-      "geopolitics + technology (chip wars, AI arms race, cyber sovereignty)",
-      "criminal justice + social justice (race and incarceration)",
-      "education + economics (student debt, returns on degree)",
-      "free will + criminal justice (responsibility, punishment philosophy)",
-      "politics + finance (regulatory capture, revolving door)",
-      "international relations + human rights (sanctions, intervention)"
-    ]
-  },
-  "argument_building_framework": {
-    "description": "For every article ingested, the system should extract these dimensions.",
-    "dimensions": [
+    "description": "WUDC-level arguments live at intersections. A debater who can bring economic mechanisms into a feminism round, or bring philosophy into a criminal justice round, instantly operates at a higher level. The system should actively look for content that sits at these intersections.",
+    "high_value_intersections": [
       {
-        "name": "THE CLAIM",
-        "question": "What is the core argument this article is making?"
+        "pair": "technology + state power",
+        "what_to_look_for": "surveillance infrastructure, algorithmic governance, digital authoritarianism, AI in policing",
+        "the_question_underneath": "does technology strengthen or undermine democratic accountability"
       },
       {
-        "name": "THE WARRANT",
-        "question": "What evidence or reasoning supports it?"
+        "pair": "economics + social justice",
+        "what_to_look_for": "wealth concentration, inheritance, intergenerational mobility data, tax policy and redistribution",
+        "the_question_underneath": "can capitalism produce justice or is equality of opportunity a fiction within capitalism"
       },
       {
-        "name": "THE IMPACT",
-        "question": "Who is affected and how much does it matter?"
+        "pair": "international relations + economics",
+        "what_to_look_for": "sanctions effectiveness, trade as foreign policy, IMF conditionality, debt and sovereignty",
+        "the_question_underneath": "when does economic interdependence produce peace and when does it produce leverage"
       },
       {
-        "name": "THE CLASH",
-        "question": "What value or fact does the opposing side contest?"
+        "pair": "philosophy + criminal justice",
+        "what_to_look_for": "free will and responsibility, retribution vs rehabilitation, the philosophy of punishment",
+        "the_question_underneath": "can punishment be justified if determinism is true"
       },
       {
-        "name": "THE COMPARATIVE",
-        "question": "How does another country or time period handle this differently?"
+        "pair": "feminism + religion",
+        "what_to_look_for": "religious exemptions from anti-discrimination law, dress code debates, marriage law and religion",
+        "the_question_underneath": "when religious freedom and gender equality conflict, which principle should prevail and by what method do you decide"
       },
       {
-        "name": "THE STEELMAN",
-        "question": "What is the strongest version of the argument you disagree with?"
+        "pair": "technology + economics",
+        "what_to_look_for": "automation and labour displacement, platform monopoly, data ownership and wealth",
+        "the_question_underneath": "does the digital economy require new economic categories or just more aggressive application of existing ones"
       },
       {
-        "name": "THE BLIND SPOT",
-        "question": "What does this article not address that a good rebuttal would target?"
+        "pair": "geopolitics + technology",
+        "what_to_look_for": "chip wars, AI arms race, cyber sovereignty, critical infrastructure vulnerabilities",
+        "the_question_underneath": "is technological competition the new Cold War and does that frame help or distort"
+      },
+      {
+        "pair": "education + social justice",
+        "what_to_look_for": "school funding inequality, legacy admissions, private school advantages, curriculum as ideology",
+        "the_question_underneath": "is education a tool for social mobility or a mechanism for reproducing class"
       }
     ]
   },
+  "argument_architecture": {
+    "description": "For every article, every topic, every claim — build the argument in this structure. This is the template the coaching node should use.",
+    "wudc_argument_structure": {
+      "claim": "What you are asserting. One sentence. Precise.",
+      "warrant": "Why it is true. The mechanism, the evidence, the logical chain. Not just an assertion restated.",
+      "impact": "Why it matters. Probability x magnitude x reversibility. Who is affected and how much.",
+      "link_to_motion": "How this argument wins the debate, not just makes a point."
+    },
+    "clash_identification": {
+      "description": "Every debate has one or two central clashes. Find them before you build your case.",
+      "how_to_find_the_clash": [
+        "Ask: what must both sides agree on for this to be a genuine disagreement",
+        "Ask: what value is on each side of this debate and are they really incompatible or just prioritised differently",
+        "Ask: what is the empirical question that, if settled, would settle the debate",
+        "Ask: what is the definitional question that, if settled, would change who wins"
+      ]
+    },
+    "rebuttal_architecture": {
+      "description": "The three types of rebuttal, in order of power",
+      "types": [
+        "Turn — their argument is not only wrong but actually supports your side",
+        "Take-out — their argument is wrong and here is why",
+        "Mitigate — their argument has some merit but it is outweighed by ours"
+      ],
+      "the_golden_rule": "Always steelman before you rebut. State their argument in its strongest form. Then rebut it. This is what WUDC judges reward."
+    }
+  },
+  "english_language_development": {
+    "description": "This system is also a language development programme. Every output should model the English of a careful, precise, well-read thinker.",
+    "vocabulary_categories_to_absorb": {
+      "logical_connectives": [
+        "it does not follow that",
+        "this presupposes",
+        "the stronger version of this objection is",
+        "on balance",
+        "the weight of evidence suggests",
+        "this holds true in most but not all cases",
+        "the distinction that matters here is",
+        "the premise is sound but the inference fails",
+        "this argument proves too much",
+        "the relevant comparison is not X but Y"
+      ],
+      "analytical_verbs": [
+        "to conflate",
+        "to elide",
+        "to bracket",
+        "to interrogate",
+        "to unpack",
+        "to operationalise",
+        "to foreground",
+        "to instantiate",
+        "to adjudicate",
+        "to substantiate",
+        "to rebut",
+        "to concede and rebuild",
+        "to steelman"
+      ],
+      "precision_nouns": [
+        "mechanism",
+        "threshold",
+        "counterfactual",
+        "precedent",
+        "asymmetry",
+        "compounding",
+        "perverse incentive",
+        "second-order effect",
+        "structural constraint",
+        "normative claim",
+        "empirical claim",
+        "definitional dispute",
+        "burden of proof"
+      ],
+      "hedging_expressions_that_signal_intellectual_honesty": [
+        "the evidence here is mixed, but the weight of it suggests",
+        "this is contested, and the honest answer is",
+        "I am granting the strongest version of this argument when I say",
+        "the distinction I am drawing is a fine one, but it matters because"
+      ]
+    },
+    "sentence_patterns_to_internalise": [
+      "X is true not because of A but because of B — and that distinction matters because it implies C.",
+      "The strongest version of the opposing argument is [steelman]. Here is why it still fails: [rebuttal].",
+      "The question is not whether X is true — it clearly is — but whether X is a reason to do Y.",
+      "Grant the premise. Deny the inference. The argument from X to Y requires assuming Z, which is exactly what is in dispute.",
+      "This is not a debate about whether harm exists. Both sides agree harm exists. The debate is about which harm is greater and which mechanism reliably reduces it."
+    ]
+  },
   "weekly_knowledge_filter": {
-    "description": "Rules for the Weekend Agent when deciding what to keep forever.",
-    "keep_permanently": [
-      "Named concepts with an author or origin (intersectionality, Overton window, Thucydides Trap)",
-      "Philosophical frameworks and what they predict (Rawls says X, Nozick says Y)",
-      "Historical events that keep getting cited in debates",
-      "Statistics that are stable over time (incarceration rates, gender pay gap methodology)",
-      "Argument patterns by name (tu quoque, slippery slope, burden of proof)",
-      "Value hierarchies — when liberty clashes with equality, who wins and why",
-      "Definitions that are disputed — controlling the definition often wins the debate"
+    "description": "The Weekend Agent's filtering rules. Be brutal. Most of what was read this week is noise. Identify the signal.",
+    "what_to_extract_and_keep_forever": [
+      "Named concepts with an author or origin — these are the vocabulary of serious intellectual discourse",
+      "Theoretical frameworks with names — realism, compatibilism, subsidiarity, regulatory capture",
+      "Historical events that keep being cited as precedent in debates — the Melian Dialogue, the Marshall Plan, the Nuremberg principles",
+      "Statistics that are methodologically robust and durable — not one study, but the consensus of the literature",
+      "Value hierarchies — when liberty clashes with equality in a specific context, how do serious thinkers resolve it",
+      "Argument patterns with names — the slippery slope, the tu quoque, the false dilemma, the modus tollens",
+      "Definitional distinctions that change debate outcomes — rule of law vs rule by law, sex vs gender, equality vs equity",
+      "Philosophical positions and what they imply for specific policy questions",
+      "Mechanisms — the causal chains that explain why things happen, not just what happened"
     ],
-    "discard_permanently": [
-      "Specific election results with no broader systemic lesson",
-      "Corporate earnings or stock market movements",
-      "Celebrity controversies with no policy dimension",
-      "News events that are purely procedural with no normative angle"
+    "what_to_discard_immediately": [
+      "Specific vote counts, seat numbers, or election results without systemic lessons",
+      "Individual scandals without structural implications",
+      "Economic data without context for what it proves",
+      "News events that happened to one person or institution with no broader lesson",
+      "Any piece of information that will be superseded by next week's news"
     ]
   },
   "debate_skill_targets": {
-    "description": "Beyond content, the system should help build these specific debate skills.",
-    "skills": [
+    "description": "Content knowledge is necessary but not sufficient. These are the specific debate skills the system should develop through how it frames, argues, and coaches.",
+    "skills_with_how_to_develop_them": [
       {
         "skill": "Definitional control",
-        "how": "For every topic, identify the 2-3 words whose definition controls the debate outcome"
-      },
-      {
-        "skill": "Stakeholder mapping",
-        "how": "Always ask — who benefits, who loses, who is invisible in this framing"
+        "why_it_wins_debates": "Motions are won and lost on definitions. If you define the key term, you set the terrain.",
+        "how_this_system_develops_it": "For every topic, identify the 2-3 words whose definition determines who wins. The system extracts these."
       },
       {
         "skill": "Burden of proof setting",
-        "how": "Identify who carries the burden in each motion and whether that is fair"
-      },
-      {
-        "skill": "Values prioritisation",
-        "how": "Name the two values in tension and argue why yours should win in this context"
-      },
-      {
-        "skill": "Comparative analysis",
-        "how": "Have at least one country or historical example ready per argument"
-      },
-      {
-        "skill": "Concession and rebuild",
-        "how": "Learn to grant the opponent's point partially and show why it does not defeat your case"
+        "why_it_wins_debates": "The side that sets the burden correctly forces the opponent to play on unfavourable ground.",
+        "how_this_system_develops_it": "Every coaching output identifies what must be proven and by whom."
       },
       {
         "skill": "Impact calculus",
-        "how": "Argue probability, magnitude, and reversibility — not just that harm exists but how bad it is"
+        "why_it_wins_debates": "Judges must choose between competing harms. The side that argues probability, magnitude, and reversibility most rigorously wins.",
+        "how_this_system_develops_it": "Every argument concludes with an impact statement structured around these three dimensions."
+      },
+      {
+        "skill": "Steelmanning",
+        "why_it_wins_debates": "Judges reward intellectual honesty. Acknowledging the best opposing argument before defeating it signals that you have thought carefully.",
+        "how_this_system_develops_it": "Every coaching output includes the steelman version of the opposing case."
+      },
+      {
+        "skill": "Comparative analysis",
+        "why_it_wins_debates": "A concrete example from another country or historical period makes an abstract argument credible and memorable.",
+        "how_this_system_develops_it": "Every topic digest includes at least two comparative examples."
+      },
+      {
+        "skill": "Concession and rebuild",
+        "why_it_wins_debates": "Refusing to grant any ground looks defensive. Granting a point and showing it does not defeat your case looks secure.",
+        "how_this_system_develops_it": "The rebuttal section always models the concede-and-rebuild structure."
+      },
+      {
+        "skill": "Precision in language",
+        "why_it_wins_debates": "Vague language signals vague thinking. Every word in a WUDC round should be the right word.",
+        "how_this_system_develops_it": "Power phrases are written to demonstrate precision. The student absorbs the standard by reading it daily."
       }
     ]
   }
