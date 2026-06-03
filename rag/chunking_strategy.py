@@ -1,11 +1,17 @@
 try:
-    from langchain.text_splitter import (
+    from langchain_text_splitters import (
         RecursiveCharacterTextSplitter,
         SentenceTransformersTokenTextSplitter,
     )
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
-    RecursiveCharacterTextSplitter = None
-    SentenceTransformersTokenTextSplitter = None
+    try:
+        from langchain.text_splitter import (
+            RecursiveCharacterTextSplitter,
+            SentenceTransformersTokenTextSplitter,
+        )
+    except ImportError:
+        RecursiveCharacterTextSplitter = None
+        SentenceTransformersTokenTextSplitter = None
 
 
 class MissingSplitter:

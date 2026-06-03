@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pathlib import Path
 
 try:
@@ -23,7 +24,7 @@ try:
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
     Chroma = None
 
-from rag.embeddings import EMBEDDING_MAP
+from rag.embeddings import EMBEDDING_MAP, embeddings_available
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DIR = BASE_DIR / "chroma"
@@ -50,7 +51,11 @@ RETRIEVAL_CONFIG = {
 }
 
 
+@lru_cache(maxsize=8)
 def _load_vector_store(store_name: str):
+    if store_name in BROKEN_STORES:
+        return None
+
     embedding = EMBEDDING_MAP.get(store_name)
     if embedding is None:
         return None
@@ -83,6 +88,8 @@ STORE_SECTION_LABELS = {
     "style_db": "YOUR DEBATE STYLE",
     "english_db": "ENGLISH VOCABULARY (Word Power Made Easy)",
 }
+
+BROKEN_STORES: set[str] = set()
 
 
 def _vector_store_corpus(vector_store) -> tuple[list[str], list[dict]]:
@@ -134,6 +141,9 @@ def build_hybrid_retriever(store_name: str, k: int = 6):
 
 
 def _build_retriever(store_name: str, config: dict):
+    if store_name in BROKEN_STORES or not embeddings_available(store_name):
+        return None
+
     vector_store = _load_vector_store(store_name)
     if vector_store is None:
         return None
@@ -164,6 +174,7 @@ def retrieve_for_node(node_name: str, query: str) -> dict:
             retrieved[store_name] = retriever.invoke(query)
         except Exception as exc:
             print(f"[Retrieval] {store_name} failed for {node_name}: {exc}")
+            BROKEN_STORES.add(store_name)
             retrieved[store_name] = []
 
     return retrieved

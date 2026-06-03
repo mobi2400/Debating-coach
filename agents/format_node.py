@@ -60,6 +60,23 @@ def format_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
     default_output = _heuristic_format(state)
 
+    if not state.get("ranked_articles") and not state.get("summaries"):
+        state["final_doc"] = default_output
+        save_daily_digest(
+            topic,
+            {
+                "summaries": state.get("summaries", []),
+                "arguments": state.get("arguments", {}),
+                "key_facts": state.get("key_facts", []),
+                "concepts": state.get("concepts", []),
+                "debate_angle": state.get("debate_angle", ""),
+                "english_lesson": state.get("english_lesson", ""),
+                "vocab_words": state.get("vocab_words", []),
+                "word_roots": state.get("word_roots", []),
+            },
+        )
+        return state
+
     prompt = (
         "Format the debate digest for WhatsApp.\n"
         "Do not use markdown symbols like # or **.\n"

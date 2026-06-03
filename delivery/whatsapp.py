@@ -6,13 +6,17 @@ from dotenv import load_dotenv
 
 try:
     from twilio.rest import Client
+    from twilio.http.http_client import TwilioHttpClient
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
     Client = None
+    TwilioHttpClient = None
 
 load_dotenv()
 
 MAX_CHARS = 1500
 SECTION_HEADER_PATTERN = re.compile(r"^(TOPIC:.*|[A-Z][A-Z ]+)$")
+TWILIO_TIMEOUT_SECONDS = 5
+SEND_RETRY_DELAY_SECONDS = 1
 
 
 def _account_sid() -> str | None:
@@ -58,7 +62,17 @@ def _build_client():
     sid, token = _account_sid(), _auth_token()
     if Client is None or not sid or not token:
         return None
-    return Client(sid, token)
+    kwargs = {}
+    if TwilioHttpClient is not None:
+        kwargs["http_client"] = TwilioHttpClient(timeout=TWILIO_TIMEOUT_SECONDS)
+    return Client(sid, token, **kwargs)
+
+
+def _should_retry_send(exc: Exception) -> bool:
+    text = str(exc).lower()
+    if any(signal in text for signal in ("proxyerror", "connect", "timed out", "10061")):
+        return False
+    return True
 
 
 def _split_oversized_section(section: str) -> list[str]:
@@ -137,8 +151,10 @@ def _send_single(text: str):
         print(f"[WhatsApp] Sent: {message.sid}")
     except Exception as exc:
         print(f"[WhatsApp] Send error: {exc}")
+        if not _should_retry_send(exc):
+            return
         try:
-            time.sleep(3)
+            time.sleep(SEND_RETRY_DELAY_SECONDS)
             client.messages.create(from_=from_number, to=to_number, body=text)
         except Exception as retry_exc:
             print(f"[WhatsApp] Retry failed: {retry_exc}")

@@ -150,7 +150,15 @@ def ingest_youtube(video_id: str, channel_type: str) -> list:
         return []
 
     try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        if hasattr(YouTubeTranscriptApi, "get_transcript"):
+            transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        else:
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            try:
+                transcript_obj = transcript_list.find_transcript(["en"])
+            except Exception:
+                transcript_obj = transcript_list.find_generated_transcript(["en"])
+            transcript = transcript_obj.fetch()
         text = " ".join(chunk.get("text", "") for chunk in transcript)
         return _chunk_text(
             text,
@@ -210,6 +218,9 @@ def _embed_with_backoff(call):
             return call()
         except Exception as exc:
             msg = str(exc)
+            if "PERMISSION_DENIED" in msg or "blocked" in msg.lower():
+                print("[Ingest] embedding permission blocked, skipping this store build")
+                return None
             if "RESOURCE_EXHAUSTED" not in msg and "429" not in msg:
                 raise
             if attempt == EMBED_MAX_RETRIES - 1:
@@ -240,16 +251,26 @@ def build_knowledge_base(all_docs: list[dict]) -> dict:
                 documents=documents,
                 embedding=EMBEDDING_MAP[store_name],
             )
+            if store is None:
+                continue
             store.save_local(str(persist_dir))
             stores[store_name] = store
         else:
             persist_dir = CHROMA_DIR / store_name
             persist_dir.mkdir(parents=True, exist_ok=True)
-            stores[store_name] = Chroma.from_documents(
-                documents=documents,
-                embedding=EMBEDDING_MAP[store_name],
-                persist_directory=str(persist_dir),
-            )
+            try:
+                store = Chroma.from_documents(
+                    documents=documents,
+                    embedding=EMBEDDING_MAP[store_name],
+                    persist_directory=str(persist_dir),
+                )
+            except Exception as exc:
+                msg = str(exc)
+                if "PERMISSION_DENIED" in msg or "blocked" in msg.lower():
+                    print(f"[Ingest] embedding permission blocked for {store_name}, skipping")
+                    continue
+                raise
+            stores[store_name] = store
 
     return stores
 

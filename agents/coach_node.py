@@ -43,6 +43,10 @@ def coach_node(state: dict) -> dict:
         rag_context,
     )
 
+    if not state.get("summaries") and not rag_context:
+        state["debate_angle"] = default_coaching
+        return state
+
     prompt = (
         "You are a debate coach writing in the user's preferred debate style.\n"
         "Produce a compact coaching block with these sections exactly:\n"

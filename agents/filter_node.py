@@ -56,6 +56,10 @@ def filter_node(state: dict) -> dict:
         state["raw_articles"] = []
         return state
 
+    if len(raw_articles) <= 2:
+        state["raw_articles"] = default_filtered
+        return state
+
     prompt = (
         "You are filtering research results for a debate digest.\n"
         "Return JSON only: an array of integer indexes to keep.\n"

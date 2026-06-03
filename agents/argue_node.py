@@ -45,6 +45,10 @@ def argue_node(state: dict) -> dict:
 
     default_arguments = _heuristic_arguments(topic, summaries, rag_context)
 
+    if not summaries and not rag_context:
+        state["arguments"] = default_arguments
+        return state
+
     prompt = (
         "You are generating debate arguments.\n"
         "Return JSON only with keys: for, against, middle.\n"

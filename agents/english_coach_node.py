@@ -99,6 +99,12 @@ def english_coach_node(state: dict) -> dict:
         topic, rag_context
     )
 
+    if not rag_context:
+        state["english_lesson"] = default_lesson
+        state["vocab_words"] = default_words
+        state["word_roots"] = default_roots
+        return state
+
     prompt = (
         "You are teaching English from Word Power Made Easy for a debate student.\n"
         "Return JSON only with keys: english_lesson, vocab_words, word_roots.\n"

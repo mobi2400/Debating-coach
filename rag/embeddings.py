@@ -50,3 +50,7 @@ EMBEDDING_MAP = {
     "reasoning_db": qa_embeddings,
     "english_db": fast_embeddings,
 }
+
+
+def embeddings_available(store_name: str) -> bool:
+    return not isinstance(EMBEDDING_MAP.get(store_name), MissingEmbeddings)

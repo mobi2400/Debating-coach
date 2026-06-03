@@ -59,6 +59,10 @@ def rank_node(state: dict) -> dict:
         state["ranked_articles"] = []
         return state
 
+    if len(articles) <= 2:
+        state["ranked_articles"] = default_ranked
+        return state
+
     prompt = (
         "You are ranking debate research results.\n"
         "Return JSON only: an array of the best article indexes in descending order.\n"
