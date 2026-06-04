@@ -89,9 +89,13 @@ LLM_POOL = {
         temperature=0.2,
         max_output_tokens=4096,
     ),
-    "best": _gemini_model(
-        model="gemini-2.5-pro",
+    # Coach lane — gemini-2.5-pro is hard-capped on the free tier (often 0
+    # daily requests). Route 'best' to Groq's largest open-weight model so
+    # personalised coaching survives a typical day. gemini stays available
+    # for `long_ctx` where its 1M context still wins.
+    "best": _groq_model(
+        model="openai/gpt-oss-120b",
         temperature=0.5,
-        max_output_tokens=4096,
+        max_tokens=4096,
     ),
 }
