@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      # Make every node deterministic: no real LLM, no real WhatsApp send,
+      # no real cache, no privacy banner noise. The tests stub these out.
+      DEV_MODE: "true"
+      DEBATEIQ_PROMPT_CACHE: "0"
+      DEBATEIQ_SILENCE_PRIVACY: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv pip install --system -r requirements.txt
+
+      - name: Run router test
+        run: python tests/test_router.py
+
+      - name: Run memory test
+        run: python tests/test_memory.py
+
+      - name: Run weekend test
+        run: python tests/test_weekend.py
+
+      - name: Run rag test
+        run: python tests/test_rag.py
+
+      - name: Run daily end-to-end test
+        run: python tests/test_daily_e2e.py

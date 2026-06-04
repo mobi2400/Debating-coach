@@ -706,57 +706,49 @@
   "2026-06-04": [
     {
       "topic": "international relations",
+      "selector_reason": "",
+      "pre_knowledge": [
+        "Feminism is a movement aimed at establishing equality across genders."
+      ],
+      "top_articles": [
+        "Mechanism vs impact framing in policy debate",
+        "Feminism debates focus on autonomy and access"
+      ],
       "summaries": [
-        "- ## Importance of International Relations\n\nThe significance of international relations lies in its profound impact on shaping global dynamics and fostering cooperation among nations in an increasingly interconnected world.\n- Some reasons why international relations is of utmost importance are:\n\n1.\n- Understanding Global Issues: IR helps us understand the complexities of global issues such as climate change, terrorism, pandemics, and economic crises.\n- Background context from the knowledge base is available for deeper prep.",
-        "- International Relations is an interdisciplinary undergraduate major and minor program that studies the interaction of actors in international politics, including states and non-state actors, such as the United Nations, the World Trade Organization, the International Monetary Fund, the World Bank, Amnesty International and other NGOs.\n- Topics of study include foreign policy; international conflict and negotiation; war, peace, and international security; terrorism; international trade and economics; human rights, ethics, and humanitarianism; climate change and environmental issues; global health; among others.\n- International relations\u2019 broad scope requires an interdisciplinary approach, drawing upon the fields of political science, economics, history, sociology, data science, law, foreign\n- Background context from the knowledge base is available for deeper prep.",
-        "- International relations attempts to explain the interactions of states in the global interstate system, and it also attempts to explain the interactions of others whose behavior originates within one country and is targeted toward members of other countries.\n- In short, the study of international relations is an attempt to explain behavior that occurs across the boundaries of states, the broader relationships of which such behavior is a part, and the institutions (private, state, nongovernmental, and intergovernmental) that oversee those interactions.\n- Explanations of that behavior may be sought at any level of human aggregation.\n- Background context from the knowledge base is available for deeper prep.",
-        "- International relations (IR, and also referred to as international studies, international politics,( or international affairs)( is an academic discipline.( In a broader sense, the study of IR, in addition to multilateral relations, concerns all activities among states\u2014such as war, diplomacy, trade, and foreign policy\u2014as well as relations with and among other international actors, such as intergovernmental organizations (IGOs), international nongovernmental organizations (INGOs), international legal bodies, and multinational corporations (MNCs).( [...] The mutual exchange of ideas, information, art, music, and language among nations through cultural diplomacy has also been recognized by governments as an important tool in the development of international relations.( [...] International relations is generally classified as a major multidiscipline of political science, along with comparative politics, political methodology, political theory, and public administration.( It often draws heavily from other fields, including anthropology, economics, geography, history \"World history (field)\"), law, philosophy, and sociology.( There are several schools of thought within IR, of which the most prominent are realism \"Realism (international relations)\"), liberalism \"Liberalism (international relations)\"), and constructivism \"Constructivism (international relations)\").\n- Background context from the knowledge base is available for deeper prep.",
-        "- Created: August 26, 2022\n\nLast Updated: February 2, 2023\n\n# Introduction\n\nInternational Relations, as defined in The Concise Oxford Dictionary of Politics and International Relations, is \u201cthe discipline that studies interactions between and among states, and more broadly, the workings of the international system as a whole.\n- It can be conceived of either as a multidisciplinary field, gathering together the international aspects of politics, economics, history, law, and sociology, or as a meta\u2010discipline, focusing on the systemic structures and patterns of interaction of the human species taken as a whole\u201d.\n- [...] This guide provides access to selected Library of Congress digital and print reference sources covering various aspects of International Relations: dictionaries, encyclopedias, handbooks, and directories.\n- Background context from the knowledge base is available for deeper prep."
+        "SUMMARY: - point one - point two - point three",
+        "SUMMARY: - point one - point two - point three"
       ],
       "arguments": {
         "for": [
-          "International Relations can be defended on fairness and access grounds.",
-          "## Importance of International Relations",
-          "Use the stored debate theory context to add warrants and weighing."
+          "A1"
         ],
         "against": [
-          "International Relations can be challenged on implementation cost or tradeoff grounds.",
-          "International Relations is an interdisciplinary undergraduate major and minor program that studies the interaction of actors in international politics, including states and non-state actors, such as the United Nations, the World Trade Organization, the International Monetary Fund, the World Bank, Amnesty International and other NGOs.",
-          "Interrogate second-order effects, incentives, and unintended consequences."
+          "B1"
         ],
-        "middle": "A strong middle ground on international relations accepts the principle but disputes scale, speed, or institutional design."
+        "middle": "Both sides have weight; depend on mechanism."
       },
       "key_facts": [
-        "## Importance of International Relations\n\nThe significance of international relations lies in its profound impact on shaping global dynamics and fostering cooperation among nations in an increasingly interconnected world",
-        "International Relations is an interdisciplinary undergraduate major and minor program that studies the interaction of actors in international politics, including states and non-state actors, such as the United Nations, t",
-        "International relations attempts to explain the interactions of states in the global interstate system, and it also attempts to explain the interactions of others whose behavior originates within one country and is targe",
-        "International relations (IR, and also referred to as international studies, international politics,( or international affairs)( is an academic discipline.( In a broader sense, the study of IR, in addition to multilateral",
-        "Created: August 26, 2022\n\nLast Updated: February 2, 2023\n\n# Introduction\n\nInternational Relations, as defined in The Concise Oxford Dictionary of Politics and International Relations, is \u201cthe discipline that studies inte"
+        "Participation rates shape outcomes.",
+        "Participation rates shape outcomes."
       ],
       "concepts": [
-        "What is international relations? Definition, Scope, Importance & More - O.P. Jindal Global University",
-        "Program in International Relations - Stanford University",
-        "International Relations \u2013 Department of Political Science \u2013 UW\u2013Madison",
-        "International relations - Wikipedia",
-        "Introduction - International Relations: A Resource Guide - Research Guides at Library of Congress"
+        "Structural inequality",
+        "Structural inequality"
       ],
-      "debate_angle": "### **DEBATE COACHING BLOCK**\n\n**TOPIC: INTERNATIONAL RELATIONS**\n\n**UNIQUE ANGLE:**\nFrame the debate not as a choice between international cooperation and isolation, but as a choice between two competing worldviews. Our worldview is based on **liberal internationalism**, which sees shared problems and seeks shared solutions through institutions. Theirs is a **realist** worldview, which sees only a zero-sum game of national interest, leading inevitably to conflict. Don't defend every flawed institution; defend the *principle* of a rules-based order as the only alternative to global anarchy.\n\n**OPEN WITH THIS:**\n\"The core question of this debate isn't whether international relations is perfect, but whether it's necessary. My opponents will point to failures and costs, arguing for a world where nations act alone. But in a world facing problems without passports\u2014pandemics, climate collapse, and economic contagion\u2014solutions without borders are not a luxury; they are a prerequisite for survival. We advocate for a system of flawed cooperation, because the only alternative is the certainty of chaotic conflict.\"\n\n**CLAIM-WARRANT-IMPACT:**\n*   **CLAIM:** A structured international relations framework is the primary mechanism for preventing catastrophic global conflict and addressing existential threats.\n*   **WARRANT:** The principle of state sovereignty, codified since Westphalia, naturally creates a state of anarchy where powerful nations can dominate weaker ones. International institutions (like the UN, WTO, World Bank) and diplomatic norms act as the only check on this impulse. They create forums for negotiation, establish rules for trade and conflict, and provide mechanisms for collective action against threats that no single nation can solve.\n*   **IMPACT:** Without this framework, we revert to a pre-World War II state of aggressive nationalism. Trade wars escalate into shooting wars, climate change goes unchecked leading to resource conflicts and mass displacement, and global health crises are met with closed borders and blame-games instead of coordinated scientific response. This leads directly to large-scale loss of life, economic collapse, and a less secure world for everyone.\n\n**TOP REBUTTALS:**\n1.  **If they say: \"IR institutions are expensive, bureaucratic, and ineffective.\"**\n    *   **Pivot:** \"They're weighing the cost of *cooperation* against an imaginary, cost-free alternative. The true cost comparison is between a flawed UN and a world without one. The budget for UN Peacekeeping is a fraction of global military spending. The cost of institutional failure is high, but the cost of global anarchy is infinitely higher. This isn't about efficiency; it's about preventing catastrophe.\"\n2.  **If they say: \"IR undermines national sovereignty.\"**\n    *   **Reframe:** \"Sovereignty in the 21st century is a fantasy if you can't protect your citizens from a global pandemic, a collapsing climate, or a foreign cyberattack on your own. True sovereignty is the ability to secure your people's future. In an interconnected world, that power is amplified, not diminished, through alliances and multilateral agreements. It's the difference between having a vote at the table and just being on the menu.\"\n3.  **If they say: \"It's just an academic theory with no real-world value.\"**\n    *   **Expose the link:** \"To call IR 'just academic' is to ignore that every foreign policy decision is based on one of its theories. When a nation chooses sanctions over invasion, that's 'soft power'. When they form an alliance, that's 'liberal internationalism'. When they act alone, that's 'realism'. These aren't abstract ideas; they are the blueprints for war and peace. Ignoring the discipline is to be blind to the logic that governs our world.\"\n\n**POWER PHRASES:**\n*   \"Problems without passports demand solutions without borders.\"\n*   \"The alternative to flawed cooperation isn't perfect isolation; it's chaotic conflict.\"\n*   \"They want to tear down the guardrails on the highway to global anarchy.\"\n*   \"This is a choice between the negotiating table and the battlefield.\"\n*   \"True sovereignty is the power to solve problems, not the right to fail alone.\"",
-      "english_lesson": "ENGLISH POWER\nFocus topic: international relations\nWord set: vocabulary, source, norman\nRoot focus: source, inter\nvocabulary: a useful high-precision word for analysis and argument\nsource: a useful high-precision word for analysis and argument\nDebate use: Use 'vocabulary' when you want your claim to sound sharper, more exact, and more mature.\nRoot drill: Learn what 'source' signals, then build one debate sentence using a word from that root family.",
+      "debate_angle": "UNIQUE ANGLE: Win on mechanism. OPEN WITH THIS: Lead with a comparative frame. CLAIM-WARRANT-IMPACT: Mechanism > slogan. TOP REBUTTALS: Address feasibility. POWER PHRASES: Compare worlds.",
+      "english_lesson": "Use lucid for clarity.",
       "vocab_words": [
-        "vocabulary",
-        "source",
-        "norman",
-        "easykno",
-        "ersary"
+        "lucid",
+        "precise",
+        "nuance"
       ],
       "word_roots": [
-        "source",
-        "inter",
-        "intra"
+        "luc",
+        "cred"
       ],
       "studied": false,
       "quiz_score": null,
-      "timestamp": "2026-06-04T07:00:53.847910"
+      "timestamp": "2026-06-04T09:25:20+00:00"
     },
     {
       "topic": "geopolitics",

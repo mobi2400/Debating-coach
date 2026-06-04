@@ -46,6 +46,21 @@ def _heuristic_filter(raw_articles: list[dict]) -> list[dict]:
     return filtered
 
 
+def _compact_articles(raw_articles: list[dict], content_limit: int = 240) -> list[dict]:
+    compact = []
+    for article in raw_articles:
+        compact.append(
+            {
+                "title": article.get("title", ""),
+                "url": article.get("url", ""),
+                "content": str(article.get("content", ""))[:content_limit],
+                "source": article.get("source", ""),
+                "published": article.get("published", ""),
+            }
+        )
+    return compact
+
+
 def filter_node(state: dict) -> dict:
     state["task_type"] = "filter"
     topic = topic_name(state.get("topic"))
@@ -60,6 +75,12 @@ def filter_node(state: dict) -> dict:
         state["raw_articles"] = default_filtered
         return state
 
+    if len(raw_articles) >= 8:
+        state["raw_articles"] = default_filtered[:6]
+        return state
+
+    compact_articles = _compact_articles(raw_articles)
+
     prompt = (
         "You are filtering research results for a debate digest.\n"
         "Return JSON only: an array of integer indexes to keep.\n"
@@ -69,7 +90,7 @@ def filter_node(state: dict) -> dict:
         "Keep articles that extend, deepen, challenge, or update the PDF themes when they are useful from a debate perspective.\n"
         "Reject generic lifestyle fluff, low-information summaries, entertainment-heavy pieces, and articles with weak debate value.\n\n"
         f"Topic: {topic}\n"
-        f"Articles: {json.dumps(raw_articles, ensure_ascii=False)}"
+        f"Articles: {json.dumps(compact_articles, ensure_ascii=False)}"
     )
 
     try:
