@@ -20,6 +20,10 @@ RSS_FEEDS = [
 ]
 
 
+def _keyword_score(text: str, keywords: list[str]) -> int:
+    return sum(1 for keyword in keywords if keyword in text)
+
+
 def rss_fetch(topic: str, hours_back: int = 24) -> list:
     """
     Fetches topic-matching articles from configured RSS feeds.
@@ -45,6 +49,10 @@ def rss_fetch(topic: str, hours_back: int = 24) -> list:
 
                 text = f"{entry.get('title', '')} {entry.get('summary', '')}".lower()
                 if keywords and not any(keyword in text for keyword in keywords):
+                    continue
+
+                score = _keyword_score(text, keywords)
+                if len(keywords) >= 4 and score < 2:
                     continue
 
                 articles.append(

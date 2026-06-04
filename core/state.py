@@ -5,6 +5,7 @@ class AgentState(TypedDict):
     # Input
     topic: str
     selector_reason: str
+    topic_info: dict
 
     # Research layer
     raw_articles: list

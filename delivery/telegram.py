@@ -36,7 +36,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 MAX_CHARS = 3500  # Telegram allows 4096; leave headroom for safety prefixes.
-SECTION_HEADER_PATTERN = re.compile(r"^(TOPIC:.*|[A-Z][A-Z ]+)$")
+SECTION_TITLES = (
+    "TOPIC FOR TODAY",
+    "PRE-KNOWLEDGE",
+    "WORD BEFORE YOU READ",
+    "TODAY'S ARTICLE / CASE",
+    "YOUR DEBATING BUILD",
+    "VOCAB SESSION",
+    "THINGS TO TAKE CARE",
+)
 SEND_RETRIES = 2
 SEND_BACKOFF_SECONDS = 3
 POLL_INTERVAL_SECONDS = 10
@@ -100,7 +108,10 @@ def _extract_sections(text: str) -> list[str]:
     sections: list[str] = []
     current: list[str] = []
     for line in text.splitlines():
-        if SECTION_HEADER_PATTERN.match(line.strip()) and current:
+        stripped = line.strip()
+        normalized = re.sub(r"[^A-Z' /-]", "", stripped.upper()).strip()
+        is_heading = any(title in normalized for title in SECTION_TITLES)
+        if is_heading and current:
             sections.append("\n".join(current).strip())
             current = [line]
         else:
@@ -108,6 +119,20 @@ def _extract_sections(text: str) -> list[str]:
     if current:
         sections.append("\n".join(current).strip())
     return [s for s in sections if s]
+
+
+def _section_messages(text: str) -> list[str]:
+    sections = _extract_sections(text)
+    if not sections:
+        return _split_oversized_section(text)
+
+    messages: list[str] = []
+    for section in sections:
+        if len(section) <= MAX_CHARS:
+            messages.append(section)
+        else:
+            messages.extend(_split_oversized_section(section))
+    return messages
 
 
 def _split_message(text: str) -> list[str]:
@@ -177,7 +202,11 @@ def send_message(text: str):
 
 
 def send_digest(final_doc: str):
-    send_message(final_doc)
+    if not final_doc:
+        return
+    for part in _section_messages(final_doc):
+        _send_single(part)
+        time.sleep(1)
 
 
 async def _drop_pending_updates(bot: "Bot") -> int | None:

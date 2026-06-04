@@ -54,6 +54,7 @@ def _initial_state(topic: str | dict) -> dict:
     return {
         "topic": normalized_topic,
         "selector_reason": "",
+        "topic_info": {},
         "raw_articles": [],
         "reference_background": "",
         "enriched_context": "",
@@ -72,6 +73,29 @@ def _initial_state(topic: str | dict) -> dict:
         "studied_today": None,
         "quiz_score": None,
     }
+
+
+def _lookup_topic_info(topic_override: str, priority_entries: list[str | dict]) -> dict:
+    normalized = topic_name(topic_override)
+    normalized_terms = set(normalized.split())
+    best_match: dict = {}
+    best_score = -1
+
+    for entry in priority_entries:
+        if not isinstance(entry, dict):
+            continue
+        candidate = topic_name(entry.get("topic", ""))
+        if not candidate:
+            continue
+        candidate_terms = set(candidate.split())
+        score = len(normalized_terms & candidate_terms)
+        if normalized == candidate or normalized in candidate or candidate in normalized:
+            score += 5
+        if score > best_score:
+            best_score = score
+            best_match = entry
+
+    return best_match if best_score > 0 else {}
 
 
 _PRIVACY_BANNER_PRINTED = False
@@ -101,10 +125,17 @@ def run_daily(topic_override: str | None = None):
         _print_privacy_banner_once()
     topics, topics_metadata = _load_topics_config()
 
+    priority_entries = topics_metadata.get("priority_topics", topics)
+
     if topic_override:
-        selection = {"topic": topic_override, "reason": "Manual topic override."}
+        matched_info = _lookup_topic_info(topic_override, priority_entries)
+        selection = {
+            "topic": topic_override,
+            "reason": "Manual topic override.",
+            "topic_info": matched_info,
+        }
     else:
-        selection = choose_topic_for_today(topics_metadata.get("priority_topics", topics))
+        selection = choose_topic_for_today(priority_entries)
 
     graph = build_daily_graph()
 
@@ -119,6 +150,7 @@ def run_daily(topic_override: str | None = None):
     print(f"{'=' * 40}")
     state = _initial_state(normalized_topic)
     state["selector_reason"] = selection.get("reason", "")
+    state["topic_info"] = selection.get("topic_info", {}) or {}
     result = graph.invoke(state)
     print(f"Raw articles: {len(result['raw_articles'])}")
     print(f"Ranked articles: {len(result['ranked_articles'])}")
@@ -219,9 +251,22 @@ def run_format_smoke():
     state["word_roots"] = ["dict", "cred"]
     state["key_facts"] = ["Participation rates shape autonomy."]
     state["concepts"] = ["Structural inequality"]
+    state["topic_info"] = {
+        "why_this_matters_for_debate": "Gender rounds are won by debaters who distinguish theory, mechanism, and implementation.",
+        "key_concepts_own_these_precisely": [
+            "Patriarchy means structured power, not just individual prejudice.",
+            "Intersectionality tracks how multiple structures of disadvantage overlap.",
+        ],
+        "essential_theoretical_frameworks": [
+            "Liberal feminism focuses on equal rights within institutions.",
+        ],
+        "argument_angles_most_debaters_miss": [
+            "The best feminist case is often about institutional design rather than moral outrage.",
+        ],
+    }
     result = format_node(state)
     print(f"Final doc chars: {len(result['final_doc'])}")
-    print(f"Contains TOPIC header: {'TOPIC:' in result['final_doc']}")
+    print(f"Contains topic banner: {'TOPIC FOR TODAY' in result['final_doc']}")
 
 
 def run_night_smoke():

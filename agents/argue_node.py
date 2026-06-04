@@ -10,30 +10,51 @@ MAX_RAG_CHARS = 1000
 MAX_SUMMARIES = 2
 
 
-def _heuristic_arguments(topic: str, summaries: list[str], rag_context: str) -> dict:
+def _topic_info_list(topic_info: dict, key: str, limit: int = 2) -> list[str]:
+    values = topic_info.get(key, [])
+    if not isinstance(values, list):
+        return []
+    return [str(item).strip() for item in values if str(item).strip()][:limit]
+
+
+def _heuristic_arguments(topic: str, summaries: list[str], rag_context: str, topic_info: dict | None = None) -> dict:
+    topic_info = topic_info or {}
     first_summary = summaries[0] if summaries else f"The topic {topic} has multiple legitimate framings."
     second_summary = summaries[1] if len(summaries) > 1 else first_summary
-    context_hint = (
-        "Use the stored debate theory context to add warrants and weighing."
-        if rag_context
-        else "Support this with examples, mechanisms, and comparative impact."
+    frameworks = _topic_info_list(topic_info, "essential_theoretical_frameworks", 2)
+    mechanisms = _topic_info_list(topic_info, "the_mechanisms_to_understand", 2)
+    missed_angles = _topic_info_list(topic_info, "argument_angles_most_debaters_miss", 2)
+    live_cases = _topic_info_list(topic_info, "live_case_studies_with_analytical_value", 1)
+
+    for_claim = frameworks[0] if frameworks else first_summary.splitlines()[0].lstrip("- ").strip()
+    against_claim = mechanisms[0] if mechanisms else second_summary.splitlines()[0].lstrip("- ").strip()
+    weighing_hint = (
+        missed_angles[0]
+        if missed_angles
+        else (
+            "Use the stored debate theory context to add warrants and weighing."
+            if rag_context
+            else "Support this with examples, mechanisms, and comparative impact."
+        )
+    )
+    middle = (
+        f"Use the live case '{live_cases[0]}' to accept the principle but dispute who should bear the cost, who enforces the norm, and what precedent it sets."
+        if live_cases
+        else f"A strong middle ground on {topic} accepts the principle but disputes scale, speed, or institutional design."
     )
 
     return {
         "for": [
-            f"{topic.title()} can be defended on fairness and access grounds.",
-            f"{first_summary.splitlines()[0].lstrip('- ').strip()}",
-            context_hint,
+            f"Defend {topic} by showing why this structure protects legitimacy, fairness, or long-term stability.",
+            for_claim,
+            weighing_hint,
         ],
         "against": [
-            f"{topic.title()} can be challenged on implementation cost or tradeoff grounds.",
-            f"{second_summary.splitlines()[0].lstrip('- ').strip()}",
+            f"Challenge {topic} by showing where implementation, incentives, or power asymmetry breaks the ideal story.",
+            against_claim,
             "Interrogate second-order effects, incentives, and unintended consequences.",
         ],
-        "middle": (
-            f"A strong middle ground on {topic} accepts the principle but disputes scale, speed, "
-            "or institutional design."
-        ),
+        "middle": middle,
     }
 
 
@@ -41,10 +62,11 @@ def argue_node(state: dict) -> dict:
     state["task_type"] = "argue"
     topic = topic_name(state.get("topic"))
     summaries = state.get("summaries", [])[:MAX_SUMMARIES]
+    topic_info = state.get("topic_info", {}) or {}
     rag_chunks = retrieve_for_node("argue_node", topic)
     rag_context = format_retrieved_context(rag_chunks)
 
-    default_arguments = _heuristic_arguments(topic, summaries, rag_context)
+    default_arguments = _heuristic_arguments(topic, summaries, rag_context, topic_info)
 
     if not summaries and not rag_context:
         state["arguments"] = default_arguments

@@ -35,6 +35,16 @@ REFERENCE_DOMAINS = (
     "scholarpedia.org",
 )
 
+EXPLAINER_TITLE_HINTS = (
+    "understanding",
+    "what is",
+    "introduction to",
+    "guide to",
+    "explained",
+    "history of",
+    "basics of",
+)
+
 # Lightweight allow-list of news-flavoured publishers so the heuristic can
 # float a real current-affairs piece to position 0 when one is available.
 NEWS_SOURCES = {"rss", "tavily", "duckduckgo"}
@@ -87,6 +97,14 @@ def _is_news_article(article: dict) -> bool:
     return False
 
 
+def _is_explainer_article(article: dict) -> bool:
+    title = str(article.get("title", "")).lower()
+    url = str(article.get("url", "")).lower()
+    if any(hint in title for hint in EXPLAINER_TITLE_HINTS):
+        return True
+    return any(domain in url for domain in ("openaccessjournals", "/definition/", "/what-is-"))
+
+
 def _recency_score(article: dict) -> int:
     published = article.get("published", "")
     if not published:
@@ -110,6 +128,8 @@ def _heuristic_rank(topic: str, articles: list[dict]) -> list[dict]:
         base = (relevance * 5) + (debate_value * 2) + _recency_score(article)
         if _is_news_article(article):
             base += 6  # nudge real news above generic search hits
+        if _is_explainer_article(article):
+            base -= 4  # decent background, weak as the main case study
         if _is_reference_article(article):
             base -= 8  # background only — never the lede
         return base
@@ -128,6 +148,10 @@ def _promote_news_first(articles: list[dict]) -> list[dict]:
         return articles
     for idx in range(1, len(articles)):
         if _is_news_article(articles[idx]):
+            promoted = articles[idx]
+            return [promoted] + articles[:idx] + articles[idx + 1 :]
+    for idx in range(1, len(articles)):
+        if not _is_reference_article(articles[idx]) and not _is_explainer_article(articles[idx]):
             promoted = articles[idx]
             return [promoted] + articles[:idx] + articles[idx + 1 :]
     return articles

@@ -1,29 +1,45 @@
-from agents.rank_node import _is_news_article, _is_reference_article
+from __future__ import annotations
+
+from agents.rank_node import _is_explainer_article, _is_news_article, _is_reference_article
 from core.topic_utils import topic_name
 from memory.weekly_store import save_daily_digest
 
 
+FINAL_DOC_CHAR_LIMIT = 3900
+
+
 def _join_lines(lines: list[str]) -> str:
-    return "\n".join(line for line in lines if line)
+    return "\n".join(line.rstrip() for line in lines if line is not None)
 
 
-FINAL_DOC_CHAR_LIMIT = 1450
+def _clean_text(text: str) -> str:
+    value = str(text)
+    for token in ("**", "__", "*", "`"):
+        value = value.replace(token, "")
+    return " ".join(value.split()).strip()
 
 
 def _trim_block(text: str, char_limit: int, line_limit: int | None = None) -> str:
     lines = [line.strip() for line in str(text).splitlines() if line.strip()]
     if line_limit is not None:
         lines = lines[:line_limit]
-    compact = " ".join(lines)
+    compact = _clean_text(" ".join(lines))
+    if len(compact) <= char_limit:
+        return compact
+    return compact[: char_limit - 3].rstrip() + "..."
+
+
+def _trim_document(text: str, char_limit: int) -> str:
+    compact = str(text).strip()
     if len(compact) <= char_limit:
         return compact
     return compact[: char_limit - 3].rstrip() + "..."
 
 
 def _sentences(text: str, limit: int = 2) -> list[str]:
-    parts = []
+    parts: list[str] = []
     for raw in str(text).replace("\n", " ").split(". "):
-        sentence = " ".join(raw.split()).strip(" -")
+        sentence = _clean_text(raw).strip(" -")
         if sentence:
             parts.append(sentence.rstrip(".") + ".")
         if len(parts) >= limit:
@@ -31,132 +47,376 @@ def _sentences(text: str, limit: int = 2) -> list[str]:
     return parts
 
 
+def _bullets(lines: list[str], char_limit: int = 180, prefix: str = "•") -> list[str]:
+    return [f"{prefix} {_trim_block(line, char_limit)}" for line in lines if str(line).strip()]
+
+
+def _topic_info_list(state: dict, key: str, limit: int = 2) -> list[str]:
+    topic_info = state.get("topic_info", {}) or {}
+    values = topic_info.get(key, [])
+    if not isinstance(values, list):
+        return []
+    return [_clean_text(item) for item in values if _clean_text(item)][:limit]
+
+
+def _topic_info_text(state: dict, key: str, char_limit: int = 180) -> str:
+    topic_info = state.get("topic_info", {}) or {}
+    value = topic_info.get(key, "")
+    return _trim_block(value, char_limit) if value else ""
+
+
 def _pre_knowledge_points(state: dict) -> list[str]:
+    points: list[str] = []
+
+    why = _topic_info_text(state, "why_this_matters_for_debate", 280)
+    if why:
+        points.append(f"Why this matters: {why}")
+
+    for item in _topic_info_list(state, "essential_theoretical_frameworks", 2):
+        points.append(f"Framework: {item}")
+
+    for item in _topic_info_list(state, "key_concepts_own_these_precisely", 2):
+        points.append(f"Key concept: {item}")
+
+    if points:
+        return points[:5]
+
     reference_background = str(state.get("reference_background", "")).strip()
     if reference_background:
-        return _sentences(reference_background, limit=2)
+        return _sentences(reference_background, limit=3)
 
-    enriched = str(state.get("enriched_context", ""))
-    cleaned_lines = []
-    for line in enriched.splitlines():
-        stripped = line.strip()
-        if not stripped:
-            continue
-        if stripped.endswith(":") and stripped.isupper():
-            continue
-        if stripped.startswith("[source:") or stripped == "---":
-            continue
-        cleaned_lines.append(stripped)
-        if len(cleaned_lines) >= 4:
-            break
-
-    cleaned_text = " ".join(cleaned_lines)
-    points = _sentences(cleaned_text, limit=2)
-    if points:
-        return [_trim_block(point, 150) for point in points]
-
-    concepts = state.get("concepts", [])[:2]
+    concepts = state.get("concepts", [])[:3]
     if concepts:
-        return [f"Know the concept '{_trim_block(concept, 80)}' before using it in today's case." for concept in concepts]
-    return []
+        return [f"Own this idea precisely: {_trim_block(concept, 140)}." for concept in concepts]
+    return ["Know the core definition before you argue implementation."]
+
+
+def _parse_english_lesson(state: dict) -> dict:
+    lesson = str(state.get("english_lesson", "")).strip()
+    parsed = {
+        "word": "",
+        "meaning": "",
+        "upgrade": "",
+        "debate_line": "",
+        "bonus": "",
+        "root": "",
+    }
+    for line in lesson.splitlines():
+        clean = line.strip()
+        lower = clean.lower()
+        if lower.startswith("word:"):
+            parsed["word"] = clean.split(":", 1)[1].strip()
+        elif lower.startswith("meaning:"):
+            parsed["meaning"] = clean.split(":", 1)[1].strip()
+        elif lower.startswith("upgrade:"):
+            parsed["upgrade"] = clean.split(":", 1)[1].strip()
+        elif lower.startswith("debate line:"):
+            parsed["debate_line"] = clean.split(":", 1)[1].strip()
+        elif lower.startswith("bonus word:"):
+            parsed["bonus"] = clean.split(":", 1)[1].strip()
+        elif lower.startswith("root:"):
+            parsed["root"] = clean.split(":", 1)[1].strip()
+
+    vocab_words = state.get("vocab_words", []) or []
+    if not parsed["word"] and vocab_words:
+        parsed["word"] = _clean_text(vocab_words[0])
+    if not parsed["bonus"] and len(vocab_words) > 1:
+        parsed["bonus"] = f"{_clean_text(vocab_words[1])} = another sharp debate word to use this week."
+    word_roots = state.get("word_roots", []) or []
+    if not parsed["root"] and word_roots:
+        parsed["root"] = f"{_clean_text(word_roots[0])} -> notice it in stronger English words."
+    return parsed
+
+
+def _extract_coach_sections(state: dict) -> dict:
+    debate_angle = str(state.get("debate_angle", "")).strip()
+    sections = {
+        "unique_angle": "",
+        "open_with_this": "",
+        "claim_warrant_impact": "",
+        "top_rebuttal": "",
+        "power_phrases": "",
+    }
+    if not debate_angle:
+        return sections
+
+    current_key = None
+    label_map = {
+        "UNIQUE ANGLE": "unique_angle",
+        "OPEN WITH THIS": "open_with_this",
+        "CLAIM-WARRANT-IMPACT": "claim_warrant_impact",
+        "TOP REBUTTAL": "top_rebuttal",
+        "TOP REBUTTALS": "top_rebuttal",
+        "POWER PHRASES": "power_phrases",
+    }
+
+    for raw_line in debate_angle.splitlines():
+        line = _clean_text(raw_line)
+        if not line:
+            continue
+        matched = False
+        for label, key in label_map.items():
+            prefix = f"{label}:"
+            if line.upper().startswith(prefix):
+                sections[key] = line[len(prefix):].strip()
+                current_key = key
+                matched = True
+                break
+        if matched:
+            continue
+        if current_key:
+            sections[current_key] = f"{sections[current_key]} {line}".strip()
+
+    return sections
 
 
 def _pick_lede(ranked_articles: list[dict]) -> dict | None:
-    """TODAY'S CASE should always lead with a current-affairs piece when
-    one is available — Wikipedia / Britannica entries are useful as
-    background but read as filler at the top of a debate digest."""
     if not ranked_articles:
         return None
+
+    def is_placeholder(article: dict) -> bool:
+        title = str(article.get("title", "")).lower()
+        return title.startswith("duckduckgo results for:")
+
     for article in ranked_articles:
-        if _is_news_article(article):
+        if _is_news_article(article) and not is_placeholder(article):
             return article
     for article in ranked_articles:
-        if not _is_reference_article(article):
+        if not is_placeholder(article) and not _is_reference_article(article) and not _is_explainer_article(article):
+            return article
+    for article in ranked_articles:
+        if not is_placeholder(article) and not _is_reference_article(article):
             return article
     return ranked_articles[0]
 
 
-def _today_case_lines(state: dict) -> list[str]:
+def _summary_points_for_article(state: dict, article_index: int) -> list[str]:
+    points: list[str] = []
+    summaries = state.get("summaries", []) or []
+    if 0 <= article_index < len(summaries):
+        for line in str(summaries[article_index]).splitlines():
+            clean = _clean_text(line).strip(" -")
+            if clean and clean.upper() != "SUMMARY:":
+                points.append(clean)
+            if len(points) >= 4:
+                return points
+    return points
+
+
+def _topical_case_lens(state: dict) -> str:
+    live_cases = _topic_info_list(state, "live_case_studies_with_analytical_value", 1)
+    return live_cases[0] if live_cases else ""
+
+
+def _article_section(state: dict) -> tuple[list[str], dict | None]:
     ranked_articles = state.get("ranked_articles", [])
     article = _pick_lede(ranked_articles)
     if article is None:
-        return ["No strong live article was retrieved today, so focus on the core framework and debate angles."]
+        live_case = _topical_case_lens(state)
+        if live_case:
+            return [f"No sharp article landed today, so use this live case instead: {live_case}"], None
+        return ["No strong live article landed today, so revise the framework and debate angles below."], None
 
-    lines = [article.get("title", "Untitled article")]
-    lines.extend(_sentences(article.get("content", ""), limit=2))
-    return lines
+    lines = [f"Article: {_trim_block(article.get('title', 'Untitled article'), 140)}"]
+    weak_case = _is_reference_article(article) or _is_explainer_article(article) or str(article.get("title", "")).lower().startswith("duckduckgo results")
+    try:
+        article_index = ranked_articles.index(article)
+    except ValueError:
+        article_index = 0
+
+    article_points = _summary_points_for_article(state, article_index)
+    if not article_points:
+        article_points = _sentences(article.get("content", ""), limit=3)
+
+    if weak_case:
+        live_case = _topical_case_lens(state)
+        if live_case:
+            lines[0] = f"Use this live case lens: {_trim_block(live_case, 140)}"
+
+    lines.extend(article_points[:4])
+
+    key_facts = state.get("key_facts", []) or []
+    if 0 <= article_index < len(key_facts):
+        lines.append(f"Use this detail: {_trim_block(key_facts[article_index], 190)}")
+    elif key_facts:
+        lines.append(f"Use this detail: {_trim_block(key_facts[0], 190)}")
+
+    live_case = _topical_case_lens(state)
+    if live_case:
+        lines.append(f"Why this matters in debate: {_trim_block(live_case, 210)}")
+
+    return lines[:8], article
 
 
-def _argument_lines(state: dict) -> list[str]:
-    arguments = state.get("arguments", {})
-    lines = []
-    if arguments.get("for"):
-        lines.append(f"For: {_trim_block(arguments['for'][0], 130)}")
-    if arguments.get("against"):
-        lines.append(f"Against: {_trim_block(arguments['against'][0], 130)}")
+def _debate_section(state: dict) -> list[str]:
+    arguments = state.get("arguments", {}) or {}
+    coach_sections = _extract_coach_sections(state)
+    lines: list[str] = []
+
+    for index, item in enumerate(arguments.get("for", [])[:3], 1):
+        lines.append(f"For argument {index}: {_trim_block(item, 250)}")
+    for index, item in enumerate(arguments.get("against", [])[:3], 1):
+        lines.append(f"Against argument {index}: {_trim_block(item, 250)}")
+
     middle = arguments.get("middle")
     if middle:
-        lines.append(f"Middle: {_trim_block(middle, 150)}")
-    return lines[:3] or ["Build the clash by comparing mechanism, incentives, and long-term impact."]
+        lines.append(f"Main clash: {_trim_block(middle, 280)}")
+    if coach_sections.get("claim_warrant_impact"):
+        lines.append(f"Why this wins: {_trim_block(coach_sections['claim_warrant_impact'], 320)}")
+    if coach_sections.get("top_rebuttal"):
+        lines.append(f"Best rebuttal move: {_trim_block(coach_sections['top_rebuttal'], 290)}")
+    if coach_sections.get("power_phrases"):
+        lines.append(f"Power phrase to steal: {_trim_block(coach_sections['power_phrases'], 260)}")
+
+    if not lines:
+        lines.append("Compare the mechanism, who gets harmed first, and which side controls long-term incentives.")
+
+    return lines[:10]
 
 
-def _recall_lines(state: dict) -> list[str]:
-    topic = topic_name(state.get("topic"))
-    concept = (state.get("concepts") or ["the central concept"])[0]
-    fact = (state.get("key_facts") or ["the strongest example from today's material"])[0]
+def _coach_note(state: dict) -> str:
+    sections = _extract_coach_sections(state)
+    if sections.get("unique_angle"):
+        extra = ""
+        if sections.get("open_with_this"):
+            extra = f" Open with something like: {sections['open_with_this']}"
+        return _trim_block(sections["unique_angle"] + extra, 560)
+
+    misses = _topic_info_list(state, "argument_angles_most_debaters_miss", 1)
+    if misses:
+        return _trim_block(misses[0], 280)
+    return "Do not stop at moral language. Prove the mechanism and the comparative impact."
+
+
+def _rebuttal_drills(state: dict) -> list[str]:
+    arguments = state.get("arguments", {}) or {}
+    coach_sections = _extract_coach_sections(state)
+    drills: list[str] = []
+    if arguments.get("against"):
+        drills.append(
+            f"If they say this against you: {_trim_block(arguments['against'][0], 130)} | Reply by forcing them to prove feasibility, comparative world, and reversibility."
+        )
+    if arguments.get("for"):
+        drills.append(
+            f"If they say this for you and you are opposing: {_trim_block(arguments['for'][0], 130)} | Reply by attacking the mechanism, incentive structure, and precedent."
+        )
+    if coach_sections.get("top_rebuttal"):
+        drills.append(f"Detailed rebuttal script: {_trim_block(coach_sections['top_rebuttal'], 260)}")
+    return drills[:3]
+
+
+def _weight_language_lines() -> list[str]:
     return [
-        f"In one sentence, explain why {_trim_block(concept, 80)} matters in {topic}.",
-        f"Use this fact in a rebuttal: {_trim_block(fact, 110)}",
+        "Use weighing words like: more likely, deeper harm, broader impact, less reversible, structurally entrenched.",
+        "Use framing words like: the real question, the decisive distinction, the stronger comparison, on balance.",
+        "Use judge language like: this matters more because, even if they win that point, we still win the round because.",
     ]
+
+
+def _vocab_session(state: dict, english: dict) -> list[str]:
+    lines: list[str] = []
+    if english.get("meaning") and english.get("word"):
+        lines.append(f"Use this precisely: {_trim_block(english['word'], 40)} means {_trim_block(english['meaning'], 150)}")
+    if english.get("bonus"):
+        lines.append(f"Bonus word: {_trim_block(english['bonus'], 180)}")
+    if english.get("root"):
+        lines.append(f"Root to notice: {_trim_block(english['root'], 160)}")
+    if english.get("debate_line"):
+        lines.append(f"Say it like this: {_trim_block(english['debate_line'], 220)}")
+    if english.get("upgrade"):
+        lines.append(f"Upgrade habit: {_trim_block(english['upgrade'], 180)}")
+    return lines[:5] or ["Power move: Replace a vague adjective with a precise mechanism word."]
+
+
+def _article_takeaway(state: dict, article_lines: list[str]) -> str:
+    if len(article_lines) >= 3:
+        return _trim_block(article_lines[2], 200)
+    key_facts = state.get("key_facts", []) or []
+    if key_facts:
+        return _trim_block(key_facts[0], 200)
+    return "Turn the case into a mechanism, not just an event summary."
+
+
+def _things_to_take_care(state: dict) -> list[str]:
+    lines: list[str] = []
+    concepts = state.get("concepts") or []
+    if concepts:
+        lines.append(f"Do not misuse the term {_trim_block(concepts[0], 95)} without defining it.")
+    if len(concepts) > 1:
+        lines.append(f"Keep this distinction ready: {_trim_block(concepts[1], 150)}")
+    key_facts = state.get("key_facts", []) or []
+    if key_facts:
+        lines.append(f"Do not quote this loosely: {_trim_block(key_facts[0], 180)}")
+    lines.append(f"Main article takeaway: {_trim_block(_article_takeaway(state, _article_section(state)[0]), 210)}")
+    lines.append(f"Use this recall trigger: {_trim_block(_recall_prompt(state), 200)}")
+    return lines[:5]
+
+
+def _recall_prompt(state: dict) -> str:
+    topic = topic_name(state.get("topic"))
+    concept = _clean_text((state.get("concepts") or ["the main concept"])[0])
+    return f"Explain in one line why {concept} changes how we debate {topic}."
 
 
 def _heuristic_format(state: dict) -> str:
     topic = topic_name(state.get("topic"))
+    english = _parse_english_lesson(state)
     pre_knowledge = _pre_knowledge_points(state)
-    case_lines = _today_case_lines(state)
-    argument_lines = _argument_lines(state)
-    recall_lines = _recall_lines(state)
-    pre_lines = [f"- {item}" for item in pre_knowledge] if pre_knowledge else ["- No background context retrieved yet."]
-    case_rendered = [f"- {item}" for item in case_lines]
-    argument_rendered = [f"- {item}" for item in argument_lines]
-    recall_rendered = [f"- {item}" for item in recall_lines]
+    article_lines, _article = _article_section(state)
+    debate_lines = _debate_section(state)
+    rebuttal_drills = _rebuttal_drills(state)
+    weight_lines = _weight_language_lines()
+    vocab_lines = _vocab_session(state, english)
+    care_lines = _things_to_take_care(state)
 
     lines = [
-        f"TOPIC: {topic.upper()}",
-        f"Why today: {state.get('selector_reason', 'Priority topic rotation.')}",
+        "🎯 TOPIC FOR TODAY",
+        topic.upper(),
+        f"_{_trim_block(state.get('selector_reason', 'Priority topic rotation.'), 140)}_",
         "",
-        "PRE-KNOWLEDGE",
-        *pre_lines,
+        "🧠 PRE-KNOWLEDGE",
+        *_bullets(pre_knowledge, 235),
         "",
-        "TODAY'S CASE",
-        *case_rendered,
+        "📖 WORD BEFORE YOU READ",
+        f"• {_trim_block(english.get('word') or 'lucid', 32)} = {_trim_block(english.get('meaning') or 'clear and easy to follow', 170)}",
+        f"• {_trim_block(english.get('upgrade') or 'Use a sharper word than good when you explain a claim.', 210)}",
+        f"• Why it helps today: Use this word when you contrast {_trim_block(topic, 40)} arguments with more precision.",
         "",
-        "DEBATE ANGLES",
-        *argument_rendered,
+        "📰 TODAY'S ARTICLE / CASE",
+        *_bullets(article_lines, 255),
         "",
-        "COACH NOTE",
-        _trim_block(state.get("debate_angle", "No coaching block generated."), 280),
+        "⚔️ YOUR DEBATING BUILD",
+        *_bullets(debate_lines, 255),
+        f"• Coach note: {_trim_block(_coach_note(state), 560)}",
         "",
-        "ENGLISH POWER",
-        _trim_block(state.get("english_lesson", "No English lesson generated."), 240, line_limit=6),
+        "🛡️ REBUTTAL DRILLS",
+        *_bullets(rebuttal_drills, 255),
         "",
-        "2-MINUTE RECALL",
-        *recall_rendered,
+        "🎙️ WEIGHING LANGUAGE TO USE",
+        *_bullets(weight_lines, 240),
+        "",
+        "🗣️ VOCAB SESSION",
+        *_bullets(vocab_lines, 225),
+        "",
+        "✅ THINGS TO TAKE CARE",
+        *_bullets(care_lines, 235),
     ]
+
     output = _join_lines(lines).strip()
-    return _trim_block(output, FINAL_DOC_CHAR_LIMIT)
+    return _trim_document(output, FINAL_DOC_CHAR_LIMIT)
 
 
 def format_node(state: dict) -> dict:
     state["task_type"] = "format"
     topic = topic_name(state.get("topic"))
+    pre_knowledge = _pre_knowledge_points(state)
     state["final_doc"] = _heuristic_format(state)
 
     save_daily_digest(
         topic,
         {
             "selector_reason": state.get("selector_reason", ""),
-            "pre_knowledge": _pre_knowledge_points(state),
+            "pre_knowledge": pre_knowledge,
             "ranked_articles": state.get("ranked_articles", []),
             "summaries": state.get("summaries", []),
             "arguments": state.get("arguments", {}),

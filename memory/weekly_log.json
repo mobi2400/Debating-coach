@@ -706,49 +706,50 @@
   "2026-06-04": [
     {
       "topic": "international relations",
-      "selector_reason": "",
+      "selector_reason": "Manual topic override.",
       "pre_knowledge": [
-        "Feminism is a movement aimed at establishing equality across genders."
+        "Why this matters: IR motions appear in every major competition. They test whether you understand power, legitimacy, and order \u2014 not just who is fighting whom. A debater who knows IR theory will always outclass one who...",
+        "Framework: Realism: states are rational actors pursuing survival in an anarchic system. Morgenthau, Waltz, Mearsheimer."
       ],
       "top_articles": [
-        "Mechanism vs impact framing in policy debate",
-        "Feminism debates focus on autonomy and access"
+        "Uneasy neighbours: Can three World Cup hosts put differences aside for a month?",
+        "Did Germany lose its UNSC seat because of support for Israel?"
       ],
       "summaries": [
-        "SUMMARY: - point one - point two - point three",
-        "SUMMARY: - point one - point two - point three"
+        "SUMMARY: - The article discusses the upcoming World Cup hosted by the US, Canada, and Mexico, which comes after a period of strained relations between the three countries. - The World Cup is a significant event that c...",
+        "SUMMARY: - Germany lost its bid to join the United Nations Security Council (UNSC) to Austria and Portugal. - This means Germany will not have a seat on the UNSC for the next two years. - The UNSC is a powerful group..."
       ],
       "arguments": {
         "for": [
-          "A1"
+          "Defend international relations by showing why this structure protects legitimacy, fairness, or long-term stability."
         ],
         "against": [
-          "B1"
+          "Challenge international relations by showing where implementation, incentives, or power asymmetry breaks the ideal story."
         ],
-        "middle": "Both sides have weight; depend on mechanism."
+        "middle": "Use the live case 'Ukraine \u2014 sovereignty norm vs self-determination, NATO expansion debate, nuclear deterrence' to accept the principle but dispute who should bear the cost, who enforces the norm, and what precedent it sets."
       },
       "key_facts": [
-        "Participation rates shape outcomes.",
-        "Participation rates shape outcomes."
+        "The World Cup is a significant event that can bring people together, but it's uncertain whether the countries can put aside their differences for a month.",
+        "Germany lost its UNSC seat to Austria and Portugal."
       ],
       "concepts": [
-        "Structural inequality",
-        "Structural inequality"
+        "International relations refers to the study of interactions and relationships between countries, including diplomacy, trade, and foreign...",
+        "United Nations Security Council (UNSC) - a group of 15 countries that works to maintain international peace and security.",
+        "The UN Security Council (UNSC) is a group of 15 countries that are responsible for maintaining international peace and security. Five of..."
       ],
-      "debate_angle": "UNIQUE ANGLE: Win on mechanism. OPEN WITH THIS: Lead with a comparative frame. CLAIM-WARRANT-IMPACT: Mechanism > slogan. TOP REBUTTALS: Address feasibility. POWER PHRASES: Compare worlds.",
-      "english_lesson": "Use lucid for clarity.",
+      "debate_angle": "**UNIQUE ANGLE** Treat the 2026 World Cup (U.S., Canada, Mexico) and Germany\u2019s recent loss of a UN\u2011Security\u2011Council seat as *real\u2011time stress tests* of the international\u2011relations architecture. They show how sport\u2011diplomacy and UN politics expose the same fault lines\u2014power asymmetry, norm enforcement, and the tension between collective legitimacy and national self\u2011interest. **OPEN WITH THIS** \u201cFrom the stadium\u2019s roar to the Security Council\u2019s silence, the world is watching whether our rules can survive the game...",
+      "english_lesson": "ENGLISH POWER Word: cogent Meaning: clear, logical, and convincing Upgrade: Use 'cogent' instead of vague words like 'good'. Debate line: Your model is not cogent unless you prove why states comply. Bonus word: nuance = a subtle difference in meaning or tone Root: cogn -> learn the root and use one word from it in tomorrow's speech.",
       "vocab_words": [
-        "lucid",
-        "precise",
+        "cogent",
         "nuance"
       ],
       "word_roots": [
-        "luc",
-        "cred"
+        "cogn",
+        "nua"
       ],
       "studied": false,
-      "quiz_score": null,
-      "timestamp": "2026-06-04T09:41:34+00:00"
+      "quiz_score": 40,
+      "timestamp": "2026-06-04T11:01:47+00:00"
     },
     {
       "topic": "geopolitics",
@@ -794,7 +795,7 @@
         "cogn"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T09:26:30+00:00"
     },
     {
@@ -848,7 +849,7 @@
         "close"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:02:31.062775"
     },
     {
@@ -902,7 +903,7 @@
         "greek"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:03:24.762741"
     },
     {
@@ -956,7 +957,7 @@
         "eighty"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:04:18.516895"
     },
     {
@@ -1010,7 +1011,7 @@
         "author"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:05:07.132306"
     },
     {
@@ -1064,7 +1065,7 @@
         "aw"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:05:59.092809"
     },
     {
@@ -1118,7 +1119,7 @@
         "all"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:06:48.023144"
     },
     {
@@ -1172,7 +1173,7 @@
         "of"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:07:32.183054"
     },
     {
@@ -1226,7 +1227,7 @@
         "equ"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:08:18.554177"
     },
     {
@@ -1280,7 +1281,7 @@
         "intra"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:09:06.625270"
     },
     {
@@ -1334,7 +1335,7 @@
         "thee"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:09:51.946344"
     },
     {
@@ -1388,51 +1389,55 @@
         "so"
       ],
       "studied": false,
-      "quiz_score": null,
+      "quiz_score": 40,
       "timestamp": "2026-06-04T07:10:41.497840"
     },
     {
       "topic": "feminism",
-      "selector_reason": "",
+      "selector_reason": "Manual topic override.",
       "pre_knowledge": [
-        "Sample background context for the topic."
+        "Why this matters: Gender motions appear at every competition. The debaters who win them are not those who shout louder but those who understand the philosophical distinctions, know the empirical literature, and can ar...",
+        "Framework: Liberal feminism \u2014 equal rights and opportunities within existing institutions. Wollstonecraft, Friedan."
       ],
       "top_articles": [
-        "Sample article one",
-        "Sample article two"
+        "Feminism and Women's Rights Movements - Gender Matters",
+        "DuckDuckGo results for: feminism"
       ],
       "summaries": [
-        "- Equality and access matter. - Framing determines the round."
+        "SUMMARY: - The feminist movement has gone through different waves, with the second wave in the 1970s focusing on achieving 'women's liberation' through various approaches, including liberal, radical, and socialist fem...",
+        "SUMMARY: - Feminism is a movement that aims to achieve equality between men and women in all areas of life, including politics, economy, and social relationships. - The history of feminism is complex and has varied ac..."
       ],
       "arguments": {
         "for": [
-          "It expands autonomy."
+          "Feminism can be defended on fairness and access grounds."
         ],
         "against": [
-          "It can trigger backlash."
+          "Feminism can be challenged on implementation cost or tradeoff grounds."
         ],
-        "middle": "Support the principle, scrutinize the mechanism."
+        "middle": "A strong middle ground on feminism accepts the principle but disputes scale, speed, or institutional design."
       },
       "key_facts": [
-        "Participation rates shape autonomy."
+        "By the 1920s, women had won the right to vote in most European countries and in North America.",
+        "Feminism has been discussed and developed since the 1980s, with various forms such as liberal feminism and libertarian feminism emerging during this time."
       ],
       "concepts": [
-        "Structural inequality"
+        "Radical feminism, which argues that the root cause of women's inequality is patriarchy, and that men, as a group, oppress women.",
+        "Equity feminism, a form of liberal feminism that emphasizes the importance of equal rights and opportunities for women, particularly in t...",
+        "Ecofeminism, a type of feminism that highlights the connection between the oppression of women and the degradation of the environment."
       ],
-      "debate_angle": "UNIQUE ANGLE: Win on implementation quality.",
-      "english_lesson": "ENGLISH POWER Word set: lucid, precise, nuance",
+      "debate_angle": "**UNIQUE ANGLE** Treat feminism not as a niche \u201cwomen\u2019s club\u201d but as the *human\u2011rights\u2011engine* that upgrades every social contract: it simultaneously removes gender\u2011based waste, expands talent pools, and stabilises democratic institutions. **OPEN WITH THIS** \u201cImagine a society where the only barrier to a person\u2019s contribution is the size of their ambition\u2014not the gender stamped on their birth certificate.\u201d **CLAIM\u2011WARRANT\u2011IMPACT** | Claim | Warrant (Evidence & Theory) | Impact | |-------|------------------------...",
+      "english_lesson": "ENGLISH POWER Word: incisive Meaning: sharp, direct, and analytically powerful Upgrade: Use 'incisive' instead of vague words like 'smart'. Debate line: An incisive rebuttal attacks the warrant, not just the wording. Bonus word: cogent = clear, logical, and convincing Root: cid -> learn the root and use one word from it in tomorrow's speech.",
       "vocab_words": [
-        "lucid",
-        "precise",
-        "nuance"
+        "incisive",
+        "cogent"
       ],
       "word_roots": [
-        "dict",
-        "cred"
+        "cid",
+        "cogn"
       ],
       "studied": false,
-      "quiz_score": null,
-      "timestamp": "2026-06-04T14:19:15.086795"
+      "quiz_score": 40,
+      "timestamp": "2026-06-04T10:22:11+00:00"
     }
   ]
 }

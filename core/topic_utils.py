@@ -40,3 +40,24 @@ def topic_keywords(topic: object) -> list[str]:
         if normalized and normalized not in merged:
             merged.append(normalized)
     return merged
+
+
+def topic_search_query(topic: object, topic_info: dict | None = None) -> str:
+    name = topic_name(topic)
+    keywords = topic_keywords(topic)
+
+    query_terms: list[str] = [name]
+    for keyword in keywords[:4]:
+        if keyword not in query_terms:
+            query_terms.append(keyword)
+
+    if isinstance(topic_info, dict):
+        live_cases = topic_info.get("live_case_studies_with_analytical_value", [])
+        if isinstance(live_cases, list):
+            for case in live_cases[:1]:
+                snippet = str(case).split("—", 1)[0].strip()
+                if snippet and snippet.lower() not in " ".join(query_terms).lower():
+                    query_terms.append(snippet)
+
+    query_terms.append("latest analysis")
+    return " ".join(term for term in query_terms if term).strip()

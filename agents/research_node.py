@@ -1,6 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor, wait
 
-from core.topic_utils import topic_name
+from core.topic_utils import topic_name, topic_search_query
 from tools.ddg_tool import ddg_search
 from tools.rss_tool import rss_fetch
 from tools.tavily_tool import tavily_search
@@ -12,14 +12,16 @@ RESEARCH_TIMEOUT_SECONDS = 20
 
 def research_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
+    topic_info = state.get("topic_info", {}) or {}
+    search_query = topic_search_query(topic, topic_info)
     raw_articles = []
     reference_background = ""
 
     jobs = {
-        "tavily": lambda: tavily_search(topic),
+        "tavily": lambda: tavily_search(search_query),
         "wiki": lambda: wiki_search(topic),
         "rss": lambda: rss_fetch(topic),
-        "ddg": lambda: ddg_search(topic),
+        "ddg": lambda: ddg_search(search_query),
     }
 
     executor = ThreadPoolExecutor(max_workers=len(jobs))

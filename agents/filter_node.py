@@ -25,10 +25,51 @@ DEBATE_GROWTH_SIGNALS = {
     "technology",
 }
 
+LOW_VALUE_TITLE_PATTERNS = (
+    "wikipedia",
+    "what is ",
+    "introduction",
+    "resource guide",
+    "program in ",
+    "definition",
+    "scope, importance",
+)
+
+LOW_VALUE_DOMAINS = (
+    "wikipedia.org",
+    "loc.gov",
+    "jgu.edu",
+    "library",
+)
+
+
+def _is_low_value_explainer(article: dict) -> bool:
+    title = article.get("title", "").strip().lower()
+    url = article.get("url", "").strip().lower()
+    if any(pattern in title for pattern in LOW_VALUE_TITLE_PATTERNS):
+        return True
+    return any(domain in url for domain in LOW_VALUE_DOMAINS)
+
+
+def _is_live_case_candidate(article: dict) -> bool:
+    source = article.get("source", "").strip().lower()
+    title = article.get("title", "").strip().lower()
+    url = article.get("url", "").strip().lower()
+    if source == "rss":
+        return True
+    if source == "tavily" and not _is_low_value_explainer(article):
+        return True
+    if source == "duckduckgo" and not title.startswith("duckduckgo results for:"):
+        return True
+    if any(domain in url for domain in ("bbc.", "reuters.", "aljazeera.", "thehindu.", "nytimes.", "foreignpolicy.")):
+        return True
+    return False
+
 
 def _heuristic_filter(raw_articles: list[dict]) -> list[dict]:
     seen = set()
     filtered = []
+    has_live_candidates = any(_is_live_case_candidate(article) for article in raw_articles)
     for article in raw_articles:
         title = article.get("title", "").strip().lower()
         url = article.get("url", "").strip().lower()
@@ -39,6 +80,10 @@ def _heuristic_filter(raw_articles: list[dict]) -> list[dict]:
 
         signal_count = sum(1 for signal in DEBATE_GROWTH_SIGNALS if signal in f"{title} {content}")
         if signal_count == 0 and len(content) < 80:
+            continue
+        if has_live_candidates and _is_low_value_explainer(article):
+            continue
+        if title.startswith("duckduckgo results for:"):
             continue
 
         seen.add(dedupe_key)
