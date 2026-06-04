@@ -4,6 +4,12 @@
  
 ---
  
+> [!IMPORTANT]
+> **Keep this repository PRIVATE on GitHub.** The scheduler workflow commits
+> `memory/weekly_log.json` (your topics, quiz scores, coaching prose,
+> vocabulary work) back to the repo so the night/weekend agents have history
+> across runs. On a public repo all of that is visible in commit history.
+
 ## The Problem
  
 Engineering student. Active debater. Zero time to read articles on feminism, geopolitics, religion, finance. This agent does all of it automatically and delivers debate-ready intelligence every morning.
