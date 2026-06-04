@@ -14,7 +14,7 @@ from datetime import date
 
 from core.fallback import get_llm_with_fallback
 from core.topic_utils import topic_name
-from delivery.whatsapp import send_message, wait_for_reply
+from delivery.telegram import send_message, wait_for_reply
 from memory.weekly_store import mark_english_quiz
 from rag.retrieval_pipeline import _load_vector_store
 

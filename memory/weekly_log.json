@@ -748,21 +748,22 @@
       ],
       "studied": false,
       "quiz_score": null,
-      "timestamp": "2026-06-04T09:25:20+00:00"
+      "timestamp": "2026-06-04T09:35:20+00:00"
     },
     {
       "topic": "geopolitics",
       "selector_reason": "Manual topic override.",
       "pre_knowledge": [
-        "3) Export Promotion & Import Substitution 4) Capital Controls International Relations 5) \u201eDevelopment as Freedom\u201f (Sen) 1) Neoconservatism."
+        "Page: Geopolitics Summary: Geopolitics (from Ancient Greek \u03b3\u1fc6 g\u00ea 'earth, land' and \u03c0\u03bf\u03bb\u03b9\u03c4\u03b9\u03ba\u03ae politik\u1e17 'politics') is the study of the effects of Earth's geography on politics and international relations.",
+        "Geopolitics usually refers to countries and relations between them."
       ],
       "top_articles": [
-        "China bans four New Zealand MPs over Taiwan visit",
-        "China bans four New Zealand lawmakers over visit to Taiwan"
+        "Geopolitics - Wikipedia",
+        "Geopolitics - an overview | ScienceDirect Topics"
       ],
       "summaries": [
-        "SUMMARY: - China has banned four New Zealand MPs from entering the country for a year after they visited Taiwan. - This move is likely a response to China's \"One China\" policy, which considers Taiwan as part of China....",
-        "SUMMARY: - China has banned four lawmakers from New Zealand because they visited Taiwan, which China sees as a part of its territory. - The visit was considered a problem by China because it might have given the wrong..."
+        "SUMMARY: - Geopolitics is the study of how the Earth's geography affects politics and international relations between countries. - It involves analyzing various geographical factors such as climate, topography, and na...",
+        "SUMMARY: - Geopolitics is the study of how geographical arrangements, such as boundaries and natural resources, affect political power and decision-making. - It involves analyzing the interaction between geographical..."
       ],
       "arguments": {
         "for": [
@@ -774,28 +775,27 @@
         "middle": "A strong middle ground on geopolitics accepts the principle but disputes scale, speed, or institutional design."
       },
       "key_facts": [
-        "The four New Zealand MPs were banned from China for a year after visiting Taiwan.",
-        "China banned four New Zealand lawmakers over their visit to Taiwan."
+        "The term \"geopolitics\" is derived from the Ancient Greek words \"g\u00ea\" meaning \"earth, land\" and \"politik\u1e17\" meaning \"politics\".",
+        "The term \"geopolitics\" was first coined by Swedish political scientist Rudolf Kjellen in 1899."
       ],
       "concepts": [
-        "\"Soft Power\" - China's decision to ban the MPs can be seen as an example of soft power, where a country uses non-military means, such as...",
-        "Geopolitical tension, which refers to the strain or conflict between countries due to differences in their political, economic, or territ...",
-        "Critical geopolitics, which deconstructs classical geopolitical theories to show their political or ideological functions for great powers."
+        "Critical geopolitics, which deconstructs classical geopolitical theories to reveal their political or ideological functions for great pow...",
+        "Critical geopolitics, which deconstructs the assumptions about the world behind political decisions related to geographical arrangements.",
+        "Geographical entities, which refer to the places, regions, territories, scales, and networks that make up the world and are used for poli..."
       ],
-      "debate_angle": "Here is a coaching block in your preferred style. ### **DEBATE COACHING BLOCK: GEOPOLITICS** **UNIQUE ANGLE** Frame this not as a binary choice between trade with China and democratic values. Instead, argue this is about a small state's *agency* and the prevention of \"sovereignty creep.\" China's ban isn't just a reaction; it's a deliberate test to see how much it can dictate the foreign policy of a smaller nation. The core issue is whether New Zealand's foreign policy is made in Wellington or dictated by Beijing...",
-      "english_lesson": "ENGLISH POWER Word: heavens Meaning: a useful high-precision word for analysis and argument Upgrade: Use 'heavens' instead of vague words like 'smart'. Debate line: An incisive rebuttal attacks the warrant, not just the wording. Bonus word: earth = a useful high-precision word for analysis and argument Root: self -> learn the root and use one word from it in tomorrow's speech.",
+      "debate_angle": "**UNIQUE ANGLE** \u2011 Treat geopolitics not as a static map of power but as a *dynamic \u201cresource\u2011access ecosystem\u201d* where climate\u2011shift, tech diffusion, and data\u2011sovereignty rewrite the classic \u201cland\u2011sea\u2011resource\u201d calculus. **OPEN WITH THIS** \u201cWhile the old\u2011school view of geopolitics reads the world as a chessboard of borders and oil, the 21st\u2011century reality is a climate\u2011and\u2011code board\u2014where melting ice, AI\u2011driven supply chains, and digital\u2011infrastructure are the new territories that decide who wins.\u201d **CLAIM\u2011WARR...",
+      "english_lesson": "ENGLISH POWER Word: incisive Meaning: sharp, direct, and analytically powerful Upgrade: Use 'incisive' instead of vague words like 'smart'. Debate line: An incisive rebuttal attacks the warrant, not just the wording. Bonus word: cogent = clear, logical, and convincing Root: cid -> learn the root and use one word from it in tomorrow's speech.",
       "vocab_words": [
-        "heavens",
-        "earth",
-        "plant"
+        "incisive",
+        "cogent"
       ],
       "word_roots": [
-        "self",
-        "isbn"
+        "cid",
+        "cogn"
       ],
       "studied": false,
       "quiz_score": null,
-      "timestamp": "2026-06-04T09:24:42+00:00"
+      "timestamp": "2026-06-04T09:26:30+00:00"
     },
     {
       "topic": "economics and finance",

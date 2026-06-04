@@ -1,7 +1,7 @@
 import json
 
 from core.fallback import get_llm_with_fallback
-from delivery.whatsapp import send_message
+from delivery.telegram import send_message
 from memory.weekly_store import get_week_log
 
 

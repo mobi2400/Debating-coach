@@ -3,7 +3,7 @@ import re
 from datetime import date
 
 from core.fallback import get_llm_with_fallback
-from delivery.whatsapp import send_message, wait_for_reply
+from delivery.telegram import send_message, wait_for_reply
 from memory.weekly_store import get_today_log, mark_as_studied
 
 

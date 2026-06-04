@@ -49,6 +49,20 @@ def _heuristic_rank(topic: str, articles: list[dict]) -> list[dict]:
     return sorted(articles, key=score, reverse=True)[:7]
 
 
+def _compact_articles(articles: list[dict], content_limit: int = 220) -> list[dict]:
+    compact = []
+    for article in articles:
+        compact.append(
+            {
+                "title": article.get("title", ""),
+                "content": str(article.get("content", ""))[:content_limit],
+                "source": article.get("source", ""),
+                "published": article.get("published", ""),
+            }
+        )
+    return compact
+
+
 def rank_node(state: dict) -> dict:
     state["task_type"] = "rank"
     topic = topic_name(state.get("topic"))
@@ -63,6 +77,12 @@ def rank_node(state: dict) -> dict:
         state["ranked_articles"] = default_ranked
         return state
 
+    if len(articles) >= 8:
+        state["ranked_articles"] = default_ranked
+        return state
+
+    compact_articles = _compact_articles(articles)
+
     prompt = (
         "You are ranking debate research results.\n"
         "Return JSON only: an array of the best article indexes in descending order.\n"
@@ -72,7 +92,7 @@ def rank_node(state: dict) -> dict:
         "Reward articles that deepen the chosen topic, surface strong debate angles, and expand the user's specification knowledge beyond the immediate PDF wording.\n"
         "Deprioritize shallow updates unless they create strong debate angles.\n\n"
         f"Topic: {topic}\n"
-        f"Articles: {json.dumps(articles, ensure_ascii=False)}"
+        f"Articles: {json.dumps(compact_articles, ensure_ascii=False)}"
     )
 
     try:

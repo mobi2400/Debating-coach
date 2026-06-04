@@ -13,7 +13,7 @@ from agents.topic_selector import choose_topic_for_today
 from agents.weekend_agent import weekend_agent_node
 from core.network_utils import clear_broken_local_proxies
 from core.topic_utils import topic_name
-from delivery.whatsapp import send_digest
+from delivery.telegram import send_digest
 from graph import build_daily_graph, build_night_graph, build_weekend_graph
 
 

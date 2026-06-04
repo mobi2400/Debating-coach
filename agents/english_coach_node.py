@@ -122,15 +122,11 @@ def _guess_meaning(word: str) -> str:
 
 
 def _heuristic_english_lesson(topic: str, rag_context: str) -> tuple[str, list[str], list[str]]:
-    vocab_words, word_roots = _extract_candidates(rag_context)
     bank_index = abs(hash(topic)) % len(CURATED_WORD_BANK)
     primary = CURATED_WORD_BANK[bank_index]
     secondary = CURATED_WORD_BANK[(bank_index + 1) % len(CURATED_WORD_BANK)]
-
-    if not vocab_words:
-        vocab_words = [primary["word"], secondary["word"]]
-    if not word_roots:
-        word_roots = [primary["root"], secondary["root"]]
+    vocab_words = [primary["word"], secondary["word"]]
+    word_roots = [primary["root"], secondary["root"]]
 
     primary_word = vocab_words[0]
     support_word = vocab_words[1] if len(vocab_words) > 1 else secondary["word"]
