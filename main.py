@@ -64,6 +64,7 @@ def _initial_state(topic: str | dict) -> dict:
         "concepts": [],
         "arguments": {},
         "debate_angle": "",
+        "debate_packet": {},
         "english_lesson": "",
         "vocab_words": [],
         "word_roots": [],

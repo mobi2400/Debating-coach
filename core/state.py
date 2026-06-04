@@ -27,6 +27,7 @@ class AgentState(TypedDict):
 
     # Coach layer
     debate_angle: str
+    debate_packet: dict
     english_lesson: str
     vocab_words: list
     word_roots: list

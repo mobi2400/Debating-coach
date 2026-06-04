@@ -1,3 +1,5 @@
+import json
+
 from core.fallback import get_llm_with_fallback
 from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
@@ -15,21 +17,35 @@ def _topic_info_list(topic_info: dict, key: str, limit: int = 2) -> list[str]:
     return [str(item).strip() for item in values if str(item).strip()][:limit]
 
 
-def _heuristic_coach(topic: str, arguments: dict, summaries: list[str], rag_context: str, topic_info: dict | None = None) -> str:
+def _build_debate_query(topic: str, topic_info: dict, summaries: list[str], arguments: dict) -> str:
+    live_case = _topic_info_list(topic_info, "live_case_studies_with_analytical_value", 1)
+    frameworks = _topic_info_list(topic_info, "essential_theoretical_frameworks", 2)
+    concepts = _topic_info_list(topic_info, "key_concepts_own_these_precisely", 2)
+    recurring = _topic_info_list(topic_info, "recurring_motions_at_wudc_level", 1)
+    pieces = [
+        topic,
+        "value clash burden of proof mechanism rebuttal weighing WUDC matter file",
+        summaries[0] if summaries else "",
+        arguments.get("middle", ""),
+        live_case[0] if live_case else "",
+        " | ".join(frameworks),
+        " | ".join(concepts),
+        recurring[0] if recurring else "",
+    ]
+    return " ".join(piece for piece in pieces if piece).strip()
+
+
+def _heuristic_debate_packet(topic: str, arguments: dict, summaries: list[str], topic_info: dict | None = None) -> dict:
     topic_info = topic_info or {}
-    opening = arguments.get("for", [f"{topic.title()} is best opened through a fairness frame."])[0]
-    rebuttal_target = arguments.get("against", ["Challenge the biggest tradeoff claim."])[0]
-    style_hint = (
-        "Borrow the rhythm and compression patterns from your stored style examples."
-        if rag_context
-        else "Keep the tone sharp, comparative, and easy to deliver under time pressure."
-    )
-    summary_anchor = summaries[0].splitlines()[0].lstrip("- ").strip() if summaries else f"Anchor your framing on the biggest practical consequence in {topic}."
     frameworks = _topic_info_list(topic_info, "essential_theoretical_frameworks", 1)
     concepts = _topic_info_list(topic_info, "key_concepts_own_these_precisely", 2)
     missed_angles = _topic_info_list(topic_info, "argument_angles_most_debaters_miss", 1)
     live_cases = _topic_info_list(topic_info, "live_case_studies_with_analytical_value", 1)
     recurring = _topic_info_list(topic_info, "recurring_motions_at_wudc_level", 1)
+    mechanisms = _topic_info_list(topic_info, "the_mechanisms_to_understand", 2)
+    opening = arguments.get("for", [f"{topic.title()} is best opened through a fairness frame."])[0]
+    rebuttal_target = arguments.get("against", ["Challenge the biggest tradeoff claim."])[0]
+    summary_anchor = summaries[0].splitlines()[0].lstrip("- ").strip() if summaries else f"Anchor your framing on the biggest practical consequence in {topic}."
 
     unique_angle = (
         missed_angles[0]
@@ -57,14 +73,41 @@ def _heuristic_coach(topic: str, arguments: dict, summaries: list[str], rag_cont
     if recurring:
         power_phrases.append(f"Think of this like the WUDC motion: {recurring[0]}")
 
+    return {
+        "unique_angle": unique_angle,
+        "value_clash": (
+            f"The deepest clash is between {concepts[0] if concepts else 'legitimacy'} and {concepts[1] if len(concepts) > 1 else 'order'}."
+            if concepts
+            else f"The deepest clash is between principle and implementation in {topic}."
+        ),
+        "burden_of_proof": (
+            "Your burden is to prove not just that the principle sounds attractive, but that the mechanism survives contact with power, incentives, and precedent."
+        ),
+        "mechanism": (
+            mechanisms[0]
+            if mechanisms
+            else "Track who has incentives to defect, who enforces the norm, and why that enforcement sticks."
+        ),
+        "open_with_this": opening_line,
+        "claim_warrant_impact": claim_block,
+        "top_rebuttal": rebuttal,
+        "judge_language": "Tell the judge why your world is more likely, more stable, and less reversible in its harms.",
+        "power_phrases": power_phrases,
+    }
+
+
+def _packet_to_block(packet: dict) -> str:
     return "\n".join(
         [
-            f"UNIQUE ANGLE: {unique_angle}",
-            f"OPEN WITH THIS: {opening_line}",
-            f"CLAIM-WARRANT-IMPACT: {claim_block}",
-            f"TOP REBUTTAL: {rebuttal}",
-            "POWER PHRASES: " + " | ".join(f"'{phrase}'" for phrase in power_phrases),
-            f"STYLE NOTE: {style_hint}",
+            f"UNIQUE ANGLE: {packet.get('unique_angle', '')}",
+            f"VALUE CLASH: {packet.get('value_clash', '')}",
+            f"BURDEN OF PROOF: {packet.get('burden_of_proof', '')}",
+            f"MECHANISM: {packet.get('mechanism', '')}",
+            f"OPEN WITH THIS: {packet.get('open_with_this', '')}",
+            f"CLAIM-WARRANT-IMPACT: {packet.get('claim_warrant_impact', '')}",
+            f"TOP REBUTTAL: {packet.get('top_rebuttal', '')}",
+            f"JUDGE LANGUAGE: {packet.get('judge_language', '')}",
+            "POWER PHRASES: " + " | ".join(f"'{phrase}'" for phrase in packet.get("power_phrases", [])),
         ]
     )
 
@@ -73,39 +116,61 @@ def coach_node(state: dict) -> dict:
     state["task_type"] = "debate"
     topic = topic_name(state.get("topic"))
     topic_info = state.get("topic_info", {}) or {}
-    rag_chunks = retrieve_for_node("coach_node", topic)
+    summaries = state.get("summaries", [])[:MAX_SUMMARIES]
+    query = _build_debate_query(topic, topic_info, summaries, state.get("arguments", {}))
+    rag_chunks = retrieve_for_node("coach_node", query)
     rag_context = format_retrieved_context(rag_chunks)
 
-    default_coaching = _heuristic_coach(
+    default_packet = _heuristic_debate_packet(
         topic,
         state.get("arguments", {}),
-        state.get("summaries", [])[:MAX_SUMMARIES],
-        rag_context,
+        summaries,
         topic_info,
     )
-
-    summaries = state.get("summaries", [])[:MAX_SUMMARIES]
+    default_coaching = _packet_to_block(default_packet)
 
     if not summaries and not rag_context:
+        state["debate_packet"] = default_packet
         state["debate_angle"] = default_coaching
         return state
 
     prompt = (
         "You are a debate coach writing in the user's preferred debate style.\n"
-        "Produce a compact coaching block with these sections exactly:\n"
-        "UNIQUE ANGLE, OPEN WITH THIS, CLAIM-WARRANT-IMPACT, TOP REBUTTALS, POWER PHRASES.\n\n"
+        "Return JSON only with these keys:\n"
+        "unique_angle, value_clash, burden_of_proof, mechanism, open_with_this, claim_warrant_impact, top_rebuttal, judge_language, power_phrases.\n"
+        "power_phrases must be an array of 3 to 5 short lines.\n"
+        "Think like a WUDC matter file writer: explain the value clash, the mechanism, the judge comparison, and how to answer the strongest opposition push.\n\n"
         f"Topic: {topic}\n"
         f"Summaries: {summaries}\n"
         f"Arguments: {state.get('arguments', {})}\n"
+        f"Topic info: {topic_info}\n"
         f"Style RAG context: {rag_context[:MAX_RAG_CHARS]}"
     )
 
     try:
         llm = get_llm_with_fallback(state)
         response = cached_invoke(llm, prompt, scope="coach")
-        content = getattr(response, "content", response)
-        state["debate_angle"] = str(content).strip() or default_coaching
+        content = str(getattr(response, "content", response)).strip()
+        if content.startswith("```"):
+            content = content.split("```", 2)[1]
+            if content.startswith("json"):
+                content = content[4:]
+        parsed = json.loads(content)
+        packet = {
+            "unique_angle": str(parsed.get("unique_angle") or default_packet["unique_angle"]).strip(),
+            "value_clash": str(parsed.get("value_clash") or default_packet["value_clash"]).strip(),
+            "burden_of_proof": str(parsed.get("burden_of_proof") or default_packet["burden_of_proof"]).strip(),
+            "mechanism": str(parsed.get("mechanism") or default_packet["mechanism"]).strip(),
+            "open_with_this": str(parsed.get("open_with_this") or default_packet["open_with_this"]).strip(),
+            "claim_warrant_impact": str(parsed.get("claim_warrant_impact") or default_packet["claim_warrant_impact"]).strip(),
+            "top_rebuttal": str(parsed.get("top_rebuttal") or default_packet["top_rebuttal"]).strip(),
+            "judge_language": str(parsed.get("judge_language") or default_packet["judge_language"]).strip(),
+            "power_phrases": parsed.get("power_phrases") if isinstance(parsed.get("power_phrases"), list) else default_packet["power_phrases"],
+        }
+        state["debate_packet"] = packet
+        state["debate_angle"] = _packet_to_block(packet)
     except Exception:
+        state["debate_packet"] = default_packet
         state["debate_angle"] = default_coaching
 
     return state

@@ -5,7 +5,7 @@ from core.topic_utils import topic_name
 from memory.weekly_store import save_daily_digest
 
 
-FINAL_DOC_CHAR_LIMIT = 3900
+FINAL_DOC_CHAR_LIMIT = 12000
 
 
 def _join_lines(lines: list[str]) -> str:
@@ -132,9 +132,13 @@ def _extract_coach_sections(state: dict) -> dict:
     debate_angle = str(state.get("debate_angle", "")).strip()
     sections = {
         "unique_angle": "",
+        "value_clash": "",
+        "burden_of_proof": "",
+        "mechanism": "",
         "open_with_this": "",
         "claim_warrant_impact": "",
         "top_rebuttal": "",
+        "judge_language": "",
         "power_phrases": "",
     }
     if not debate_angle:
@@ -143,10 +147,14 @@ def _extract_coach_sections(state: dict) -> dict:
     current_key = None
     label_map = {
         "UNIQUE ANGLE": "unique_angle",
+        "VALUE CLASH": "value_clash",
+        "BURDEN OF PROOF": "burden_of_proof",
+        "MECHANISM": "mechanism",
         "OPEN WITH THIS": "open_with_this",
         "CLAIM-WARRANT-IMPACT": "claim_warrant_impact",
         "TOP REBUTTAL": "top_rebuttal",
         "TOP REBUTTALS": "top_rebuttal",
+        "JUDGE LANGUAGE": "judge_language",
         "POWER PHRASES": "power_phrases",
     }
 
@@ -261,10 +269,18 @@ def _debate_section(state: dict) -> list[str]:
     middle = arguments.get("middle")
     if middle:
         lines.append(f"Main clash: {_trim_block(middle, 280)}")
+    if coach_sections.get("value_clash"):
+        lines.append(f"Underlying value clash: {_trim_block(coach_sections['value_clash'], 290)}")
+    if coach_sections.get("burden_of_proof"):
+        lines.append(f"Burden of proof: {_trim_block(coach_sections['burden_of_proof'], 290)}")
+    if coach_sections.get("mechanism"):
+        lines.append(f"Mechanism to explain: {_trim_block(coach_sections['mechanism'], 290)}")
     if coach_sections.get("claim_warrant_impact"):
         lines.append(f"Why this wins: {_trim_block(coach_sections['claim_warrant_impact'], 320)}")
     if coach_sections.get("top_rebuttal"):
         lines.append(f"Best rebuttal move: {_trim_block(coach_sections['top_rebuttal'], 290)}")
+    if coach_sections.get("judge_language"):
+        lines.append(f"Judge framing: {_trim_block(coach_sections['judge_language'], 260)}")
     if coach_sections.get("power_phrases"):
         lines.append(f"Power phrase to steal: {_trim_block(coach_sections['power_phrases'], 260)}")
 
