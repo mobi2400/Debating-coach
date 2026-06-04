@@ -1,8 +1,13 @@
 import json
 import os
 import tempfile
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+
+
+def _now_iso() -> str:
+    """UTC timestamp so dev machines and GH Actions runners agree."""
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 # Absolute path so the log lands in the project regardless of cwd.
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -92,7 +97,7 @@ def save_daily_digest(topic: str, content_dict: dict):
         "word_roots": _compact_list(content_dict.get("word_roots", []), 2, 24),
         "studied": False,
         "quiz_score": None,
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": _now_iso(),
     }
 
     replaced = False
@@ -128,7 +133,7 @@ def mark_as_studied(date_str: str, studied: bool, score: int | None = None):
 def mark_english_quiz(date_str: str, score: int):
     log = load_log()
     if date_str not in log:
-        log[date_str] = [{"topic": "english", "timestamp": datetime.now().isoformat()}]
+        log[date_str] = [{"topic": "english", "timestamp": _now_iso()}]
     for entry in log[date_str]:
         entry["english_quiz_score"] = score
     save_log(log)

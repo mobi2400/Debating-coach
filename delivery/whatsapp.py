@@ -74,6 +74,14 @@ def _dev_mode() -> bool:
     return os.getenv("DEV_MODE", "false").lower() == "true"
 
 
+def _safe_console_text(text: str) -> str:
+    try:
+        text.encode("cp1252")
+        return text
+    except Exception:
+        return text.encode("cp1252", errors="replace").decode("cp1252")
+
+
 def _base_url() -> str | None:
     pid = _phone_number_id()
     if not pid:
@@ -155,7 +163,7 @@ def _send_single(text: str):
     to = _to_number()
 
     if _dev_mode() or not token or not url or not to:
-        print(f"\n[WhatsApp DEV]\n{text}\n{'=' * 40}")
+        print(f"\n[WhatsApp DEV]\n{_safe_console_text(text)}\n{'=' * 40}")
         return
 
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
