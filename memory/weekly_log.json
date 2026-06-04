@@ -706,18 +706,18 @@
   "2026-06-04": [
     {
       "topic": "international relations",
-      "selector_reason": "Manual topic override.",
+      "selector_reason": "New priority topic that has not been studied yet.",
       "pre_knowledge": [
         "Why this matters: IR motions appear in every major competition. They test whether you understand power, legitimacy, and order \u2014 not just who is fighting whom. A debater who knows IR theory will always outclass one who...",
         "Framework: Realism: states are rational actors pursuing survival in an anarchic system. Morgenthau, Waltz, Mearsheimer."
       ],
       "top_articles": [
-        "Germany blames Russia for 'bitter defeat' in UN Security Council bid",
-        "Ukraine: Conflict at the Crossroads of Europe and Russia | Council on Foreign Relations"
+        "Rahul \u2018selling panic\u2019, promoting baseless conspiracy theories: BJP",
+        "Israel must allow ICRC to visit Palestinians in prison, Supreme Court rules"
       ],
       "summaries": [
-        "SUMMARY: - Germany lost its bid for a seat on the UN Security Council, and they believe Russia is to blame for this defeat. - Russia allegedly stirred up sentiment against Germany due to its support for Ukraine, which...",
-        "SUMMARY: - The United States and European Union have increased their support for Ukraine, providing defense, economic, and humanitarian assistance, in response to Russia's invasion in 2022. - The U.S. and EU do not re..."
+        "SUMMARY: - The article discusses a claim made by a Congress leader, Rahul, that the current government in India is facing an \"institutional revolt\" and that the country is at risk of an \"economic tsunami\" due to its l...",
+        "SUMMARY: - The Israeli Supreme Court made a decision about the International Committee of the Red Cross (ICRC) visiting Palestinians in prison. - The court said that the Israeli government cannot stop the ICRC from vi..."
       ],
       "arguments": {
         "for": [
@@ -729,27 +729,27 @@
         "middle": "Use the live case 'Ukraine \u2014 sovereignty norm vs self-determination, NATO expansion debate, nuclear deterrence' to accept the principle but dispute who should bear the cost, who enforces the norm, and what precedent it sets."
       },
       "key_facts": [
-        "Germany's support for Ukraine was a factor in Russia's opposition to Germany's UN Security Council bid.",
-        "The United States has provided Ukraine with more than $50 billion in assistance, including advanced military aid, as of February 2023."
+        "The Modi government is accused of removing protections against international shocks, making India vulnerable to economic crises.",
+        "The Israeli Supreme Court rejected the government's ban on ICRC visits to Palestinian prisoners."
       ],
       "concepts": [
-        "\"Soft Power\" - This concept refers to the ability of a country to influence others through non-coercive means, such as diplomacy and econ...",
-        "Sovereignty, which refers to a country's independence and self-governance, and is a key issue in the conflict between Ukraine and Russia,...",
-        "Humanitarian Intervention, which refers to the use of military force to protect civilians from severe human rights violations or humanita..."
+        "Realism, which is a theory in international relations that emphasizes the importance of a country's power and security in its interaction...",
+        "International law, which refers to the set of rules and standards that countries must follow in their interactions with each other and wi...",
+        "Humanitarian funding refers to the financial support provided by governments, organizations, and individuals to address humanitarian cris..."
       ],
-      "debate_angle": "UNIQUE ANGLE: The double\u2011standard of Western hegemony \u2013 how the same norms Europe and the US demand of Russia are bent when they suit power interests, eroding legitimacy in the international system. VALUE CLASH: Legitimacy (fair, rule\u2011based order) vs. Stability (realist security and power preservation). BURDEN OF PROOF: The affirmative must prove that the current IR architecture (UNSC veto, sanction regimes, NATO expansion) systematically privileges great powers, undermining legitimacy, and that a reform\u2011oriente...",
-      "english_lesson": "ENGLISH POWER Word: nuance Meaning: a subtle difference in meaning or tone Upgrade: Use 'nuance' instead of vague words like 'difference'. Debate line: The nuance is that harm comes from the mechanism, not the headline. Bonus word: lucid = clear and easy to understand Root: nua -> learn the root and use one word from it in tomorrow's speech.",
+      "debate_angle": "UNIQUE ANGLE: The Double\u2011Standard Defense \u2013 argue that a robust IR framework (norms, institutions, and realist power calculations) is essential precisely because it curtails the very great\u2011power abuses that the opposition fears, turning legitimacy into a strategic asset. VALUE CLASH: Legitimacy & Fairness vs. Raw Power & Survival BURDEN OF PROOF: The affirmative must prove that without the normative scaffolding of international relations (security\u2011dilemma mitigation, collective\u2011action institutions, and norm\u2011to\u2011l...",
+      "english_lesson": "ENGLISH POWER Word: salient Meaning: most noticeable or most important Upgrade: Use 'salient' instead of vague words like 'important'. Debate line: The salient comparison is not freedom in theory but power in practice. Bonus word: incisive = sharp, direct, and analytically powerful Root: sal -> learn the root and use one word from it in tomorrow's speech.",
       "vocab_words": [
-        "nuance",
-        "lucid"
+        "salient",
+        "incisive"
       ],
       "word_roots": [
-        "nua",
-        "luc"
+        "sal",
+        "cid"
       ],
       "studied": false,
       "quiz_score": 40,
-      "timestamp": "2026-06-04T15:24:26+00:00"
+      "timestamp": "2026-06-04T17:51:47+00:00"
     },
     {
       "topic": "geopolitics",
