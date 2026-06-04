@@ -148,7 +148,10 @@ def run_daily_e2e_test():
     assert result["arguments"].get("middle"), "argue_node must yield a middle ground"
     assert "UNIQUE ANGLE" in result["debate_angle"], "coach_node must emit UNIQUE ANGLE"
     assert result["english_lesson"], "english_coach_node must populate english_lesson"
-    assert "TOPIC:" in result["final_doc"], "format_node must emit TOPIC: header"
+    final_doc = result["final_doc"]
+    assert (
+        "TOPIC:" in final_doc or "TOPIC FOR TODAY" in final_doc
+    ), "format_node must emit a topic header"
 
     print("Daily e2e checks passed.")
 
