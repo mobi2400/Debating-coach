@@ -1,6 +1,7 @@
 import os
 
 from dotenv import load_dotenv
+from core.network_utils import clear_broken_local_proxies
 
 try:
     from langchain_google_genai import ChatGoogleGenerativeAI
@@ -13,6 +14,7 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
     ChatGroq = None
 
 load_dotenv()
+clear_broken_local_proxies()
 
 
 class MissingDependencyLLM:

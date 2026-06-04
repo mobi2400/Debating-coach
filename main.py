@@ -9,10 +9,17 @@ from agents.english_quiz_node import english_quiz_node
 from agents.format_node import format_node
 from agents.night_agent import night_agent_node
 from agents.summarize_node import summarize_node
+from agents.topic_selector import choose_topic_for_today
 from agents.weekend_agent import weekend_agent_node
+from core.network_utils import clear_broken_local_proxies
 from core.topic_utils import topic_name
 from delivery.whatsapp import send_digest
 from graph import build_daily_graph, build_night_graph, build_weekend_graph
+
+
+_CLEARED_PROXIES = clear_broken_local_proxies()
+if _CLEARED_PROXIES:
+    print(f"[Network] Cleared broken proxy env vars: {', '.join(_CLEARED_PROXIES)}")
 
 
 def _load_topics_config() -> tuple[list[str], dict]:
@@ -46,7 +53,9 @@ def _initial_state(topic: str | dict) -> dict:
     normalized_topic = topic_name(topic)
     return {
         "topic": normalized_topic,
+        "selector_reason": "",
         "raw_articles": [],
+        "reference_background": "",
         "enriched_context": "",
         "ranked_articles": [],
         "summaries": [],
@@ -69,7 +78,9 @@ def run_daily(topic_override: str | None = None):
     topics, topics_metadata = _load_topics_config()
 
     if topic_override:
-        topics = [topic_override]
+        selection = {"topic": topic_override, "reason": "Manual topic override."}
+    else:
+        selection = choose_topic_for_today(topics_metadata.get("priority_topics", topics))
 
     graph = build_daily_graph()
 
@@ -77,19 +88,21 @@ def run_daily(topic_override: str | None = None):
         print("Study scope loaded.")
         print(topics_metadata.get("study_scope", ""))
 
-    for topic in topics:
-        normalized_topic = topic_name(topic)
-        print(f"\n{'=' * 40}")
-        print(f"Processing topic: {normalized_topic}")
-        print(f"{'=' * 40}")
-        result = graph.invoke(_initial_state(normalized_topic))
-        print(f"Raw articles: {len(result['raw_articles'])}")
-        print(f"Ranked articles: {len(result['ranked_articles'])}")
-        print(f"Summaries: {len(result['summaries'])}")
-        print(f"Arguments FOR: {len(result['arguments'].get('for', []))}")
-        print(f"Enriched context chars: {len(result['enriched_context'])}")
-        print(f"Final doc chars: {len(result['final_doc'])}")
-        send_digest(result["final_doc"])
+    normalized_topic = topic_name(selection["topic"])
+    print(f"\n{'=' * 40}")
+    print(f"Processing topic: {normalized_topic}")
+    print(f"Reason: {selection.get('reason', '')}")
+    print(f"{'=' * 40}")
+    state = _initial_state(normalized_topic)
+    state["selector_reason"] = selection.get("reason", "")
+    result = graph.invoke(state)
+    print(f"Raw articles: {len(result['raw_articles'])}")
+    print(f"Ranked articles: {len(result['ranked_articles'])}")
+    print(f"Summaries: {len(result['summaries'])}")
+    print(f"Arguments FOR: {len(result['arguments'].get('for', []))}")
+    print(f"Enriched context chars: {len(result['enriched_context'])}")
+    print(f"Final doc chars: {len(result['final_doc'])}")
+    send_digest(result["final_doc"])
 
 
 def run_summarize_smoke():

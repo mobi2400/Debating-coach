@@ -1,9 +1,14 @@
 import os
 
+from core.network_utils import clear_broken_local_proxies
+
 try:
     from langchain_google_genai import GoogleGenerativeAIEmbeddings
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
     GoogleGenerativeAIEmbeddings = None
+
+
+clear_broken_local_proxies()
 
 
 GEMINI_EMBED_MODEL = "models/gemini-embedding-001"

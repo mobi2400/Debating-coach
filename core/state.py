@@ -4,9 +4,11 @@ from typing import Optional, TypedDict
 class AgentState(TypedDict):
     # Input
     topic: str
+    selector_reason: str
 
     # Research layer
     raw_articles: list
+    reference_background: str
 
     # RAG layer
     enriched_context: str

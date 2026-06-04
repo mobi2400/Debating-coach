@@ -1,5 +1,3 @@
-from core.fallback import get_llm_with_fallback
-from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
 from memory.weekly_store import save_daily_digest
 
@@ -8,103 +6,142 @@ def _join_lines(lines: list[str]) -> str:
     return "\n".join(line for line in lines if line)
 
 
-def _heuristic_format(state: dict) -> str:
-    topic = topic_name(state.get("topic"))
+FINAL_DOC_CHAR_LIMIT = 1450
+
+
+def _trim_block(text: str, char_limit: int, line_limit: int | None = None) -> str:
+    lines = [line.strip() for line in str(text).splitlines() if line.strip()]
+    if line_limit is not None:
+        lines = lines[:line_limit]
+    compact = " ".join(lines)
+    if len(compact) <= char_limit:
+        return compact
+    return compact[: char_limit - 3].rstrip() + "..."
+
+
+def _sentences(text: str, limit: int = 2) -> list[str]:
+    parts = []
+    for raw in str(text).replace("\n", " ").split(". "):
+        sentence = " ".join(raw.split()).strip(" -")
+        if sentence:
+            parts.append(sentence.rstrip(".") + ".")
+        if len(parts) >= limit:
+            break
+    return parts
+
+
+def _pre_knowledge_points(state: dict) -> list[str]:
+    reference_background = str(state.get("reference_background", "")).strip()
+    if reference_background:
+        return _sentences(reference_background, limit=2)
+
+    enriched = str(state.get("enriched_context", ""))
+    cleaned_lines = []
+    for line in enriched.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.endswith(":") and stripped.isupper():
+            continue
+        if stripped.startswith("[source:") or stripped == "---":
+            continue
+        cleaned_lines.append(stripped)
+        if len(cleaned_lines) >= 4:
+            break
+
+    cleaned_text = " ".join(cleaned_lines)
+    points = _sentences(cleaned_text, limit=2)
+    if points:
+        return [_trim_block(point, 150) for point in points]
+
+    concepts = state.get("concepts", [])[:2]
+    if concepts:
+        return [f"Know the concept '{_trim_block(concept, 80)}' before using it in today's case." for concept in concepts]
+    return []
+
+
+def _today_case_lines(state: dict) -> list[str]:
+    ranked_articles = state.get("ranked_articles", [])
+    if not ranked_articles:
+        return ["No strong live article was retrieved today, so focus on the core framework and debate angles."]
+
+    article = ranked_articles[0]
+    lines = [article.get("title", "Untitled article")]
+    lines.extend(_sentences(article.get("content", ""), limit=2))
+    return lines
+
+
+def _argument_lines(state: dict) -> list[str]:
     arguments = state.get("arguments", {})
-    lines = [
-        f"TOPIC: {topic.upper()}",
-        "=" * 28,
-        "",
-        "BACKGROUND",
-        state.get("enriched_context", "")[:700] or "No background context retrieved yet.",
-        "",
-        "TOP ARTICLES",
+    lines = []
+    if arguments.get("for"):
+        lines.append(f"For: {_trim_block(arguments['for'][0], 130)}")
+    if arguments.get("against"):
+        lines.append(f"Against: {_trim_block(arguments['against'][0], 130)}")
+    middle = arguments.get("middle")
+    if middle:
+        lines.append(f"Middle: {_trim_block(middle, 150)}")
+    return lines[:3] or ["Build the clash by comparing mechanism, incentives, and long-term impact."]
+
+
+def _recall_lines(state: dict) -> list[str]:
+    topic = topic_name(state.get("topic"))
+    concept = (state.get("concepts") or ["the central concept"])[0]
+    fact = (state.get("key_facts") or ["the strongest example from today's material"])[0]
+    return [
+        f"In one sentence, explain why {_trim_block(concept, 80)} matters in {topic}.",
+        f"Use this fact in a rebuttal: {_trim_block(fact, 110)}",
     ]
 
-    ranked_articles = state.get("ranked_articles", [])
-    if ranked_articles:
-        for index, article in enumerate(ranked_articles[:5], start=1):
-            lines.append(f"{index}. {article.get('title', 'Untitled')}")
-    else:
-        lines.append("No ranked articles available in the current environment.")
 
-    lines.extend(["", "SUMMARY BULLETS"])
-    if state.get("summaries"):
-        for summary in state["summaries"][:3]:
-            lines.append(summary)
-            lines.append("")
-    else:
-        lines.append("No summaries available.")
+def _heuristic_format(state: dict) -> str:
+    topic = topic_name(state.get("topic"))
+    pre_knowledge = _pre_knowledge_points(state)
+    case_lines = _today_case_lines(state)
+    argument_lines = _argument_lines(state)
+    recall_lines = _recall_lines(state)
+    pre_lines = [f"- {item}" for item in pre_knowledge] if pre_knowledge else ["- No background context retrieved yet."]
+    case_rendered = [f"- {item}" for item in case_lines]
+    argument_rendered = [f"- {item}" for item in argument_lines]
+    recall_rendered = [f"- {item}" for item in recall_lines]
 
-    lines.extend(["ARGUMENTS FOR"])
-    lines.extend(f"- {item}" for item in arguments.get("for", []))
-    lines.extend(["", "ARGUMENTS AGAINST"])
-    lines.extend(f"- {item}" for item in arguments.get("against", []))
-    lines.extend(["", "MIDDLE GROUND", arguments.get("middle", "No middle-ground argument generated."), ""])
-    lines.extend(["COACH SECTION", state.get("debate_angle", "No coaching block generated.")])
-    lines.extend(["", "ENGLISH POWER", state.get("english_lesson", "No English lesson generated.")])
-
-    if state.get("key_facts"):
-        lines.extend(["", "KEY FACTS"])
-        lines.extend(f"- {fact}" for fact in state["key_facts"][:5])
-
-    if state.get("concepts"):
-        lines.extend(["", "CONCEPTS TO REMEMBER"])
-        lines.extend(f"- {concept}" for concept in state["concepts"][:5])
-
-    return _join_lines(lines).strip()
+    lines = [
+        f"TOPIC: {topic.upper()}",
+        f"Why today: {state.get('selector_reason', 'Priority topic rotation.')}",
+        "",
+        "PRE-KNOWLEDGE",
+        *pre_lines,
+        "",
+        "TODAY'S CASE",
+        *case_rendered,
+        "",
+        "DEBATE ANGLES",
+        *argument_rendered,
+        "",
+        "COACH NOTE",
+        _trim_block(state.get("debate_angle", "No coaching block generated."), 280),
+        "",
+        "ENGLISH POWER",
+        _trim_block(state.get("english_lesson", "No English lesson generated."), 240, line_limit=6),
+        "",
+        "2-MINUTE RECALL",
+        *recall_rendered,
+    ]
+    output = _join_lines(lines).strip()
+    return _trim_block(output, FINAL_DOC_CHAR_LIMIT)
 
 
 def format_node(state: dict) -> dict:
     state["task_type"] = "format"
     topic = topic_name(state.get("topic"))
-    default_output = _heuristic_format(state)
-
-    if not state.get("ranked_articles") and not state.get("summaries"):
-        state["final_doc"] = default_output
-        save_daily_digest(
-            topic,
-            {
-                "summaries": state.get("summaries", []),
-                "arguments": state.get("arguments", {}),
-                "key_facts": state.get("key_facts", []),
-                "concepts": state.get("concepts", []),
-                "debate_angle": state.get("debate_angle", ""),
-                "english_lesson": state.get("english_lesson", ""),
-                "vocab_words": state.get("vocab_words", []),
-                "word_roots": state.get("word_roots", []),
-            },
-        )
-        return state
-
-    prompt = (
-        "Format the debate digest for WhatsApp.\n"
-        "Do not use markdown symbols like # or **.\n"
-        "Use clean all-caps section labels, readable spacing, and concise phone-friendly output.\n"
-        "The very first line MUST be exactly: TOPIC: <TOPIC IN UPPERCASE>\n"
-        "Use these section headers verbatim and in this order: TOPIC:, BACKGROUND, TOP ARTICLES, "
-        "SUMMARY BULLETS, ARGUMENTS FOR, ARGUMENTS AGAINST, MIDDLE GROUND, COACH SECTION, ENGLISH POWER, KEY FACTS, CONCEPTS TO REMEMBER.\n\n"
-        f"Topic: {topic}\n"
-        f"Ranked articles: {state.get('ranked_articles', [])}\n"
-        f"Summaries: {state.get('summaries', [])}\n"
-        f"Arguments: {state.get('arguments', {})}\n"
-        f"Debate coaching: {state.get('debate_angle', '')}\n"
-        f"English lesson: {state.get('english_lesson', '')}\n"
-        f"Key facts: {state.get('key_facts', [])}\n"
-        f"Concepts: {state.get('concepts', [])}"
-    )
-
-    try:
-        llm = get_llm_with_fallback(state)
-        response = cached_invoke(llm, prompt, scope="format")
-        content = getattr(response, "content", response)
-        state["final_doc"] = str(content).strip() or default_output
-    except Exception:
-        state["final_doc"] = default_output
+    state["final_doc"] = _heuristic_format(state)
 
     save_daily_digest(
         topic,
         {
+            "selector_reason": state.get("selector_reason", ""),
+            "pre_knowledge": _pre_knowledge_points(state),
+            "ranked_articles": state.get("ranked_articles", []),
             "summaries": state.get("summaries", []),
             "arguments": state.get("arguments", {}),
             "key_facts": state.get("key_facts", []),

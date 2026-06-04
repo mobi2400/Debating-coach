@@ -26,8 +26,7 @@ rank-bm25>=0.2.2
 PyMuPDF>=1.24.10
 youtube-transcript-api>=0.6.2
 
-# WhatsApp
-twilio>=9.2.3
+# WhatsApp (Meta Cloud API — uses requests; no SDK needed)
 
 # Utilities
 python-dotenv>=1.0.1

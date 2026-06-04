@@ -1,7 +1,12 @@
+from core.network_utils import clear_broken_local_proxies
+
 try:
     from langchain_community.tools import DuckDuckGoSearchRun
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
     DuckDuckGoSearchRun = None
+
+
+clear_broken_local_proxies()
 
 
 def _build_ddg():

@@ -13,6 +13,7 @@ RESEARCH_TIMEOUT_SECONDS = 20
 def research_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
     raw_articles = []
+    reference_background = ""
 
     jobs = {
         "tavily": lambda: tavily_search(topic),
@@ -39,7 +40,10 @@ def research_node(state: dict) -> dict:
         if isinstance(result, list):
             raw_articles.extend(result)
         elif isinstance(result, dict) and result:
-            raw_articles.append(result)
+            if source_name == "wiki":
+                reference_background = str(result.get("content", "")).strip()
+            else:
+                raw_articles.append(result)
 
     for future in pending:
         source_name = future_map[future]
@@ -49,6 +53,7 @@ def research_node(state: dict) -> dict:
     executor.shutdown(wait=False, cancel_futures=True)
 
     state["raw_articles"] = raw_articles
+    state["reference_background"] = reference_background[:2000]
     state["task_type"] = "fetch"
     state["article_length"] = max((len(article.get("content", "")) for article in raw_articles), default=0)
     return state

@@ -31,6 +31,56 @@ STOPWORDS = {
     "would",
 }
 
+BLOCKED_WORDS = {
+    "vocabulary",
+    "source",
+    "norman",
+    "easykno",
+    "ersary",
+    "chapter",
+    "session",
+    "preview",
+    "review",
+}
+
+CURATED_WORD_BANK = [
+    {
+        "word": "cogent",
+        "meaning": "clear, logical, and convincing",
+        "upgrade_from": "good",
+        "example": "Your model is not cogent unless you prove why states comply.",
+        "root": "cogn",
+    },
+    {
+        "word": "nuance",
+        "meaning": "a subtle but important distinction",
+        "upgrade_from": "difference",
+        "example": "The nuance is that harm comes from the mechanism, not the headline.",
+        "root": "nua",
+    },
+    {
+        "word": "lucid",
+        "meaning": "clear and easy to follow",
+        "upgrade_from": "clear",
+        "example": "Make the opening lucid enough that a judge can track your clash instantly.",
+        "root": "luc",
+    },
+    {
+        "word": "salient",
+        "meaning": "most important or most noticeable",
+        "upgrade_from": "important",
+        "example": "The salient comparison is not freedom in theory but power in practice.",
+        "root": "sal",
+    },
+    {
+        "word": "incisive",
+        "meaning": "sharp, direct, and analytically strong",
+        "upgrade_from": "smart",
+        "example": "An incisive rebuttal attacks the warrant, not just the wording.",
+        "root": "cid",
+    },
+]
+
 
 def _extract_candidates(rag_context: str) -> tuple[list[str], list[str]]:
     words = []
@@ -38,7 +88,9 @@ def _extract_candidates(rag_context: str) -> tuple[list[str], list[str]]:
 
     for token in re.findall(r"\b[a-zA-Z]{5,14}\b", rag_context):
         lowered = token.lower()
-        if lowered in STOPWORDS:
+        if lowered in STOPWORDS or lowered in BLOCKED_WORDS:
+            continue
+        if not lowered.isalpha():
             continue
         if lowered not in words:
             words.append(lowered)
@@ -47,6 +99,8 @@ def _extract_candidates(rag_context: str) -> tuple[list[str], list[str]]:
 
     for match in re.findall(r"\b([a-zA-Z]{2,6})[-:]", rag_context):
         lowered = match.lower()
+        if lowered in BLOCKED_WORDS:
+            continue
         if lowered not in roots:
             roots.append(lowered)
         if len(roots) >= 3:
@@ -69,24 +123,27 @@ def _guess_meaning(word: str) -> str:
 
 def _heuristic_english_lesson(topic: str, rag_context: str) -> tuple[str, list[str], list[str]]:
     vocab_words, word_roots = _extract_candidates(rag_context)
+    bank_index = abs(hash(topic)) % len(CURATED_WORD_BANK)
+    primary = CURATED_WORD_BANK[bank_index]
+    secondary = CURATED_WORD_BANK[(bank_index + 1) % len(CURATED_WORD_BANK)]
+
     if not vocab_words:
-        vocab_words = ["lucid", "precise", "nuance", "cogent", "salient"]
+        vocab_words = [primary["word"], secondary["word"]]
     if not word_roots:
-        word_roots = ["dict", "cred", "bene"]
+        word_roots = [primary["root"], secondary["root"]]
 
     primary_word = vocab_words[0]
-    support_word = vocab_words[1] if len(vocab_words) > 1 else primary_word
+    support_word = vocab_words[1] if len(vocab_words) > 1 else secondary["word"]
     root = word_roots[0]
 
     lesson_lines = [
         "ENGLISH POWER",
-        f"Focus topic: {topic}",
-        f"Word set: {', '.join(vocab_words[:3])}",
-        f"Root focus: {', '.join(word_roots[:2])}",
-        f"{primary_word}: {_guess_meaning(primary_word)}",
-        f"{support_word}: {_guess_meaning(support_word)}",
-        f"Debate use: Use '{primary_word}' when you want your claim to sound sharper, more exact, and more mature.",
-        f"Root drill: Learn what '{root}' signals, then build one debate sentence using a word from that root family.",
+        f"Word: {primary_word}",
+        f"Meaning: {_guess_meaning(primary_word)}",
+        f"Upgrade: Use '{primary_word}' instead of vague words like '{primary.get('upgrade_from', 'good')}'.",
+        f"Debate line: {primary.get('example')}",
+        f"Bonus word: {support_word} = {_guess_meaning(support_word)}",
+        f"Root: {root} -> learn the root and use one word from it in tomorrow's speech.",
     ]
     return "\n".join(lesson_lines), vocab_words, word_roots
 

@@ -760,57 +760,51 @@
     },
     {
       "topic": "geopolitics",
+      "selector_reason": "Manual topic override.",
+      "pre_knowledge": [
+        "DOMAIN KNOWLEDGE: --- [source: knowledge_base/pdfs/topic_pdfs/FIRSTPRINCIPLESMADTrainingHandbook.pdf] 3) Export Promotion & Import Substitution 4) Capital Controls International Relations 5) \u201eDevelopment as Freedom\u201f (...",
+        "Governance 1) Liberal democracy (some liberal democracies are more liberal than others) 2) Social democracy (see Scandinavia)."
+      ],
+      "top_articles": [
+        "China bans four New Zealand MPs over Taiwan visit",
+        "China bans four New Zealand lawmakers over visit to Taiwan"
+      ],
       "summaries": [
-        "- Reich\u2019, German Studies Review, vol.\n- 4, no.\n- 1 (1981), pp.\n- Background context from the knowledge base is available for deeper prep.",
-        "- Page: Geopolitics\nSummary: Geopolitics (from Ancient Greek  \u03b3\u1fc6 g\u00ea 'earth, land' and  \u03c0\u03bf\u03bb\u03b9\u03c4\u03b9\u03ba\u03ae politik\u1e17 'politics') is the study of the effects of Earth's geography on politics and international relations.\n- Geopolitics usually refers to countries and relations between them.\n- According to multiple researchers, the term is currently being used to describe a broad spectrum of concepts, in a general sense used as \"a synonym for international political relations\", but more specifically \"to imply the global structure of such relations\"; this usage builds on an \"early-twentieth-century term for a pseudoscience of political geography\" and other pseudoscientific theories of historical and geographic determinism.\n- Background context from the knowledge base is available for deeper prep.",
-        "- magazines.\n- \u2018Anti-geopolitics\u2019 describes the challenges to state-centred geopolitics from within civil society, including dissidents, social movements, and allied forms of resistance.\n- Its aim is to oppose the idea that the interests of the state and its political allies are the same as the interests of communities.\n- Background context from the knowledge base is available for deeper prep.",
-        "- 3 days ago - Geopolitics focuses on political power linked to geographic space, in particular, territorial waters, land territory and wealth of natural resources, in correlation with diplomatic history, in particular the context of a larger power relative to its neighboring states of smaller or similar power.\n- Heartland and Rimland theories Geopolitics is the study of how geographical factors, including terrain, climate, resources, and spatial relationships, causally influence the...\n- 2 weeks ago - Geopolitics, analysis of the geographic influences on power relationships in international relations.\n- Background context from the knowledge base is available for deeper prep.",
-        "- # Geopolitics\n\nGeopolitics refers to the practice of formulating policy based on geographical factors that influence international relations and interactions among states.\n- This concept has evolved over time and can be interpreted in various ways, often leading to both beneficial and adverse outcomes in global politics.\n- Historically, figures like Sir Halford Mackinder and Karl Haushofer have shaped the discourse around geopolitics, examining how control over strategically important territories can impact national power and influence.\n- Background context from the knowledge base is available for deeper prep."
+        "SUMMARY: - China has banned four New Zealand MPs from entering the country for a year after they visited Taiwan. - This move is likely a response to China's \"One China\" policy, which considers Taiwan as part of China....",
+        "SUMMARY: - China has banned four lawmakers from New Zealand because they visited Taiwan, which China sees as a part of its territory. - The visit was considered a problem by China because it might have given the wrong..."
       ],
       "arguments": {
         "for": [
-          "Geopolitics can be defended on fairness and access grounds.",
-          "Reich\u2019, German Studies Review, vol.",
-          "Use the stored debate theory context to add warrants and weighing."
+          "Geopolitics can be defended on fairness and access grounds."
         ],
         "against": [
-          "Geopolitics can be challenged on implementation cost or tradeoff grounds.",
-          "Page: Geopolitics",
-          "Interrogate second-order effects, incentives, and unintended consequences."
+          "Geopolitics can be challenged on implementation cost or tradeoff grounds."
         ],
         "middle": "A strong middle ground on geopolitics accepts the principle but disputes scale, speed, or institutional design."
       },
       "key_facts": [
-        "Reich\u2019, German Studies Review, vol.",
-        "Page: Geopolitics\nSummary: Geopolitics (from Ancient Greek  \u03b3\u1fc6 g\u00ea 'earth, land' and  \u03c0\u03bf\u03bb\u03b9\u03c4\u03b9\u03ba\u03ae politik\u1e17 'politics') is the study of the effects of Earth's geography on politics and international relations.",
-        "magazines.",
-        "3 days ago - Geopolitics focuses on political power linked to geographic space, in particular, territorial waters, land territory and wealth of natural resources, in correlation with diplomatic history, in particular the",
-        "# Geopolitics\n\nGeopolitics refers to the practice of formulating policy based on geographical factors that influence international relations and interactions among states."
+        "The four New Zealand MPs were banned from China for a year after visiting Taiwan.",
+        "China banned four New Zealand lawmakers over their visit to Taiwan."
       ],
       "concepts": [
-        "[PDF] Geopolitics: An Overview of Concepts and Empirical Examples from ...",
-        "geopolitics",
-        "Geopolitics - Human Geography - Research Guides at Dartmouth College",
-        "DuckDuckGo results for: geopolitics",
-        "Geopolitics | Diplomacy and International Relations | Research Starters | EBSCO Research"
+        "\"Soft Power\" - China's decision to ban the MPs can be seen as an example of soft power, where a country uses non-military means, such as...",
+        "Geopolitical tension, which refers to the strain or conflict between countries due to differences in their political, economic, or territ...",
+        "Geopolitics, which refers to the study of how geography and politics interact to influence the relationships between countries and regions."
       ],
-      "debate_angle": "Alright, let's get you prepped. The key here is to avoid the 19th-century caricature of geopolitics as just maps and armies. We'll frame it as a modern, necessary, and nuanced tool for stability.\n\n***\n\n### **COACHING BLOCK: GEOPOLITICS**\n\n**UNIQUE ANGLE**\nFrame geopolitics not as a tool for conquest, but as a prerequisite for fairness and stability in an unequal world. Your core argument is that ignoring geography is a luxury no nation can afford. It\u2019s not about projecting power for its own sake, but about securing the fundamental lifelines\u2014trade, resources, security\u2014that allow a society to function and its people to thrive. This reframes the debate from \"aggression vs. peace\" to \"strategic foresight vs. passive vulnerability.\"\n\n**OPEN WITH THIS**\n\"The opposition will likely paint a picture of geopolitics as an archaic game of empires. But that view is dangerously simplistic. In the 21st century, geopolitics isn't about redrawing maps with armies; it's about securing the supply chains that stock our shelves, the energy that heats our homes, and the stability that protects our people. Our case is simple: ignoring the realities of geography doesn't lead to peace, it creates a power vacuum that invites chaos.\"\n\n**CLAIM-WARRANT-IMPACT**\n*   **Claim:** A proactive geopolitical strategy is the only realistic framework for ensuring national security and equitable access to global resources.\n*   **Warrant:** The world is defined by geographic chokepoints, uneven resource distribution, and strategic corridors. A state that fails to account for these realities in its policy-making becomes a passive object of other nations' ambitions. A sound geopolitical policy allows a state to preemptively secure its supply chains, form defensive alliances based on mutual interests (like protecting a shared waterway), and deter aggression, creating a stable environment for its citizens. This isn't imperialism; it's a high-return insurance policy against coercion and collapse.\n*   **Impact:** The failure to engage in geopolitics results in tangible, catastrophic harms. It means vulnerability to economic blackmail when a single trade route is threatened. It means energy crises when a hostile power controls key resources. Ultimately, it means a loss of sovereignty and the inability to protect the fundamental well-being of your population, subjecting them to the consequences of crises they had no hand in creating.\n\n**TOP REBUTTALS**\n1.  **If they say it\u2019s just a justification for militarism/imperialism:** \"My opponent is attacking a strawman. They're conflating nuanced, defensive strategy with nineteenth-century conquest. Our model isn't about planting flags; it's about ensuring the ships carrying food and medicine can reach our ports. Ignoring geography doesn't create peace; it creates a vacuum that truly aggressive actors are more than willing to fill. Which world is safer?\"\n2.  **If they raise implementation costs or domestic tradeoffs:** \"They present a false choice between foreign policy and domestic well-being. The cost of *not* having a geopolitical strategy is infinitely higher. What is the cost of a blockaded port? A collapsed supply chain? A humanitarian crisis on your border? The strategic investments we advocate for are the very foundation upon which domestic prosperity is built and secured.\"\n3.  **If they argue for \"anti-geopolitics\" or focusing on civil society:** \"While the interests of communities are paramount, you cannot protect them by pretending the state doesn't operate in a world of physical constraints and competing actors. A state's first duty is to provide the security umbrella under which civil society can even exist. To abandon the tools of geopolitics is to abandon the people to the whims of global chaos, leaving them utterly exposed.\"\n\n**POWER PHRASES**\n*   \"Geography is not a choice; it's a reality that must be managed.\"\n*   \"This isn't about lines on a map; it's about lifelines for our people.\"\n*   \"They are advocating for a policy of passive vulnerability.\"\n*   \"We choose strategic foresight over chaotic reaction.\"\n*   \"Their world doesn't lead to peace; it leads to a power vacuum.\"",
-      "english_lesson": "ENGLISH POWER\nFocus topic: geopolitics\nWord set: vocabulary, source, norman\nRoot focus: source, dis\nvocabulary: a useful high-precision word for analysis and argument\nsource: a useful high-precision word for analysis and argument\nDebate use: Use 'vocabulary' when you want your claim to sound sharper, more exact, and more mature.\nRoot drill: Learn what 'source' signals, then build one debate sentence using a word from that root family.",
+      "debate_angle": "Here is a coaching block in your preferred style. ### **DEBATE COACHING BLOCK: GEOPOLITICS** **UNIQUE ANGLE** Frame this not as a binary choice between trade with China and democratic values. Instead, argue this is about a small state's *agency* and the prevention of \"sovereignty creep.\" China's ban isn't just a reaction; it's a deliberate test to see how much it can dictate the foreign policy of a smaller nation. The core issue is whether New Zealand's foreign policy is made in Wellington or dictated by Beijing...",
+      "english_lesson": "ENGLISH POWER Word: heavens Meaning: a useful high-precision word for analysis and argument Upgrade: Use 'heavens' instead of vague words like 'important'. Debate line: The salient comparison is not freedom in theory but power in practice. Bonus word: earth = a useful high-precision word for analysis and argument Root: self -> learn the root and use one word from it in tomorrow's speech.",
       "vocab_words": [
-        "vocabulary",
-        "source",
-        "norman",
-        "easykno",
-        "astrophysics"
+        "heavens",
+        "earth",
+        "plant"
       ],
       "word_roots": [
-        "source",
-        "dis",
-        "aw"
+        "self",
+        "isbn"
       ],
       "studied": false,
       "quiz_score": null,
-      "timestamp": "2026-06-04T07:01:48.432597"
+      "timestamp": "2026-06-04T14:50:54.797276"
     },
     {
       "topic": "economics and finance",
@@ -1405,6 +1399,49 @@
       "studied": false,
       "quiz_score": null,
       "timestamp": "2026-06-04T07:10:41.497840"
+    },
+    {
+      "topic": "feminism",
+      "selector_reason": "",
+      "pre_knowledge": [
+        "Sample background context for the topic."
+      ],
+      "top_articles": [
+        "Sample article one",
+        "Sample article two"
+      ],
+      "summaries": [
+        "- Equality and access matter. - Framing determines the round."
+      ],
+      "arguments": {
+        "for": [
+          "It expands autonomy."
+        ],
+        "against": [
+          "It can trigger backlash."
+        ],
+        "middle": "Support the principle, scrutinize the mechanism."
+      },
+      "key_facts": [
+        "Participation rates shape autonomy."
+      ],
+      "concepts": [
+        "Structural inequality"
+      ],
+      "debate_angle": "UNIQUE ANGLE: Win on implementation quality.",
+      "english_lesson": "ENGLISH POWER Word set: lucid, precise, nuance",
+      "vocab_words": [
+        "lucid",
+        "precise",
+        "nuance"
+      ],
+      "word_roots": [
+        "dict",
+        "cred"
+      ],
+      "studied": false,
+      "quiz_score": null,
+      "timestamp": "2026-06-04T14:19:15.086795"
     }
   ]
 }

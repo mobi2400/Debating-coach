@@ -1,9 +1,15 @@
 from datetime import datetime, timedelta, timezone
 
+from core.network_utils import clear_broken_local_proxies
+from core.topic_utils import topic_keywords
+
 try:
     import feedparser
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
     feedparser = None
+
+
+clear_broken_local_proxies()
 
 RSS_FEEDS = [
     "http://feeds.bbci.co.uk/news/world/rss.xml",
@@ -24,6 +30,7 @@ def rss_fetch(topic: str, hours_back: int = 24) -> list:
 
     articles = []
     cutoff = datetime.now(timezone.utc) - timedelta(hours=hours_back)
+    keywords = topic_keywords(topic)
 
     for feed_url in RSS_FEEDS:
         try:
@@ -37,7 +44,7 @@ def rss_fetch(topic: str, hours_back: int = 24) -> list:
                     continue
 
                 text = f"{entry.get('title', '')} {entry.get('summary', '')}".lower()
-                if topic.lower() not in text:
+                if keywords and not any(keyword in text for keyword in keywords):
                     continue
 
                 articles.append(

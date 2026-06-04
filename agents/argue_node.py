@@ -6,7 +6,8 @@ from core.topic_utils import topic_name
 from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
 
 
-MAX_RAG_CHARS = 2500
+MAX_RAG_CHARS = 1000
+MAX_SUMMARIES = 2
 
 
 def _heuristic_arguments(topic: str, summaries: list[str], rag_context: str) -> dict:
@@ -39,7 +40,7 @@ def _heuristic_arguments(topic: str, summaries: list[str], rag_context: str) -> 
 def argue_node(state: dict) -> dict:
     state["task_type"] = "argue"
     topic = topic_name(state.get("topic"))
-    summaries = state.get("summaries", [])
+    summaries = state.get("summaries", [])[:MAX_SUMMARIES]
     rag_chunks = retrieve_for_node("argue_node", topic)
     rag_context = format_retrieved_context(rag_chunks)
 

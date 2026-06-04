@@ -1,6 +1,7 @@
 import os
 
 from dotenv import load_dotenv
+from core.network_utils import clear_broken_local_proxies
 
 try:
     from langchain_tavily import TavilySearch as _Tavily  # current package
@@ -11,6 +12,7 @@ except ImportError:  # pragma: no cover - bootstrap envs without langchain-tavil
         _Tavily = None
 
 load_dotenv()
+clear_broken_local_proxies()
 
 
 def _build_tavily():
@@ -35,6 +37,9 @@ def _normalize_results(results) -> list[dict]:
     #   {"query": "...", "results": [{title,url,content,raw_content,...}], ...}
     # The older TavilySearchResults returned just the list.
     if isinstance(results, dict):
+        if results.get("error"):
+            print(f"[Tavily] Provider error: {results['error']}")
+            return []
         items = results.get("results") or []
     else:
         items = results or []

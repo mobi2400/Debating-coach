@@ -4,7 +4,8 @@ from core.topic_utils import topic_name
 from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
 
 
-MAX_RAG_CHARS = 2500
+MAX_RAG_CHARS = 900
+MAX_SUMMARIES = 2
 
 
 def _heuristic_coach(topic: str, arguments: dict, summaries: list[str], rag_context: str) -> str:
@@ -39,11 +40,13 @@ def coach_node(state: dict) -> dict:
     default_coaching = _heuristic_coach(
         topic,
         state.get("arguments", {}),
-        state.get("summaries", []),
+        state.get("summaries", [])[:MAX_SUMMARIES],
         rag_context,
     )
 
-    if not state.get("summaries") and not rag_context:
+    summaries = state.get("summaries", [])[:MAX_SUMMARIES]
+
+    if not summaries and not rag_context:
         state["debate_angle"] = default_coaching
         return state
 
@@ -52,7 +55,7 @@ def coach_node(state: dict) -> dict:
         "Produce a compact coaching block with these sections exactly:\n"
         "UNIQUE ANGLE, OPEN WITH THIS, CLAIM-WARRANT-IMPACT, TOP REBUTTALS, POWER PHRASES.\n\n"
         f"Topic: {topic}\n"
-        f"Summaries: {state.get('summaries', [])}\n"
+        f"Summaries: {summaries}\n"
         f"Arguments: {state.get('arguments', {})}\n"
         f"Style RAG context: {rag_context[:MAX_RAG_CHARS]}"
     )

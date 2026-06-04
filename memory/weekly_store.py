@@ -52,22 +52,65 @@ def save_daily_digest(topic: str, content_dict: dict):
     if today not in log:
         log[today] = []
 
-    log[today].append(
-        {
-            "topic": topic,
-            "summaries": content_dict.get("summaries", []),
-            "arguments": content_dict.get("arguments", {}),
-            "key_facts": content_dict.get("key_facts", []),
-            "concepts": content_dict.get("concepts", []),
-            "debate_angle": content_dict.get("debate_angle", ""),
-            "english_lesson": content_dict.get("english_lesson", ""),
-            "vocab_words": content_dict.get("vocab_words", []),
-            "word_roots": content_dict.get("word_roots", []),
-            "studied": False,
-            "quiz_score": None,
-            "timestamp": datetime.now().isoformat(),
-        }
-    )
+    def _shorten_text(value: str, limit: int) -> str:
+        text = " ".join(str(value).split())
+        if len(text) <= limit:
+            return text
+        return text[: limit - 3].rstrip() + "..."
+
+    def _compact_list(items: list, limit: int, item_limit: int) -> list[str]:
+        compacted = []
+        for item in items[:limit]:
+            compacted.append(_shorten_text(str(item), item_limit))
+        return compacted
+
+    arguments = content_dict.get("arguments", {}) or {}
+    compact_arguments = {
+        "for": _compact_list(arguments.get("for", []), 1, 220),
+        "against": _compact_list(arguments.get("against", []), 1, 220),
+        "middle": _shorten_text(arguments.get("middle", ""), 240),
+    }
+
+    top_articles = []
+    for article in content_dict.get("ranked_articles", [])[:2]:
+        title = article.get("title")
+        if title:
+            top_articles.append(_shorten_text(title, 140))
+
+    new_entry = {
+        "topic": topic,
+        "selector_reason": _shorten_text(content_dict.get("selector_reason", ""), 140),
+        "pre_knowledge": _compact_list(content_dict.get("pre_knowledge", []), 2, 220),
+        "top_articles": top_articles,
+        "summaries": _compact_list(content_dict.get("summaries", []), 2, 220),
+        "arguments": compact_arguments,
+        "key_facts": _compact_list(content_dict.get("key_facts", []), 2, 220),
+        "concepts": _compact_list(content_dict.get("concepts", []), 3, 140),
+        "debate_angle": _shorten_text(content_dict.get("debate_angle", ""), 520),
+        "english_lesson": _shorten_text(content_dict.get("english_lesson", ""), 420),
+        "vocab_words": _compact_list(content_dict.get("vocab_words", []), 3, 32),
+        "word_roots": _compact_list(content_dict.get("word_roots", []), 2, 24),
+        "studied": False,
+        "quiz_score": None,
+        "timestamp": datetime.now().isoformat(),
+    }
+
+    replaced = False
+    for index, entry in enumerate(log[today]):
+        if str(entry.get("topic", "")).strip().lower() == topic.strip().lower():
+            studied = entry.get("studied", False)
+            quiz_score = entry.get("quiz_score")
+            english_quiz_score = entry.get("english_quiz_score")
+            new_entry["studied"] = studied
+            new_entry["quiz_score"] = quiz_score
+            if english_quiz_score is not None:
+                new_entry["english_quiz_score"] = english_quiz_score
+            log[today][index] = new_entry
+            replaced = True
+            break
+
+    if not replaced:
+        log[today].append(new_entry)
 
     save_log(log)
 
