@@ -1,3 +1,4 @@
+from agents.rank_node import _is_news_article, _is_reference_article
 from core.topic_utils import topic_name
 from memory.weekly_store import save_daily_digest
 
@@ -60,12 +61,27 @@ def _pre_knowledge_points(state: dict) -> list[str]:
     return []
 
 
+def _pick_lede(ranked_articles: list[dict]) -> dict | None:
+    """TODAY'S CASE should always lead with a current-affairs piece when
+    one is available — Wikipedia / Britannica entries are useful as
+    background but read as filler at the top of a debate digest."""
+    if not ranked_articles:
+        return None
+    for article in ranked_articles:
+        if _is_news_article(article):
+            return article
+    for article in ranked_articles:
+        if not _is_reference_article(article):
+            return article
+    return ranked_articles[0]
+
+
 def _today_case_lines(state: dict) -> list[str]:
     ranked_articles = state.get("ranked_articles", [])
-    if not ranked_articles:
+    article = _pick_lede(ranked_articles)
+    if article is None:
         return ["No strong live article was retrieved today, so focus on the core framework and debate angles."]
 
-    article = ranked_articles[0]
     lines = [article.get("title", "Untitled article")]
     lines.extend(_sentences(article.get("content", ""), limit=2))
     return lines

@@ -23,6 +23,69 @@ DEBATE_PRIORITY_TERMS = {
     "ai",
 }
 
+# Reference / encyclopedia sources — useful for background, terrible as
+# "today's case". We still let them rank, just never near the top.
+REFERENCE_SOURCES = {"wikipedia", "britannica"}
+REFERENCE_DOMAINS = (
+    "wikipedia.org",
+    "britannica.com",
+    "encyclopedia.com",
+    "wiktionary.org",
+    "wikiquote.org",
+    "scholarpedia.org",
+)
+
+# Lightweight allow-list of news-flavoured publishers so the heuristic can
+# float a real current-affairs piece to position 0 when one is available.
+NEWS_SOURCES = {"rss", "tavily", "duckduckgo"}
+NEWS_DOMAIN_HINTS = (
+    "bbc.",
+    "aljazeera.",
+    "reuters.",
+    "apnews.",
+    "thehindu.",
+    "ndtv.",
+    "hindustantimes.",
+    "indianexpress.",
+    "theguardian.",
+    "nytimes.",
+    "ft.com",
+    "wsj.com",
+    "economist.com",
+    "bloomberg.",
+    "cnn.",
+    "nbcnews.",
+    "scroll.in",
+    "thewire.in",
+    "livemint.",
+    "epw.in",
+    "aeon.co",
+    "foreignpolicy.",
+)
+
+
+def _is_reference_article(article: dict) -> bool:
+    source = str(article.get("source", "")).lower()
+    if source in REFERENCE_SOURCES:
+        return True
+    url = str(article.get("url", "")).lower()
+    return any(domain in url for domain in REFERENCE_DOMAINS)
+
+
+def _is_news_article(article: dict) -> bool:
+    if _is_reference_article(article):
+        return False
+    source = str(article.get("source", "")).lower()
+    if source in NEWS_SOURCES:
+        url = str(article.get("url", "")).lower()
+        # Tavily/DuckDuckGo can also surface wiki pages; rely on the domain
+        # hint when the source label alone isn't decisive.
+        if source == "rss":
+            return True
+        if any(hint in url for hint in NEWS_DOMAIN_HINTS):
+            return True
+    return False
+
 
 def _recency_score(article: dict) -> int:
     published = article.get("published", "")
@@ -44,9 +107,30 @@ def _heuristic_rank(topic: str, articles: list[dict]) -> list[dict]:
         content = f"{article.get('title', '')} {article.get('content', '')}".lower()
         relevance = sum(1 for term in topic_terms if term in content)
         debate_value = sum(1 for term in DEBATE_PRIORITY_TERMS if term in content)
-        return (relevance * 5) + (debate_value * 2) + _recency_score(article)
+        base = (relevance * 5) + (debate_value * 2) + _recency_score(article)
+        if _is_news_article(article):
+            base += 6  # nudge real news above generic search hits
+        if _is_reference_article(article):
+            base -= 8  # background only — never the lede
+        return base
 
     return sorted(articles, key=score, reverse=True)[:7]
+
+
+def _promote_news_first(articles: list[dict]) -> list[dict]:
+    """Ensure the top slot is a real news/current-affairs article when one
+    exists. Encyclopedia/reference pages get bumped down even if the LLM or
+    base score put them first. Stable for everything below position 0."""
+    if not articles:
+        return articles
+    first = articles[0]
+    if _is_news_article(first) or not _is_reference_article(first):
+        return articles
+    for idx in range(1, len(articles)):
+        if _is_news_article(articles[idx]):
+            promoted = articles[idx]
+            return [promoted] + articles[:idx] + articles[idx + 1 :]
+    return articles
 
 
 def _compact_articles(articles: list[dict], content_limit: int = 220) -> list[dict]:
@@ -74,11 +158,11 @@ def rank_node(state: dict) -> dict:
         return state
 
     if len(articles) <= 2:
-        state["ranked_articles"] = default_ranked
+        state["ranked_articles"] = _promote_news_first(default_ranked)
         return state
 
     if len(articles) >= 8:
-        state["ranked_articles"] = default_ranked
+        state["ranked_articles"] = _promote_news_first(default_ranked)
         return state
 
     compact_articles = _compact_articles(articles)
@@ -105,8 +189,8 @@ def rank_node(state: dict) -> dict:
             for index in indexes
             if isinstance(index, int) and 0 <= index < len(articles)
         ]
-        state["ranked_articles"] = ranked[:7] or default_ranked
+        state["ranked_articles"] = _promote_news_first(ranked[:7] or default_ranked)
     except Exception:
-        state["ranked_articles"] = default_ranked
+        state["ranked_articles"] = _promote_news_first(default_ranked)
 
     return state
