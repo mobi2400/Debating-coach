@@ -1439,5 +1439,54 @@
       "quiz_score": 40,
       "timestamp": "2026-06-04T10:22:11+00:00"
     }
+  ],
+  "2026-06-05": [
+    {
+      "topic": "international relations",
+      "selector_reason": "New priority topic that has not been studied yet.",
+      "pre_knowledge": [
+        "Why this matters: IR motions appear in every major competition. They test whether you understand power, legitimacy, and order \u2014 not just who is fighting whom. A debater who knows IR theory will always outclass one who...",
+        "Framework: Realism: states are rational actors pursuing survival in an anarchic system. Morgenthau, Waltz, Mearsheimer."
+      ],
+      "top_articles": [
+        "Putin hails New Delhi as \u2018reliable partner'; blasts West over \u2018detrimental\u2019 interference in India-Russia ties",
+        "Israel must allow ICRC to visit Palestinians in prison, Supreme Court rules"
+      ],
+      "summaries": [
+        "SUMMARY: - Russian President Putin considers India a reliable partner and values their relationship. - Putin criticized Western countries for trying to interfere with India-Russia ties, calling it detrimental. - India...",
+        "SUMMARY: - Israel's Supreme Court made a decision about the International Committee of the Red Cross (ICRC) visiting Palestinians in prison. - The court ruled that the Israeli government cannot stop the ICRC from visi..."
+      ],
+      "arguments": {
+        "for": [
+          "Defend international relations by showing why this structure protects legitimacy, fairness, or long-term stability."
+        ],
+        "against": [
+          "Challenge international relations by showing where implementation, incentives, or power asymmetry breaks the ideal story."
+        ],
+        "middle": "Use the live case 'Ukraine \u2014 sovereignty norm vs self-determination, NATO expansion debate, nuclear deterrence' to accept the principle but dispute who should bear the cost, who enforces the norm, and what precedent it sets."
+      },
+      "key_facts": [
+        "Putin views India as a \"reliable partner\".",
+        "Israel's Supreme Court rejected the government's ban on prisoner visits by the ICRC."
+      ],
+      "concepts": [
+        "National interests, referring to a country's priorities and goals in its interactions with other nations.",
+        "International law, which refers to the set of rules and standards that countries agree to follow in their dealings with each other, inclu...",
+        "Nuclear Non-Proliferation Treaty, which is an agreement aimed at preventing the spread of nuclear weapons and weapons technology."
+      ],
+      "debate_angle": "UNIQUE ANGLE: The double\u2011standard lens: expose how great powers weaponise liberal norms against rivals while shielding allies (e.g., US/West vs Russia\u2011India and Israel\u2011ICRC), proving that a realist, balance\u2011of\u2011power order better preserves both legitimacy and stability. VALUE CLASH: Stability (realist power politics) vs Legitimacy (liberal normative order). BURDEN OF PROOF: The affirmative must demonstrate that a realist\u2011centric international system yields greater long\u2011term stability and that liberal norms are ap...",
+      "english_lesson": "ENGLISH POWER Word: salient Meaning: most noticeable or most important Upgrade: Use 'salient' instead of vague words like 'important'. Debate line: The salient comparison is not freedom in theory but power in practice. Bonus word: incisive = sharp, direct, and analytically powerful Root: sal -> learn the root and use one word from it in tomorrow's speech.",
+      "vocab_words": [
+        "salient",
+        "incisive"
+      ],
+      "word_roots": [
+        "sal",
+        "cid"
+      ],
+      "studied": false,
+      "quiz_score": null,
+      "timestamp": "2026-06-05T06:48:56+00:00"
+    }
   ]
 }
