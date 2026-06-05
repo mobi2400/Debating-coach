@@ -157,6 +157,10 @@ def _recent_vocab(limit_days: int = 10) -> set[str]:
 
 def _candidate_words_from_articles(state: dict) -> list[str]:
     recent = _recent_vocab()
+    seeded = [str(word).strip().lower() for word in (state.get("vocab_candidates", []) or []) if str(word).strip()]
+    if seeded:
+        return [word for word in seeded if word not in recent][:5]
+
     article_texts = []
     for article in state.get("ranked_articles", [])[:3]:
         article_texts.append(str(article.get("title", "")))
@@ -261,6 +265,7 @@ def english_coach_node(state: dict) -> dict:
         f"Topic: {topic}\n"
         f"Recent words to avoid: {sorted(_recent_vocab())[:20]}\n"
         f"Candidate fresh words from article/research: {article_candidates}\n"
+        f"Curated vocabulary notes from vocab lane: {state.get('vocab_context_notes', [])}\n"
         f"Today's article context:\n" + "\n\n".join(article_context) + "\n\n"
         f"English RAG context: {rag_context[:MAX_RAG_CHARS]}"
     )

@@ -68,6 +68,11 @@ def _topic_info_text(state: dict, key: str, char_limit: int = 180) -> str:
 def _pre_knowledge_points(state: dict) -> list[str]:
     points: list[str] = []
 
+    specialist_notes = state.get("preknowledge_notes", []) or []
+    if specialist_notes:
+        for note in specialist_notes[:3]:
+            points.append(_trim_block(note, 220))
+
     why = _topic_info_text(state, "why_this_matters_for_debate", 280)
     if why:
         points.append(f"Why this matters: {why}")
@@ -218,7 +223,7 @@ def _topical_case_lens(state: dict) -> str:
 
 def _article_section(state: dict) -> tuple[list[str], dict | None]:
     ranked_articles = state.get("ranked_articles", [])
-    article = _pick_lede(ranked_articles)
+    article = state.get("lead_case") or _pick_lede(ranked_articles)
     if article is None:
         live_case = _topical_case_lens(state)
         if live_case:
@@ -235,6 +240,9 @@ def _article_section(state: dict) -> tuple[list[str], dict | None]:
     article_points = _summary_points_for_article(state, article_index)
     if not article_points:
         article_points = _sentences(article.get("content", ""), limit=3)
+    deep_dive = state.get("case_deep_dive", []) or []
+    if deep_dive:
+        article_points.extend(str(item).strip() for item in deep_dive[:2] if str(item).strip())
 
     if weak_case:
         live_case = _topical_case_lens(state)
@@ -331,8 +339,16 @@ def _weight_language_lines() -> list[str]:
 
 def _vocab_session(state: dict, english: dict) -> list[str]:
     lines: list[str] = []
+    candidates = [str(word).strip() for word in (state.get("vocab_candidates", []) or []) if str(word).strip()]
+    context_notes = [str(note).strip() for note in (state.get("vocab_context_notes", []) or []) if str(note).strip()]
     if english.get("meaning") and english.get("word"):
         lines.append(f"Use this precisely: {_trim_block(english['word'], 40)} means {_trim_block(english['meaning'], 150)}")
+    if candidates:
+        fresh = [word for word in candidates if word.lower() != str(english.get("word", "")).lower()]
+        if fresh:
+            lines.append(f"Fresh article word: {_trim_block(fresh[0], 36)} -> pull this into one rebuttal tomorrow.")
+    if context_notes:
+        lines.append(f"Why this word fits today: {_trim_block(context_notes[0], 220)}")
     if english.get("bonus"):
         lines.append(f"Bonus word: {_trim_block(english['bonus'], 180)}")
     if english.get("root"):

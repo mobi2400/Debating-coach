@@ -8,11 +8,18 @@ class AgentState(TypedDict):
     topic_info: dict
 
     # Research layer
+    candidate_articles: list
+    lead_case: dict
+    lead_case_reason: str
     raw_articles: list
     reference_background: str
 
     # RAG layer
     enriched_context: str
+    preknowledge_notes: list
+    case_deep_dive: list
+    vocab_candidates: list
+    vocab_context_notes: list
 
     # Filter + rank layer
     ranked_articles: list

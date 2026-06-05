@@ -54,6 +54,7 @@ def research_node(state: dict) -> dict:
 
     executor.shutdown(wait=False, cancel_futures=True)
 
+    state["candidate_articles"] = raw_articles
     state["raw_articles"] = raw_articles
     state["reference_background"] = reference_background[:2000]
     state["task_type"] = "fetch"

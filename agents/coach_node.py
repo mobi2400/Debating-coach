@@ -117,7 +117,10 @@ def coach_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
     topic_info = state.get("topic_info", {}) or {}
     summaries = state.get("summaries", [])[:MAX_SUMMARIES]
+    lead_title = str((state.get("lead_case") or {}).get("title", "")).strip()
     query = _build_debate_query(topic, topic_info, summaries, state.get("arguments", {}))
+    if lead_title:
+        query = f"{query} {lead_title}".strip()
     rag_chunks = retrieve_for_node("coach_node", query)
     rag_context = format_retrieved_context(rag_chunks)
 
@@ -141,6 +144,7 @@ def coach_node(state: dict) -> dict:
         "power_phrases must be an array of 3 to 5 short lines.\n"
         "Think like a WUDC matter file writer: explain the value clash, the mechanism, the judge comparison, and how to answer the strongest opposition push.\n\n"
         f"Topic: {topic}\n"
+        f"Lead case: {lead_title}\n"
         f"Summaries: {summaries}\n"
         f"Arguments: {state.get('arguments', {})}\n"
         f"Topic info: {topic_info}\n"

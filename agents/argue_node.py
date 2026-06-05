@@ -63,7 +63,9 @@ def argue_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
     summaries = state.get("summaries", [])[:MAX_SUMMARIES]
     topic_info = state.get("topic_info", {}) or {}
-    rag_chunks = retrieve_for_node("argue_node", topic)
+    lead_title = str((state.get("lead_case") or {}).get("title", "")).strip()
+    query = f"{topic} {lead_title}".strip()
+    rag_chunks = retrieve_for_node("argue_node", query)
     rag_context = format_retrieved_context(rag_chunks)
 
     default_arguments = _heuristic_arguments(topic, summaries, rag_context, topic_info)
@@ -78,6 +80,7 @@ def argue_node(state: dict) -> dict:
         "'for' and 'against' must each be arrays of exactly 3 arguments.\n"
         "'middle' must be one nuanced bridging position.\n\n"
         f"Topic: {topic}\n"
+        f"Lead case: {lead_title}\n"
         f"Summaries: {json.dumps(summaries, ensure_ascii=False)}\n"
         f"RAG context: {rag_context[:MAX_RAG_CHARS]}"
     )
