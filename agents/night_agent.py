@@ -266,6 +266,15 @@ def bedtime_mode(state: dict) -> dict:
     return state
 
 
+def _run_compulsory_english_quiz(state: dict) -> dict:
+    from agents.english_quiz_node import english_quiz_node
+
+    send_message(
+        "English vocab is compulsory tonight too. After the debate part, do this short vocabulary test."
+    )
+    return english_quiz_node(state)
+
+
 def night_agent_node(state: dict) -> dict:
     send_message(
         "Did you read today's debate digest? Reply yes for a debate quiz, "
@@ -279,6 +288,8 @@ def night_agent_node(state: dict) -> dict:
         return english_quiz_node(state)
 
     if _looks_like_yes(reply):
-        return quiz_mode(state)
+        state = quiz_mode(state)
+        return _run_compulsory_english_quiz(state)
 
-    return bedtime_mode(state)
+    state = bedtime_mode(state)
+    return _run_compulsory_english_quiz(state)

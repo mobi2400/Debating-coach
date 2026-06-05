@@ -353,6 +353,74 @@ def _article_takeaway(state: dict, article_lines: list[str]) -> str:
     return "Turn the case into a mechanism, not just an event summary."
 
 
+def _article_example_context(state: dict) -> tuple[str, str]:
+    article_lines, article = _article_section(state)
+    title = ""
+    if article is not None:
+        title = _trim_block(article.get("title", ""), 90)
+    if not title and article_lines:
+        title = _trim_block(article_lines[0], 90)
+
+    key_facts = state.get("key_facts", []) or []
+    example = ""
+    if key_facts:
+        example = _trim_block(key_facts[0], 180)
+    elif len(article_lines) > 1:
+        example = _trim_block(article_lines[1], 180)
+    return title, example
+
+
+def _explain_debate_lines(state: dict) -> list[str]:
+    arguments = state.get("arguments", {}) or {}
+    coach_sections = _extract_coach_sections(state)
+    article_title, article_example = _article_example_context(state)
+    article_tag = f"in today's case about {article_title}" if article_title else "in today's case"
+
+    lines: list[str] = []
+
+    for index, item in enumerate(arguments.get("for", [])[:3], 1):
+        lines.append(f"For argument {index}: {_trim_block(item, 230)}")
+        lines.append(
+            f"Why this matters: This is your affirmative warrant. You are saying the world gets something valuable out of this principle or structure, not just a nice slogan."
+        )
+        if article_example:
+            lines.append(f"Example: {article_tag}, {_trim_block(article_example, 200)}")
+
+    for index, item in enumerate(arguments.get("against", [])[:3], 1):
+        lines.append(f"Against argument {index}: {_trim_block(item, 230)}")
+        lines.append(
+            "Why this matters: This is your negative pressure point. You are testing where incentives break, who pays the cost, or why the mechanism collapses in practice."
+        )
+        if article_example:
+            lines.append(f"Example: {article_tag}, {_trim_block(article_example, 200)}")
+
+    middle = arguments.get("middle")
+    if middle:
+        lines.append(f"Main clash: {_trim_block(middle, 260)}")
+        lines.append(
+            "Clash explanation: This is the hinge of the round. It tells you which comparison the judge must care about once both teams finish giving examples."
+        )
+    if coach_sections.get("value_clash"):
+        lines.append(f"Underlying value clash: {_trim_block(coach_sections['value_clash'], 280)}")
+        lines.append(
+            "Value clash explained: This tells you what moral or political priorities are actually colliding underneath the surface story."
+        )
+    if coach_sections.get("burden_of_proof"):
+        lines.append(f"Burden of proof: {_trim_block(coach_sections['burden_of_proof'], 280)}")
+    if coach_sections.get("mechanism"):
+        lines.append(f"Mechanism to explain: {_trim_block(coach_sections['mechanism'], 280)}")
+        if article_example:
+            lines.append(
+                f"Mechanism example: Use {article_tag} to show the step-by-step chain, not just the outcome. Start from actor incentives, then show how that produced {_trim_block(article_example, 170)}"
+            )
+    if coach_sections.get("claim_warrant_impact"):
+        lines.append(f"Why this wins: {_trim_block(coach_sections['claim_warrant_impact'], 320)}")
+    if coach_sections.get("judge_language"):
+        lines.append(f"Judge framing: {_trim_block(coach_sections['judge_language'], 250)}")
+
+    return lines[:22]
+
+
 def _things_to_take_care(state: dict) -> list[str]:
     lines: list[str] = []
     concepts = state.get("concepts") or []
@@ -379,7 +447,7 @@ def _heuristic_format(state: dict) -> str:
     english = _parse_english_lesson(state)
     pre_knowledge = _pre_knowledge_points(state)
     article_lines, _article = _article_section(state)
-    debate_lines = _debate_section(state)
+    debate_lines = _explain_debate_lines(state)
     rebuttal_drills = _rebuttal_drills(state)
     weight_lines = _weight_language_lines()
     vocab_lines = _vocab_session(state, english)
