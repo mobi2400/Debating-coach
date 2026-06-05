@@ -14,16 +14,16 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
-PAGE_BG = "#0d1117"
-PANEL_BG = "#161b22"
-BORDER = "#30363d"
-TEXT = "#e6edf3"
-MUTED = "#8b949e"
-ACCENT = "#7ee8fa"
-ACCENT_2 = "#f0c674"
-ACCENT_3 = "#a5e075"
-WARN = "#ff7b72"
-INFO = "#79c0ff"
+PAGE_BG = "#f6f1e7"   # cream paper
+PANEL_BG = "#ece5d2"
+BORDER = "#cdbe9f"
+TEXT = "#1f2530"
+MUTED = "#5a5a52"
+ACCENT = "#1a4a5c"    # deep teal
+ACCENT_2 = "#8a4124"  # rust
+ACCENT_3 = "#3f6f3f"  # forest green
+WARN = "#a8341d"
+INFO = "#2a5a8c"
 
 
 def _figure(width_in: float, height_in: float):

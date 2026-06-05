@@ -65,6 +65,34 @@ def callout(title: str, body: str, kind: str = "Callout") -> Paragraph:
     return Paragraph(f"<b>{html.escape(title)}</b><br/>{body}", STYLES[style_name])
 
 
+def term(label: str, gloss: str) -> str:
+    """Returns the inline HTML for a buzzword + its short gloss.
+
+    Use in body paragraphs the first time a term appears, like:
+        f"... we use {term('RAG', 'pull your own material into the prompt')} ..."
+
+    The label is bolded; the gloss is italicised in a warm brown.
+    """
+    return (
+        f'<b>{html.escape(label)}</b> '
+        f'<i><font color="#6e4a18">({html.escape(gloss)})</font></i>'
+    )
+
+
+def buzz(label: str, body: str) -> Paragraph:
+    """A dedicated 'buzzword check' paragraph — used when a term needs more
+    than a one-line gloss. Renders as a small indented italic note."""
+    return Paragraph(
+        f'<b><font color="#6e4a18">{html.escape(label)}.</font></b> {body}',
+        STYLES["Buzz"],
+    )
+
+
+def lead(text: str) -> Paragraph:
+    """A one-line summary that sits under a chapter title."""
+    return Paragraph(text, STYLES["ChapterLead"])
+
+
 def bullets(items: list[str]):
     """Render bullets as a single KeepTogether flowable. Each line gets an
     inline coloured marker; KeepTogether tries to avoid splitting the list
@@ -149,11 +177,14 @@ def cover() -> list:
 def how_to_read() -> list:
     body = [
         *chapter(0, "Foreword: how to read this book"),
-        P("This handbook is written for one specific reader: the engineer who built "
-          "DebateIQ alongside an AI assistant and now needs to understand it well "
-          "enough to maintain and extend it without that assistant. Every concept is "
-          "introduced before it's used. Every design choice has a short rationale. "
-          "Every bug we fixed has a paragraph explaining what broke and why."),
+        lead("Written for the developer who built this project with an AI helper "
+             "and now wants to own every line of it without that helper."),
+        P("Every concept is introduced before it's used. Every design choice has "
+          "a short rationale. Every bug we fixed has a paragraph explaining what "
+          "broke and why. The first time a piece of jargon appears in the body "
+          "text, you'll see it followed by a short italic gloss like this — "
+          f"{term('RAG', 'pulling your own material into the model prompt')} — so "
+          "you never have to stop and Google."),
         section("How chapters are organised"),
         bullets([
             "Each chapter starts with what the topic is in plain language.",
@@ -164,13 +195,16 @@ def how_to_read() -> list:
         ]),
         section("Conventions used in this book"),
         callout("Callout — concept",
-                "Used for ideas you should commit to memory."),
+                "A boxed idea worth committing to memory."),
         callout("Tip — practical move",
-                "Used for ways of working that will save you debugging time.",
+                "A way of working that will save you debugging time later.",
                 kind="tip"),
         callout("Warning — common pitfall",
-                "Used for things that have actually broken on this project.",
+                "Something that has actually broken on this project in the past.",
                 kind="warn"),
+        buzz("Buzzword check",
+             "An italic note like this appears when a term needs more space than "
+             "an inline gloss. If you can already define the word, skim past."),
         section("The mental model in one sentence"),
         P("DebateIQ <b>picks one topic per day</b>, <b>researches</b> it through "
           "public sources and a private knowledge base, <b>builds a debate lesson</b> "
@@ -184,8 +218,8 @@ def chapter_big_picture(assets: dict) -> list:
     return [
         PageBreak(),
         *chapter(1, "The big picture"),
-        P("Before reading any code, hold this picture in your head. Every file we "
-          "discuss later belongs to one of the boxes on the system map."),
+        lead("Before any code, hold the system map in your head. Every file we "
+             "talk about later sits in one of those boxes."),
         Spacer(1, 4 * mm),
         *image_block(assets["system_map"], width_mm=150,
                      caption="DebateIQ at a glance — sources at the top, a LangGraph pipeline in the middle, providers below it, outputs at the bottom."),
@@ -210,6 +244,11 @@ def chapter_big_picture(assets: dict) -> list:
                 "per day using a lightweight spaced-repetition heuristic. Every "
                 "downstream module is shaped by that choice — keep this in mind."),
     ]
+
+
+def chapter_folder_structure_intro():
+    return lead("If a stranger walked into this codebase, the folder layout "
+                "tells them what we thought were the important boundaries.")
 
 
 def chapter_folder_structure() -> list:
@@ -268,9 +307,10 @@ Debate Coach/
     return [
         PageBreak(),
         *chapter(2, "The folder structure"),
-        P("If you walk into a strange codebase, the folder layout tells you what "
-          "the authors thought were the important boundaries. Here is ours, and why "
-          "each directory exists."),
+        chapter_folder_structure_intro(),
+        P("Here is ours, and why each directory exists. The dark blocks below "
+          "are file paths; the comments after each one are the role that "
+          "directory plays."),
         code(tree),
         section("Why agents/ is its own folder"),
         P("Every node in the LangGraph pipeline is a pure function: it takes the "
@@ -313,43 +353,56 @@ def chapter_prereqs() -> list:
     return [
         PageBreak(),
         *chapter(3, "Foundations you need before reading further"),
-        P("If any of the items below feel unfamiliar, stop and learn them first. "
-          "Trying to reason about LangGraph or RAG without these basics is what "
-          "produced most of the bugs in our archaeology chapter."),
+        lead("Concepts the rest of the book quietly assumes you already know. "
+             "If any of these feel new, stop here and learn them first."),
         section("Python project basics"),
         bullets([
-            "<b>Virtual environments</b> — every project gets its own. We use <i>uv</i> because it's an order of magnitude faster than pip and resolves dependencies in one shot.",
-            "<b>requirements.txt</b> — a pinned list of every package we need. Lower bounds (<i>&gt;=</i>) for flexibility, exact pins only when a version is known to break.",
-            "<b>Type hints</b> — <i>def f(state: dict) -&gt; dict</i> is documentation that the editor checks for you.",
-            "<b>__init__.py</b> — an empty file telling Python this folder is a package. Every folder you import from needs one.",
+            f"{term('Virtual environment', 'isolated Python install per project so libraries do not collide')} — every project gets its own. We use <b>uv</b> because it resolves dependencies in one shot.",
+            "<b>requirements.txt</b> — a pinned list of every package we need. Lower bounds (>=) for flexibility, exact pins only when a version is known to break.",
+            f"{term('Type hints', 'function signatures that tell the editor what types are expected')} — <i>def f(state: dict) -&gt; dict</i> is documentation the editor checks for you.",
+            "<b>__init__.py</b> — an empty file telling Python this folder is an importable package. Every folder you import from needs one.",
         ]),
+        buzz("uv",
+             "A drop-in replacement for pip written in Rust. Installs a 50-package "
+             "project in seconds instead of minutes. The command is <i>uv pip install …</i>."),
         section("Environment variables and secrets"),
         P("Anything sensitive — API keys, bot tokens, your phone number — lives in "
-          "a <b>.env</b> file at the project root. It's listed in <b>.gitignore</b> "
-          "so it never reaches the public repo. In production those same values "
-          "come from <b>GitHub Actions Secrets</b>. The code reads both via "
-          "<i>os.getenv()</i> and never cares which one it's talking to."),
+          f"a <b>.env</b> file at the project root. {term('.env file', 'a plain-text file holding key=value pairs the program reads at startup')} "
+          "It's listed in <b>.gitignore</b> so it never reaches the public repo."),
+        P(f"In production those same values come from {term('GitHub Actions Secrets', 'encrypted values stored in your GitHub repo, available to workflows as env vars')}. "
+          "The code reads either source via <i>os.getenv()</i> and never cares which one it's talking to."),
         callout("Tip — read env vars lazily",
-                "Don't read .env at module import. Read it inside the function that "
-                "actually needs it. We had a real bug where DEV_MODE was captured "
-                "at import time, then later toggled, and the change had no effect.",
+                "Don't read .env at module import. Read it inside the function "
+                "that actually needs it. We had a real bug where DEV_MODE was "
+                "captured at import time, then later toggled, and the change "
+                "had no effect.",
                 kind="tip"),
         section("Git and GitHub"),
         bullets([
             "<b>git add / commit / push</b> are the three commands you'll run hundreds of times.",
             "Every meaningful change becomes one commit with a present-tense message: <i>fix: drop pre-flight ping from fallback proxy</i>.",
-            "GitHub Actions runs your scheduler and your tests. We treat broken CI as a hard block on shipping.",
+            f"{term('GitHub Actions', 'GitHub built-in automation — runs scripts when you push, on a schedule, or manually')} runs our scheduler and tests. Broken CI blocks shipping.",
         ]),
+        buzz("CI / CD",
+             "<i>Continuous Integration</i> means tests run on every push so "
+             "regressions surface immediately. <i>Continuous Deployment</i> "
+             "means the same automation also ships the change. Our CI runs "
+             "tests; our scheduler is closer to a cron job than true CD."),
         section("LangChain and LangGraph in one paragraph each"),
-        P("<b>LangChain</b> is glue: it wraps OpenAI/Groq/Gemini APIs so your code "
-          "calls <i>llm.invoke(prompt)</i> and stops caring which provider sits behind "
-          "it. We use a tiny slice of LangChain — the chat-model wrappers and the "
-          "vector-store retriever interface — and write everything else ourselves."),
-        P("<b>LangGraph</b> is a workflow engine for LangChain-style state. You "
-          "declare nodes (functions that take state and return state) and edges "
-          "(which node feeds which). The library takes care of running them in the "
-          "right order. We use it because the alternative — manually orchestrating "
-          "nine functions and their failure modes — is fragile."),
+        P(f"{term('LangChain', 'a Python library that wraps every LLM provider behind one common interface')} is glue. "
+          "Your code calls <i>llm.invoke(prompt)</i> and stops caring whether the "
+          "provider behind it is Groq, OpenAI, or Gemini. We use a tiny slice — "
+          "the chat-model wrappers and the vector-store retriever interface — and "
+          "write everything else ourselves."),
+        P(f"{term('LangGraph', 'a workflow engine built on top of LangChain')} lets you declare "
+          "<b>nodes</b> (functions that take state and return state) and "
+          "<b>edges</b> (which node feeds which). The library handles the running "
+          "order. The alternative — manually orchestrating nine functions and "
+          "their failure modes — is fragile."),
+        buzz("LLM",
+             "<i>Large Language Model</i>. A neural network trained to predict the "
+             "next token of text. ChatGPT, Claude, Gemini, Llama, Qwen are all LLMs. "
+             "When this book says 'the model', it means an LLM."),
     ]
 
 
@@ -357,20 +410,28 @@ def chapter_agent_state(assets: dict) -> list:
     return [
         PageBreak(),
         *chapter(4, "Agentic AI in this project, demystified"),
-        P("Before LangGraph, a Python program is a chain of function calls. After "
-          "LangGraph, a Python program is still a chain of function calls, but the "
-          "<b>data passed between them is centralized in one mutable dict</b>. That "
-          "dict is the agent's state. Every node reads from it and writes back to "
-          "it. Nothing else moves between nodes."),
+        lead("'Agentic AI' sounds mystical. In this codebase it means: ordinary "
+             "Python functions sharing one dictionary, run in a defined order."),
+        buzz("Agentic AI",
+             "Marketing term for systems where an LLM (or a set of them) makes "
+             "decisions in a loop — read inputs, decide what to do, take an action, "
+             "read the result, repeat. We use a milder version: the LLM doesn't "
+             "decide the flow, but each step uses an LLM to do its work."),
+        P(f"Before {term('LangGraph', 'workflow engine that runs your nodes in order')}, "
+          "a Python program is a chain of function calls. After LangGraph, a Python "
+          "program is still a chain of function calls — the only change is that the "
+          "data passed between them lives in one shared, mutable dictionary. That "
+          "dictionary is the <b>agent state</b>. Every node reads from it and writes "
+          "back to it. Nothing else moves between nodes."),
         Spacer(1, 4 * mm),
         *image_block(assets["agent_state"], width_mm=150,
                      caption="AgentState fields, grouped by which pipeline phase populates them."),
         section("Reading the state contract"),
-        P("Open <i>core/state.py</i>. The <b>AgentState</b> TypedDict is the "
-          "contract between every node. If a node needs a new field — say, "
+        P(f"Open <i>core/state.py</i>. The <b>AgentState</b> {term('TypedDict', 'a Python dictionary type with declared keys and value types — gives you editor warnings if you mistype')} "
+          "is the contract between every node. If a node needs a new field — say, "
           "<i>english_quiz_score</i> — you add it here first, then every node knows "
-          "it exists. If a field disappears from this file, the editor will tell "
-          "you which nodes still reference it."),
+          "it exists. If a field disappears from this file, the editor immediately "
+          "tells you which nodes still reference it."),
         section("What an agent really is"),
         P("In this codebase an <i>agent</i> is just <b>a function that takes "
           "AgentState and returns AgentState</b>. There's no magic. The word "
@@ -418,10 +479,14 @@ def chapter_llm_layer(assets: dict) -> list:
     return [
         PageBreak(),
         *chapter(5, "The LLM layer"),
-        P("Large language models are the most expensive and most unreliable part "
-          "of the system. Two ideas tame both: <b>role-based routing</b> (don't use "
-          "your biggest model for trivial work) and <b>fallback chains</b> (when "
-          "the primary 429s, drop down a tier instead of failing)."),
+        lead("Two ideas tame the most unreliable part of the system: don't use "
+             "your biggest model for trivial work, and have a backup plan when "
+             "the primary one rejects you."),
+        P(f"Large language models are the most expensive and most unreliable part "
+          "of the system. Two patterns tame both: <b>role-based routing</b> — "
+          "don't use your biggest model for trivial work — and "
+          f"{term('fallback chains', 'an ordered list of models to try when the primary one fails')} — when the primary "
+          f"{term('429s', 'HTTP status code 429 means the provider rate-limited you (too many requests or tokens)')}, drop down to the next tier instead of failing the whole node."),
         section("The model pool"),
         P("<i>core/llm_pool.py</i> holds the only place where a model is "
           "instantiated. Everywhere else asks for a model by <i>role</i>, never by "
@@ -466,10 +531,16 @@ def chapter_llm_layer(assets: dict) -> list:
                 "rate limits. We removed it; failures now surface on the real call.",
                 kind="warn"),
         section("The disk cache that saves quota"),
-        P("Free-tier providers cap your daily and per-minute tokens. The same "
-          "topic comes up every ~14 days in our rotation. <i>core/prompt_cache.py</i> "
-          "hashes (scope, model, prompt) into a filename in <i>.cache/llm/</i>, "
-          "stores responses for 30 days, and skips the network on hit."),
+        P(f"Free-tier providers cap your daily and per-minute tokens "
+          f"({term('TPD/TPM', 'tokens per day / tokens per minute — provider-imposed quotas')}). "
+          "The same topic comes up every ~14 days in our rotation, so the same "
+          "prompts re-appear. <i>core/prompt_cache.py</i> hashes (scope, model, prompt) "
+          "into a filename in <i>.cache/llm/</i>, stores the response for 30 days, "
+          "and skips the network on a hit."),
+        buzz("Cache hit / miss",
+             "A <b>cache hit</b> means we found a stored answer for this exact "
+             "prompt — return it free. A <b>cache miss</b> means we have to ask "
+             "the model. The hit rate is the percentage of calls served from cache."),
         code("# wrap the LLM call:\n"
              "response = cached_invoke(llm, prompt, scope='summarize')"),
         callout("Tip — choose your cache scope deliberately",
@@ -484,9 +555,15 @@ def chapter_research_tools() -> list:
     return [
         PageBreak(),
         *chapter(6, "Research tools — the live data layer"),
+        lead("Four ways of asking the public internet for material on today's "
+             "topic. Layered on purpose so one tool's blind spot is another's strength."),
         P("Four tools pull material from the public internet. Each one has a "
           "specific job; together they cover recency, depth, background, and "
           "redundancy."),
+        buzz("API",
+             "<i>Application Programming Interface</i> — a contract a service "
+             "exposes so other programs can talk to it. Tavily's API takes a "
+             "search query and returns articles."),
         section("Tavily — depth"),
         P("Tavily is a search API tuned for LLM input. It returns full article "
           "content, not just snippets. We use it as our primary deep-search lane."),
@@ -496,18 +573,25 @@ def chapter_research_tools() -> list:
           "history. We never lead a digest with Wikipedia content (it reads as "
           "filler), but the rank node uses it for the BACKGROUND section."),
         section("RSS — recency"),
-        P("Fast-changing topics deserve a check on the last 24 hours of news. "
+        P(f"Fast-changing topics deserve a check on the last 24 hours of news. "
+          f"{term('RSS', 'Really Simple Syndication — an XML feed publishers expose listing their newest items')} feeds "
+          "expose a publisher's latest items as a machine-readable list. "
           "<i>tools/rss_tool.py</i> reads a handful of curated feeds (BBC, Al "
-          "Jazeera, Reuters, The Hindu, Indian Express) and filters by topic "
-          "keyword."),
+          "Jazeera, Reuters, The Hindu, Indian Express) and filters by topic keyword."),
         section("DuckDuckGo — redundancy"),
         P("No API key, no rate limits, low quality. It catches things the other "
           "three miss. Treat its results with suspicion."),
         section("Why we run them in parallel"),
-        P("Four serial tool calls would add ~12 seconds of latency. "
-          "<i>research_node.py</i> runs them under a <i>ThreadPoolExecutor</i> with "
-          "a 20-second global timeout. Whoever finishes first gets included; "
+        P(f"Four serial tool calls would add ~12 seconds of latency. "
+          f"<i>research_node.py</i> runs them under a "
+          f"{term('ThreadPoolExecutor', 'Python helper that runs multiple functions at once on separate threads')} "
+          "with a 20-second global timeout. Whoever finishes first gets included; "
           "stragglers are dropped silently."),
+        buzz("Parallel vs concurrent",
+             "<b>Parallel</b> means truly at the same time on separate CPU cores. "
+             "<b>Concurrent</b> means interleaved on one core. For network calls "
+             "the distinction barely matters — your program is waiting on the "
+             "network either way, so we get the speedup."),
         callout("Bug we fixed — broken proxy env vars",
                 "On one machine every tool was returning empty. The diagnosis took "
                 "an hour because the symptom looked like a code bug but the actual "
@@ -526,25 +610,38 @@ def chapter_rag(assets: dict) -> list:
     return [
         PageBreak(),
         *chapter(7, "RAG — retrieval-augmented generation"),
-        P("RAG is the difference between an LLM that knows generic things and one "
-          "that knows <b>your specific material</b>. The mechanism is simple: turn "
-          "every chunk of your knowledge into a vector, store vectors in an index, "
-          "and at query time pull the chunks most similar to the question. Feed "
-          "those chunks into the LLM's prompt as context."),
+        lead("The trick that turns a general LLM into one that knows your "
+             "specific PDFs, speeches, and notes."),
+        buzz("RAG",
+             "<i>Retrieval-Augmented Generation</i>. You don't fine-tune the model "
+             "on your data. You search your data at query time, paste the most "
+             "relevant chunks into the prompt, and let the model answer using them. "
+             "Cheaper, faster, and easier to update than fine-tuning."),
+        P("The mechanism is simple in three steps. (1) Take every document you "
+          f"care about and split it into small pieces — {term('chunks', 'short slices of a document — typically 200-700 characters — small enough to embed cleanly')}. "
+          f"(2) Convert each chunk into a high-dimensional number array — an "
+          f"{term('embedding', 'a list of ~3000 numbers that represents the meaning of the text')}. "
+          f"(3) Store the embeddings in a {term('vector store', 'a database optimised for finding the closest numerical neighbours to a query vector')} so "
+          "you can retrieve the closest chunks to any new question."),
         section("The four vector stores"),
         Spacer(1, 2 * mm),
         *image_block(assets["rag_stores"], width_mm=150,
                      caption="Each lane has different content and a different retrieval style. Not one bag of knowledge."),
         section("Hybrid retrieval — BM25 + vectors"),
-        P("Pure vector search is great for concepts and bad for exact terms. "
+        P(f"Pure vector search is great for concepts and bad for exact terms. "
           "Searching <i>CEDAW</i> with embeddings might miss the chunk that has "
-          "those exact letters. Pure BM25 (keyword search) does the opposite. We "
-          "combine them on the knowledge store with a 40/60 weight so both win."),
+          f"those exact letters. {term('BM25', 'a classic keyword-ranking algorithm from the search-engine world — predates embeddings')} does the opposite. "
+          "We combine them on the knowledge store with a 40/60 weight so both win."),
+        buzz("Hybrid retrieval",
+             "Run BM25 and vector search side by side, then blend their results. "
+             "BM25 wins on exact terms (acronyms, proper nouns). Vectors win on "
+             "concepts (paraphrases, synonyms). Together they cover both."),
         section("MMR — diverse chunks"),
-        P("MMR (Maximum Marginal Relevance) penalises redundancy. Without it, "
+        P(f"{term('MMR', 'Maximum Marginal Relevance — a retrieval style that penalises redundancy in the result set')} "
+          "penalises chunks that overlap with chunks already chosen. Without it, "
           "asking the reasoning store about 'fairness' might pull five chunks that "
           "all argue the same point. With MMR you get five chunks that argue five "
-          "different angles. Critical for the argue node."),
+          "different angles. Critical for the argue node, where variety matters."),
         section("Chunking is not cosmetic"),
         P("How you cut a PDF into pieces controls what retrieval can find. We use "
           "different chunkers per content type:"),
@@ -561,11 +658,14 @@ def chapter_rag(assets: dict) -> list:
           "models; we collapsed them when torch wouldn't load reliably on Windows. "
           "Single embedding model means one API surface and one cost line."),
         section("FAISS, not Chroma"),
-        P("Chroma is more featureful but had build issues on Windows and the "
-          "version we needed segfaulted under our query load. FAISS is leaner, "
-          "loads in milliseconds, persists as two flat files per store. Migration "
-          "lived in commit <i>a00393f</i>. The lesson: pick the simpler local "
-          "persistence layer unless you need the heavier semantics."),
+        P(f"{term('Chroma', 'a popular open-source vector database with a richer feature set than FAISS')} is more featureful "
+          f"but had build issues on Windows and the version we needed "
+          f"{term('segfaulted', 'crashed with a Segmentation Fault — a low-level memory error in native code')} "
+          "under our query load. "
+          f"{term('FAISS', 'Facebook AI Similarity Search — a small, fast library for nearest-neighbour search in vector spaces')} "
+          "is leaner, loads in milliseconds, and persists as two flat files per "
+          "store. Migration lived in commit <i>a00393f</i>. Lesson: pick the "
+          "simpler local persistence layer unless you need the heavier semantics."),
         section("The Word Power Made Easy extractor"),
         P("That PDF has 47 numbered sessions with named subsections — <i>TEASER "
           "PREVIEW, USING THE WORDS, ORIGINS AND RELATED WORDS, REVIEW OF "
@@ -585,9 +685,10 @@ def chapter_pipeline(assets: dict) -> list:
     return [
         PageBreak(),
         *chapter(8, "The daily pipeline — node by node"),
-        P("This is the chapter to come back to whenever you change a node. Each "
-          "section names the file, what it reads from state, what it writes, and "
-          "what its fallback does when the LLM fails."),
+        lead("The reference chapter. Come back here whenever you change a node "
+             "or add a new one."),
+        P("Each section names the file, what it reads from state, what it "
+          "writes, and what its fallback does when the LLM fails."),
         Spacer(1, 4 * mm),
         *image_block(assets["daily_pipeline"], width_mm=150,
                      caption="The nine-step daily graph. Reads top-to-bottom, no branches."),
@@ -658,9 +759,11 @@ def chapter_memory() -> list:
     return [
         PageBreak(),
         *chapter(9, "Memory — what the system remembers between runs"),
+        lead("Without memory, every morning is the system's first morning. "
+             "We keep memory deliberately small."),
         P("Without memory, the night agent would have nothing to quiz you on and "
-          "the weekend agent would have nothing to distill. <i>memory/weekly_store.py</i> "
-          "is a thin layer over a single JSON file."),
+          "the weekend agent would have nothing to distill. "
+          "<i>memory/weekly_store.py</i> is a thin layer over a single JSON file."),
         section("The schema, kept deliberately small"),
         P("Every daily run appends an entry keyed by today's date. The entry "
           "stores compact fields only — three bullet summaries, two key facts, "
@@ -678,15 +781,25 @@ def chapter_memory() -> list:
              "  'timestamp': '2026-06-05T08:01:14+00:00',\n"
              "}]"),
         section("Atomic writes — no half-written files"),
-        P("<i>save_log</i> writes to a temp file in the same directory and then "
-          "<i>os.replace()</i>s it. If the runner crashes mid-write, the original "
-          "log is untouched. The temp file lives in the same dir so the rename is "
-          "atomic on every filesystem we care about."),
+        P(f"<i>save_log</i> writes to a temp file in the same directory and then "
+          f"calls {term('os.replace', 'an OS-level rename that is atomic — either fully succeeds or fully fails, never half-applied')}. "
+          "If the runner crashes mid-write, the original log is untouched. The "
+          "temp file lives in the same dir so the rename stays atomic on every "
+          "filesystem we care about."),
+        buzz("Atomic operation",
+             "An operation that either fully completes or has no effect at all — "
+             "there's no half-done state observers can see. <i>os.replace</i> is "
+             "atomic; a plain <i>write()</i> followed by another <i>write()</i> is not."),
         section("UTC timestamps"),
-        P("Earlier versions used <i>datetime.now().isoformat()</i> — naive local "
-          "time. Dev runs landed in IST, GitHub Actions in UTC. We replaced every "
-          "call with <i>datetime.now(timezone.utc).isoformat()</i>. Every entry now "
-          "agrees on the wall clock."),
+        P(f"Earlier versions used <i>datetime.now().isoformat()</i> — a "
+          f"{term('naive', 'naive datetime = no timezone attached — interpreted as local time')} local timestamp. "
+          "Dev runs landed in IST, GitHub Actions in UTC. We replaced every "
+          "call with <i>datetime.now(timezone.utc).isoformat()</i>. Every entry "
+          "now agrees on the wall clock."),
+        buzz("UTC",
+             "<i>Coordinated Universal Time</i> — the world's primary time "
+             "standard, the same everywhere. Always store and compare timestamps "
+             "in UTC; convert to local time only when displaying to a human."),
         callout("Lesson — store what compounds",
                 "Memory is not a transcript. Memory is the distilled signal that "
                 "next week's recap will build on. If a field doesn't help the "
@@ -698,6 +811,8 @@ def chapter_night_weekend() -> list:
     return [
         PageBreak(),
         *chapter(10, "Night and weekend loops — the reinforcement layer"),
+        lead("Without these two loops the system is just a newsletter. With "
+             "them it's a learning tool."),
         P("Information delivered in the morning is forgotten by evening. The night "
           "agent and weekend agent exist to make today's lesson stick."),
         section("Night agent — three-way branch"),
@@ -718,11 +833,11 @@ def chapter_night_weekend() -> list:
           "frameworks, statistics, and argument patterns. Anything topical, "
           "anecdotal, or shelf-life-bound gets dropped."),
         section("Spaced repetition without the framework"),
-        P("<i>agents/topic_selector.py</i> sorts priority topics by "
+        P(f"<i>agents/topic_selector.py</i> sorts priority topics by "
           "(seen_today_penalty, -days_since, appearances, index). Topics not "
           "studied for the longest time bubble to the top; topics already "
-          "studied today sink. Conceptually it's spaced repetition — the implementation "
-          "is twenty lines."),
+          f"studied today sink. Conceptually it's {term('spaced repetition', 'showing material at increasing intervals so you review it just as you are about to forget — the principle behind Anki, Quizlet, Duolingo')} — "
+          "the implementation is twenty lines."),
         callout("Tip — reinforcement is the point",
                 "Without the night and weekend loops this project is just a "
                 "newsletter. With them it's a learning system. Treat them as "
@@ -735,8 +850,11 @@ def chapter_delivery() -> list:
     return [
         PageBreak(),
         *chapter(11, "Delivery — how the lesson reaches your phone"),
-        P("Delivery looks trivial until you actually try to ship daily messages "
-          "to a phone. We migrated three times before landing on Telegram."),
+        lead("Delivery looks trivial. We migrated providers three times before "
+             "landing on something that actually worked end to end."),
+        P("Every migration only touched <i>delivery/</i>. The pipeline never "
+          "knew the channel had changed. That's the payoff of keeping I/O out of "
+          "your business logic."),
         section("Phase one — Twilio WhatsApp sandbox"),
         P("Twilio is the textbook choice. We started there. Two problems killed "
           "it: trial accounts cap out fast, and the sandbox would silently "
@@ -744,15 +862,21 @@ def chapter_delivery() -> list:
           "exactly right. The bug looked like the code; the cause was a config "
           "string."),
         section("Phase two — Meta WhatsApp Cloud API"),
-        P("Better economics (1000 free conversations per month), but Meta's "
-          "reply detection requires a public webhook. GitHub Actions runners don't "
-          "have a public IP. We considered standing up a Render free-tier Flask "
-          "server, then asked whether all this complexity was worth it."),
+        P(f"Better economics (1000 free conversations per month), but Meta's "
+          f"reply detection requires a public {term('webhook', 'a URL on a publicly-reachable server that the provider calls when something happens — needs hosting and a stable IP')}. "
+          "GitHub Actions runners don't have a public IP. We considered standing "
+          "up a free-tier Flask server, then asked whether the complexity was worth it."),
         section("Phase three — Telegram bot"),
-        P("Telegram has no conversation cap, no 24-hour session window, and a "
-          "<i>pull-based</i> reply API. The night agent just calls "
-          "<i>bot.get_updates()</i> every ten seconds until it sees your message. "
-          "No webhook, no server, no template approval."),
+        P(f"Telegram has no conversation cap, no 24-hour session window, and a "
+          f"{term('pull-based', 'your code asks for new messages on a schedule, instead of the provider pushing them at you')} reply API. "
+          "The night agent calls <i>bot.get_updates()</i> every ten seconds until "
+          "it sees your message. No webhook, no server, no template approval."),
+        buzz("Webhook vs polling",
+             "<b>Webhook</b> = provider calls you. Requires you to be reachable "
+             "at a fixed URL. <b>Polling</b> = you call the provider on a "
+             "schedule. Works from anywhere, even a stateless runner. Polling "
+             "is slower (you check 10s after a message arrives, not the instant "
+             "it does), but for our use case 10s is fine."),
         section("Section-by-section sending"),
         P("The full digest is too long for one Telegram message. <i>send_digest</i> "
           "splits the final document on the section headers (TOPIC FOR TODAY, "
@@ -769,9 +893,16 @@ def chapter_automation(assets: dict) -> list:
     return [
         PageBreak(),
         *chapter(12, "Automation — GitHub Actions"),
-        P("A learning system that requires you to manually run a Python script "
-          "every morning is not a learning system. GitHub Actions runs main.py "
-          "for you on a cron schedule and gives you a stateful free-tier runner."),
+        lead("Turn a script you run by hand into a service that runs itself "
+             "three times a day, for free, with state that survives between runs."),
+        P(f"A learning system that requires you to manually run a Python script "
+          f"every morning is not a learning system. {term('GitHub Actions', 'free CI/CD platform built into every GitHub repo — runs scripts on push, on a schedule, or manually')} "
+          f"runs main.py for you on a {term('cron', 'a way of expressing schedules with five numbers — minute, hour, day-of-month, month, day-of-week')} "
+          "schedule and gives you a free-tier runner with cache and commit-back."),
+        buzz("Runner",
+             "The virtual machine GitHub spins up to execute your workflow. "
+             "Stateless by default — every run starts fresh. We use the cache "
+             "and a commit-back trick to give it memory."),
         section("Three schedules"),
         bullets([
             "<b>02:30 UTC weekdays</b> → 08:00 IST → daily digest.",
@@ -797,11 +928,16 @@ def chapter_automation(assets: dict) -> list:
                 "prints a one-time reminder at startup unless DEBATEIQ_SILENCE_PRIVACY=1.",
                 kind="warn"),
         section("Caching the FAISS index"),
-        P("Rebuilding the index from PDFs takes a few minutes and burns Gemini "
-          "embedding quota. The workflow restores the previous run's index from "
-          "<i>actions/cache@v4</i> keyed by the hash of sources.json, the "
-          "extractor, and the chunker. If you don't change those, the cache "
-          "stays warm forever."),
+        P(f"Rebuilding the index from PDFs takes a few minutes and burns Gemini "
+          f"embedding quota. The workflow restores the previous run's index from "
+          f"{term('actions/cache', 'a GitHub Actions feature that saves a directory between runs, keyed by a hash you choose')} "
+          "keyed by the hash of sources.json, the extractor, and the chunker. "
+          "If you don't change those, the cache stays warm forever."),
+        buzz("Cache key",
+             "The string that identifies a stored cache entry. If the key "
+             "changes, the cache misses and you rebuild from scratch. We hash "
+             "the files that affect the index so a config change invalidates "
+             "the cache automatically."),
         section("Secrets"),
         P("Anything sensitive lives in the repo's Settings → Secrets → Actions. "
           "The workflow names them with the same env-var names the Python code "
@@ -813,8 +949,14 @@ def chapter_testing() -> list:
     return [
         PageBreak(),
         *chapter(13, "Testing strategy"),
+        lead("Five test files, no real API calls. Each stubs the network and "
+             "the LLM so the suite runs in seconds with zero quota burn."),
         P("The codebase has five test files. None of them require network or "
           "API keys — they all stub the external surfaces."),
+        buzz("Stub / mock / fake",
+             "Loose synonyms for 'a fake version of an external dependency you "
+             "use in tests'. We use plain Python objects that mimic the real "
+             "API just enough for the pipeline to run."),
         section("Why no pytest framework"),
         P("Each file is a script that runs assertions and prints a single "
           "success line. CI runs them with <i>python tests/test_X.py</i>. We could "
@@ -829,10 +971,14 @@ def chapter_testing() -> list:
             "<b>test_daily_e2e.py</b> — full daily graph with stubbed tools and a fake LLM, asserts every state field is populated.",
         ]),
         section("Stubbing pattern"),
-        P("The e2e test monkey-patches the tool functions and the LLM pool "
-          "before importing the graph. The graph then walks the full pipeline "
-          "using a deterministic fake LLM that recognises each prompt by a "
-          "key phrase and returns a hardcoded response."),
+        P(f"The e2e test {term('monkey-patches', 'temporarily overwrites a function or class attribute on an imported module — convenient for testing')} "
+          "the tool functions and the LLM pool before importing the graph. The "
+          "graph then walks the full pipeline using a deterministic fake LLM that "
+          "recognises each prompt by a key phrase and returns a hardcoded response."),
+        buzz("End-to-end (e2e) test",
+             "Exercises the whole system from input to output, not just one "
+             "function. Slower than unit tests, but catches integration bugs "
+             "that unit tests miss."),
         callout("Tip — fake LLMs are gold",
                 "A 50-line fake LLM lets you exercise the entire pipeline in a "
                 "tenth of a second with zero quota. We add a new case to it "
@@ -918,9 +1064,11 @@ def chapter_bugs(assets: dict) -> list:
     items = [
         PageBreak(),
         *chapter(14, "Bug archaeology — what broke and why"),
-        P("This is the longest chapter on purpose. Every bug we fixed is a small "
-          "lesson that pays compounding interest. The shape of each entry is the "
-          "same: <b>symptom</b>, <b>root cause</b>, <b>fix</b>, <b>lesson</b>."),
+        lead("Every bug we fixed is a small lesson that pays compounding "
+             "interest. Read this chapter slowly."),
+        P("The shape of each entry is the same: <b>symptom</b> (what you saw), "
+          "<b>root cause</b> (what was actually wrong), <b>fix</b> (the smallest "
+          "correct change), <b>lesson</b> (what you'll keep doing forever)."),
         Spacer(1, 4 * mm),
         *image_block(assets["bug_anatomy"], width_mm=140,
                      caption="The four-question template we apply to every bug."),
@@ -938,7 +1086,8 @@ def chapter_extending() -> list:
     return [
         PageBreak(),
         *chapter(15, "Extending the project"),
-        P("Five common changes you'll want to make and the smallest path to each."),
+        lead("Five common changes you'll want to make and the smallest path "
+             "to each."),
         section("Add a new topic"),
         bullets([
             "Open <i>topics.json</i>.",
@@ -981,6 +1130,7 @@ def chapter_debugging() -> list:
     return [
         PageBreak(),
         *chapter(16, "Debugging playbook"),
+        lead("When something breaks, this is the first chapter you open."),
         P("Symptoms you'll see in the wild, mapped to the first three places to "
           "look. If none of those resolve it, the bug is worth its own archaeology "
           "entry."),
