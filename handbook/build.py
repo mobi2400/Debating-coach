@@ -65,15 +65,18 @@ def callout(title: str, body: str, kind: str = "Callout") -> Paragraph:
     return Paragraph(f"<b>{html.escape(title)}</b><br/>{body}", STYLES[style_name])
 
 
-def bullets(items: list[str]) -> ListFlowable:
-    return ListFlowable(
-        [ListItem(P(item), leftIndent=10, value="bullet") for item in items],
-        bulletType="bullet",
-        bulletColor=ACCENT_2,
-        start="•",
-        leftIndent=14,
-        bulletFontSize=10,
-    )
+def bullets(items: list[str]):
+    """Render bullets as a single KeepTogether flowable. Each line gets an
+    inline coloured marker; KeepTogether tries to avoid splitting the list
+    across pages when it would look ugly."""
+    rows = [
+        Paragraph(
+            f'<font color="#f0c674" size="11">●</font>&nbsp;&nbsp;{item}',
+            STYLES["Bullet"],
+        )
+        for item in items
+    ]
+    return KeepTogether(rows)
 
 
 def chapter(num: int, title: str) -> list:

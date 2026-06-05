@@ -94,7 +94,8 @@ def build_styles() -> StyleSheet1:
         name="Bullet",
         fontName="Helvetica",
         fontSize=10.5, leading=15, textColor=TEXT,
-        leftIndent=14, bulletIndent=2, spaceAfter=2, alignment=TA_LEFT,
+        leftIndent=18, firstLineIndent=-12,
+        spaceAfter=3, alignment=TA_LEFT,
     ))
     ss.add(ParagraphStyle(
         name="Code",
