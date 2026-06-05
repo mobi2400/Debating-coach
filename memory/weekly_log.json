@@ -706,18 +706,18 @@
   "2026-06-04": [
     {
       "topic": "international relations",
-      "selector_reason": "New priority topic that has not been studied yet.",
+      "selector_reason": "Manual topic override.",
       "pre_knowledge": [
         "Why this matters: IR motions appear in every major competition. They test whether you understand power, legitimacy, and order \u2014 not just who is fighting whom. A debater who knows IR theory will always outclass one who...",
         "Framework: Realism: states are rational actors pursuing survival in an anarchic system. Morgenthau, Waltz, Mearsheimer."
       ],
       "top_articles": [
-        "Rahul \u2018selling panic\u2019, promoting baseless conspiracy theories: BJP",
-        "Israel must allow ICRC to visit Palestinians in prison, Supreme Court rules"
+        "Germany blames Russia for 'bitter defeat' in UN Security Council bid",
+        "Ukraine: Conflict at the Crossroads of Europe and Russia | Council on Foreign Relations"
       ],
       "summaries": [
-        "SUMMARY: - The article discusses a claim made by a Congress leader, Rahul, that the current government in India is facing an \"institutional revolt\" and that the country is at risk of an \"economic tsunami\" due to its l...",
-        "SUMMARY: - The Israeli Supreme Court made a decision about the International Committee of the Red Cross (ICRC) visiting Palestinians in prison. - The court said that the Israeli government cannot stop the ICRC from vi..."
+        "SUMMARY: - Germany lost its bid for a seat on the UN Security Council, and they believe Russia is to blame for this defeat. - Russia allegedly stirred up sentiment against Germany due to its support for Ukraine, which...",
+        "SUMMARY: - The United States and European Union have increased their support for Ukraine, providing defense, economic, and humanitarian assistance, in response to Russia's invasion in 2022. - The U.S. and EU do not re..."
       ],
       "arguments": {
         "for": [
@@ -729,27 +729,27 @@
         "middle": "Use the live case 'Ukraine \u2014 sovereignty norm vs self-determination, NATO expansion debate, nuclear deterrence' to accept the principle but dispute who should bear the cost, who enforces the norm, and what precedent it sets."
       },
       "key_facts": [
-        "The Modi government is accused of removing protections against international shocks, making India vulnerable to economic crises.",
-        "The Israeli Supreme Court rejected the government's ban on ICRC visits to Palestinian prisoners."
+        "Germany's support for Ukraine was a factor in Russia's opposition to Germany's UN Security Council bid.",
+        "The United States has provided Ukraine with more than $50 billion in assistance, including advanced military aid, as of February 2023."
       ],
       "concepts": [
-        "Realism, which is a theory in international relations that emphasizes the importance of a country's power and security in its interaction...",
-        "International law, which refers to the set of rules and standards that countries must follow in their interactions with each other and wi...",
-        "Humanitarian funding refers to the financial support provided by governments, organizations, and individuals to address humanitarian cris..."
+        "\"Soft Power\" - This concept refers to the ability of a country to influence others through non-coercive means, such as diplomacy and econ...",
+        "Sovereignty, which refers to a country's independence and self-governance, and is a key issue in the conflict between Ukraine and Russia,...",
+        "Humanitarian Intervention, which refers to the use of military force to protect civilians from severe human rights violations or humanita..."
       ],
-      "debate_angle": "UNIQUE ANGLE: The Double\u2011Standard Defense \u2013 argue that a robust IR framework (norms, institutions, and realist power calculations) is essential precisely because it curtails the very great\u2011power abuses that the opposition fears, turning legitimacy into a strategic asset. VALUE CLASH: Legitimacy & Fairness vs. Raw Power & Survival BURDEN OF PROOF: The affirmative must prove that without the normative scaffolding of international relations (security\u2011dilemma mitigation, collective\u2011action institutions, and norm\u2011to\u2011l...",
-      "english_lesson": "ENGLISH POWER Word: salient Meaning: most noticeable or most important Upgrade: Use 'salient' instead of vague words like 'important'. Debate line: The salient comparison is not freedom in theory but power in practice. Bonus word: incisive = sharp, direct, and analytically powerful Root: sal -> learn the root and use one word from it in tomorrow's speech.",
+      "debate_angle": "UNIQUE ANGLE: The double\u2011standard of Western hegemony \u2013 how the same norms Europe and the US demand of Russia are bent when they suit power interests, eroding legitimacy in the international system. VALUE CLASH: Legitimacy (fair, rule\u2011based order) vs. Stability (realist security and power preservation). BURDEN OF PROOF: The affirmative must prove that the current IR architecture (UNSC veto, sanction regimes, NATO expansion) systematically privileges great powers, undermining legitimacy, and that a reform\u2011oriente...",
+      "english_lesson": "ENGLISH POWER Word: nuance Meaning: a subtle difference in meaning or tone Upgrade: Use 'nuance' instead of vague words like 'difference'. Debate line: The nuance is that harm comes from the mechanism, not the headline. Bonus word: lucid = clear and easy to understand Root: nua -> learn the root and use one word from it in tomorrow's speech.",
       "vocab_words": [
-        "salient",
-        "incisive"
+        "nuance",
+        "lucid"
       ],
       "word_roots": [
-        "sal",
-        "cid"
+        "nua",
+        "luc"
       ],
       "studied": false,
       "quiz_score": 40,
-      "timestamp": "2026-06-04T17:51:47+00:00"
+      "timestamp": "2026-06-04T15:24:26+00:00"
     },
     {
       "topic": "geopolitics",
@@ -1442,51 +1442,140 @@
   ],
   "2026-06-05": [
     {
-      "topic": "international relations",
-      "selector_reason": "New priority topic that has not been studied yet.",
+      "topic": "feminism",
+      "selector_reason": "",
       "pre_knowledge": [
-        "Why this matters: IR motions appear in every major competition. They test whether you understand power, legitimacy, and order \u2014 not just who is fighting whom. A debater who knows IR theory will always outclass one who...",
-        "Framework: Realism: states are rational actors pursuing survival in an anarchic system. Morgenthau, Waltz, Mearsheimer."
+        "Why this matters: Gender rounds are won by debaters who distinguish theory, mechanism, and implementation.",
+        "Framework: Liberal feminism focuses on equal rights within institutions."
       ],
       "top_articles": [
-        "Putin hails New Delhi as \u2018reliable partner'; blasts West over \u2018detrimental\u2019 interference in India-Russia ties",
-        "Israel must allow ICRC to visit Palestinians in prison, Supreme Court rules"
+        "Sample article one",
+        "Sample article two"
       ],
       "summaries": [
-        "SUMMARY: - Russian President Putin considers India a reliable partner and values their relationship. - Putin criticized Western countries for trying to interfere with India-Russia ties, calling it detrimental. - India...",
-        "SUMMARY: - Israel's Supreme Court made a decision about the International Committee of the Red Cross (ICRC) visiting Palestinians in prison. - The court ruled that the Israeli government cannot stop the ICRC from visi..."
+        "- Equality and access matter. - Framing determines the round."
       ],
       "arguments": {
         "for": [
-          "Defend international relations by showing why this structure protects legitimacy, fairness, or long-term stability."
+          "It expands autonomy."
         ],
         "against": [
-          "Challenge international relations by showing where implementation, incentives, or power asymmetry breaks the ideal story."
+          "It can trigger backlash."
         ],
-        "middle": "Use the live case 'Ukraine \u2014 sovereignty norm vs self-determination, NATO expansion debate, nuclear deterrence' to accept the principle but dispute who should bear the cost, who enforces the norm, and what precedent it sets."
+        "middle": "Support the principle, scrutinize the mechanism."
       },
       "key_facts": [
-        "Putin views India as a \"reliable partner\".",
-        "Israel's Supreme Court rejected the government's ban on prisoner visits by the ICRC."
+        "Participation rates shape autonomy."
       ],
       "concepts": [
-        "National interests, referring to a country's priorities and goals in its interactions with other nations.",
-        "International law, which refers to the set of rules and standards that countries agree to follow in their dealings with each other, inclu...",
-        "Nuclear Non-Proliferation Treaty, which is an agreement aimed at preventing the spread of nuclear weapons and weapons technology."
+        "Structural inequality"
       ],
-      "debate_angle": "UNIQUE ANGLE: The double\u2011standard lens: expose how great powers weaponise liberal norms against rivals while shielding allies (e.g., US/West vs Russia\u2011India and Israel\u2011ICRC), proving that a realist, balance\u2011of\u2011power order better preserves both legitimacy and stability. VALUE CLASH: Stability (realist power politics) vs Legitimacy (liberal normative order). BURDEN OF PROOF: The affirmative must demonstrate that a realist\u2011centric international system yields greater long\u2011term stability and that liberal norms are ap...",
-      "english_lesson": "ENGLISH POWER Word: salient Meaning: most noticeable or most important Upgrade: Use 'salient' instead of vague words like 'important'. Debate line: The salient comparison is not freedom in theory but power in practice. Bonus word: incisive = sharp, direct, and analytically powerful Root: sal -> learn the root and use one word from it in tomorrow's speech.",
+      "debate_angle": "UNIQUE ANGLE: Win on implementation quality.",
+      "english_lesson": "ENGLISH POWER Word set: lucid, precise, nuance",
       "vocab_words": [
-        "salient",
-        "incisive"
+        "lucid",
+        "precise",
+        "nuance"
       ],
       "word_roots": [
-        "sal",
-        "cid"
+        "dict",
+        "cred"
       ],
       "studied": false,
       "quiz_score": null,
-      "timestamp": "2026-06-05T06:48:56+00:00"
+      "timestamp": "2026-06-05T16:40:12+00:00"
+    },
+    {
+      "topic": "international relations",
+      "selector_reason": "",
+      "pre_knowledge": [
+        "Feminism is a movement aimed at establishing equality across genders."
+      ],
+      "top_articles": [
+        "Mechanism vs impact framing in policy debate",
+        "Feminism debates focus on autonomy and access"
+      ],
+      "summaries": [
+        "SUMMARY: - point one - point two - point three",
+        "SUMMARY: - point one - point two - point three"
+      ],
+      "arguments": {
+        "for": [
+          "A1"
+        ],
+        "against": [
+          "B1"
+        ],
+        "middle": "Both sides have weight; depend on mechanism."
+      },
+      "key_facts": [
+        "Participation rates shape outcomes.",
+        "Participation rates shape outcomes."
+      ],
+      "concepts": [
+        "Structural inequality",
+        "Structural inequality"
+      ],
+      "debate_angle": "UNIQUE ANGLE: Frame international relations as a clash between principle and implementation, then win on whichever side has better long-term incentives. VALUE CLASH: The deepest clash is between principle and implementation in international relations. BURDEN OF PROOF: Your burden is to prove not just that the principle sounds attractive, but that the mechanism survives contact with power, incentives, and precedent. MECHANISM: Track who has incentives to defect, who enforces the norm, and why that enforcement sti...",
+      "english_lesson": "ENGLISH POWER Word: salient Meaning: most important or most noticeable Upgrade: Use 'salient' instead of vague words like 'important'. Debate line: The salient comparison is not freedom in theory but power in practice. Bonus word: nuance = a subtle but important distinction Root: sal -> learn the root and use one word from it in tomorrow's speech.",
+      "vocab_words": [
+        "salient",
+        "nuance"
+      ],
+      "word_roots": [
+        "sal",
+        "nua"
+      ],
+      "studied": false,
+      "quiz_score": null,
+      "timestamp": "2026-06-05T16:40:15+00:00"
+    },
+    {
+      "topic": "geopolitics",
+      "selector_reason": "New priority topic that has not been studied yet.",
+      "pre_knowledge": [
+        "Why this matters: Geopolitics is where economics, history, and power intersect. Debaters who understand it can anchor abstract arguments in concrete structural realities. It also produces the most WUDC-relevant motion...",
+        "Framework: Mackinder's Heartland Theory \u2014 who controls Eurasia controls the world"
+      ],
+      "top_articles": [
+        "US-China Tech Decoupling: A Shift Towards a More Paranoid World - HKS Student Policy Review HKS Student Policy Review",
+        "\"U.S.-China Technology Decoupling\" Series Report (III): U.S. Sanctions Against China-Guanghua Thought Leadership"
+      ],
+      "summaries": [
+        "SUMMARY: - The US and China are becoming more separated in terms of technology, which could lead to more instability and conflict between the two countries. - The US is trying to remove Chinese technology and capital...",
+        "SUMMARY: - The U.S. is using sanctions against China to try to separate their technology industries, which is called \"decoupling\". - Sanctions on different parts of the industry (upstream or downstream) can have diffe..."
+      ],
+      "arguments": {
+        "for": [
+          "Defend geopolitics by showing why this structure protects legitimacy, fairness, or long-term stability."
+        ],
+        "against": [
+          "Challenge geopolitics by showing where implementation, incentives, or power asymmetry breaks the ideal story."
+        ],
+        "middle": "Use the live case 'US-China tech decoupling \u2014 mechanisms, costs, and whether it is achievable' to accept the principle but dispute who should bear the cost, who enforces the norm, and what precedent it sets."
+      },
+      "key_facts": [
+        "The US is making efforts to excise Chinese technology and capital from its supply chain due to growing suspicion of China.",
+        "Sanctions targeting upstream industries can harm downstream enterprises' performance."
+      ],
+      "concepts": [
+        "Securitization of data, which refers to the process of making data a national security issue, leading to increased mistrust and separatio...",
+        "Decoupling, which refers to the separation of the U.S. and China's technology industries, particularly in terms of trade and integration...",
+        "Strategic competition, which refers to the ongoing rivalry between the US and China in areas like technology, national security, and econ..."
+      ],
+      "debate_angle": "UNIQUE ANGLE: The middle\u2011power boon of US\u2011China tech decoupling \u2013 why the real contest is over who profits from the emerging multipolar tech order, not just a binary US vs China clash. VALUE CLASH: Legitimacy & fairness of a rules\u2011based international order versus long\u2011term global stability and economic efficiency. BURDEN OF PROOF: The proposition must prove that decoupling advances a fair, rule\u2011based system without causing disproportionate instability; the opposition must demonstrate that the economic and securi...",
+      "english_lesson": "ENGLISH POWER Word: cogent Meaning: clear, logical, and convincing Upgrade: Use 'cogent' instead of vague words like 'good'. Debate line: Your model is not cogent unless you prove why states comply. Bonus word: salient = most important or most noticeable Root: cogn -> learn the root and use one word from it in tomorrow's speech.",
+      "vocab_words": [
+        "cogent",
+        "salient"
+      ],
+      "word_roots": [
+        "cogn",
+        "sal"
+      ],
+      "studied": false,
+      "quiz_score": null,
+      "timestamp": "2026-06-05T17:31:48+00:00"
     }
   ]
 }
