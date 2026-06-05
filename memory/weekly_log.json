@@ -1483,7 +1483,8 @@
       ],
       "studied": false,
       "quiz_score": null,
-      "timestamp": "2026-06-05T16:40:12+00:00"
+      "timestamp": "2026-06-05T16:40:12+00:00",
+      "english_quiz_score": 90
     },
     {
       "topic": "international relations",
@@ -1528,7 +1529,8 @@
       ],
       "studied": false,
       "quiz_score": null,
-      "timestamp": "2026-06-05T16:40:15+00:00"
+      "timestamp": "2026-06-05T16:40:15+00:00",
+      "english_quiz_score": 90
     },
     {
       "topic": "geopolitics",
@@ -1575,7 +1577,8 @@
       ],
       "studied": false,
       "quiz_score": null,
-      "timestamp": "2026-06-05T17:31:48+00:00"
+      "timestamp": "2026-06-05T17:31:48+00:00",
+      "english_quiz_score": 90
     }
   ]
 }
