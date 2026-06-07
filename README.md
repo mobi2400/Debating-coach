@@ -14,7 +14,6 @@
 > every morning", including how to rewrite topics for your subject and load
 > your own PDFs into the RAG pipeline.
 >
-> Want the deep architectural tour? Read [handbook/DebateIQ_Handbook.pdf](handbook/DebateIQ_Handbook.pdf) — a 48-page learning handbook with diagrams, every design decision, and a bug-archaeology chapter.
 
 ## The Problem
 
@@ -313,7 +312,6 @@ Debate Coach/
 │   ├── FORKING_GUIDE.md
 │   ├── TELEGRAM_SETUP.md
 │   └── STATE_PERSISTENCE.md
-├── handbook/                 # 48-page learning PDF + generator
 ├── graph.py                  # LangGraph wiring (daily / night / weekend)
 ├── main.py                   # entry point — reads --mode flag
 ├── topics.json               # your priority subjects
@@ -414,7 +412,7 @@ Contributions welcome — especially:
 
 - **New `topics.json` recipes** for different fields of study (drop one in `docs/topic_recipes/`).
 - **New research tools** following the schema in `tools/`.
-- **Bug reports** — open an issue with the failing mode, the full GitHub Actions log of the step that failed, and which LLM lane was active. The bug-archaeology chapter of the handbook is a good prior for triage.
+- **Bug reports** — open an issue with the failing mode, the full GitHub Actions log of the step that failed, and which LLM lane was active.
 
 Tests:
 
