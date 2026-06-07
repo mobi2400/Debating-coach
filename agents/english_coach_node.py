@@ -81,6 +81,55 @@ CURATED_WORD_BANK = [
         "example": "An incisive rebuttal attacks the warrant, not just the wording.",
         "root": "cid",
     },
+    {
+        "word": "tenuous",
+        "meaning": "weak, fragile, or not strongly supported",
+        "upgrade_from": "weak",
+        "example": "Their link is tenuous because they never prove why the actor would comply.",
+        "root": "ten",
+    },
+    {
+        "word": "robust",
+        "meaning": "strong enough to survive pressure or criticism",
+        "upgrade_from": "strong",
+        "example": "A robust model still works even after opposition attacks the mechanism.",
+        "root": "rob",
+    },
+    {
+        "word": "coherent",
+        "meaning": "internally consistent and logically connected",
+        "upgrade_from": "consistent",
+        "example": "Your extension must remain coherent with your earlier framing.",
+        "root": "coh",
+    },
+    {
+        "word": "plausible",
+        "meaning": "seemingly reasonable or likely to be true",
+        "upgrade_from": "possible",
+        "example": "The counterfactual is not plausible unless you explain why incentives change.",
+        "root": "plau",
+    },
+    {
+        "word": "asymmetry",
+        "meaning": "an imbalance of power, information, or burden",
+        "upgrade_from": "imbalance",
+        "example": "The round turns on the asymmetry between who decides and who bears the harm.",
+        "root": "sym",
+    },
+    {
+        "word": "normative",
+        "meaning": "concerned with values and what ought to be",
+        "upgrade_from": "moral",
+        "example": "Their case is normative, but they still need a practical enforcement mechanism.",
+        "root": "norm",
+    },
+    {
+        "word": "credible",
+        "meaning": "believable enough to influence how others act",
+        "upgrade_from": "believable",
+        "example": "Deterrence only works if the threat is credible to the other side.",
+        "root": "cred",
+    },
 ]
 
 WORD_HINTS = {
@@ -155,6 +204,42 @@ def _recent_vocab(limit_days: int = 10) -> set[str]:
     return recent
 
 
+def _fresh_word_pool() -> list[dict]:
+    return CURATED_WORD_BANK + [
+        {
+            "word": word,
+            "meaning": meaning,
+            "upgrade_from": "vague language",
+            "example": f"Use '{word}' when you want your explanation to sound sharper and more debate-ready.",
+            "root": word[:4],
+        }
+        for word, meaning in WORD_HINTS.items()
+        if word not in {item["word"] for item in CURATED_WORD_BANK}
+    ]
+
+
+def _dedupe_fresh_words(words: list[str], recent: set[str], fallback_pool: list[str], limit: int = 3) -> list[str]:
+    chosen: list[str] = []
+    for source in (words, fallback_pool):
+        for word in source:
+            clean = str(word).strip().lower()
+            if not clean or clean in chosen or clean in recent:
+                continue
+            chosen.append(clean)
+            if len(chosen) >= limit:
+                return chosen
+
+    for source in (words, fallback_pool):
+        for word in source:
+            clean = str(word).strip().lower()
+            if not clean or clean in chosen:
+                continue
+            chosen.append(clean)
+            if len(chosen) >= limit:
+                return chosen
+    return chosen
+
+
 def _candidate_words_from_articles(state: dict) -> list[str]:
     recent = _recent_vocab()
     seeded = [str(word).strip().lower() for word in (state.get("vocab_candidates", []) or []) if str(word).strip()]
@@ -185,9 +270,65 @@ def _candidate_words_from_articles(state: dict) -> list[str]:
     return candidates[:5]
 
 
+def _candidate_words_from_lesson(state: dict) -> list[str]:
+    recent = _recent_vocab()
+    lesson_texts: list[str] = []
+
+    topic_info = state.get("topic_info", {}) or {}
+    for key in (
+        "why_this_matters_for_debate",
+        "article_selection_rule",
+        "debate_standard",
+    ):
+        value = topic_info.get(key)
+        if value:
+            lesson_texts.append(str(value))
+
+    for key in (
+        "preknowledge_notes",
+        "case_deep_dive",
+        "summaries",
+        "key_facts",
+        "concepts",
+        "vocab_context_notes",
+    ):
+        values = state.get(key, []) or []
+        if isinstance(values, list):
+            lesson_texts.extend(str(item) for item in values[:6] if str(item).strip())
+
+    arguments = state.get("arguments", {}) or {}
+    for side in ("for", "against"):
+        lesson_texts.extend(str(item) for item in (arguments.get(side, []) or [])[:3] if str(item).strip())
+    middle = arguments.get("middle")
+    if middle:
+        lesson_texts.append(str(middle))
+
+    debate_angle = state.get("debate_angle")
+    if debate_angle:
+        lesson_texts.append(str(debate_angle))
+
+    lead_case = state.get("lead_case", {}) or {}
+    lesson_texts.append(str(lead_case.get("title", "")))
+    lesson_texts.append(str(lead_case.get("content", ""))[:900])
+
+    candidates: list[str] = []
+    pool = " ".join(lesson_texts)
+    for token in re.findall(r"\b[a-zA-Z]{6,18}\b", pool):
+        lowered = token.lower()
+        if lowered in STOPWORDS or lowered in BLOCKED_WORDS or lowered in recent:
+            continue
+        if lowered not in WORD_HINTS:
+            continue
+        if lowered not in candidates:
+            candidates.append(lowered)
+        if len(candidates) >= 8:
+            break
+    return candidates
+
+
 def _rotating_curated_words(topic: str) -> tuple[dict, dict]:
     recent = _recent_vocab()
-    ordered = CURATED_WORD_BANK[:]
+    ordered = _fresh_word_pool()
     ordered.sort(key=lambda item: (item["word"] in recent, abs(hash(f"{topic}:{item['word']}"))))
     primary = ordered[0]
     secondary = next((item for item in ordered[1:] if item["word"] != primary["word"]), ordered[1])
@@ -220,7 +361,7 @@ def _article_driven_lesson(topic: str, candidate_words: list[str]) -> tuple[str,
         return _heuristic_english_lesson(topic, "")
 
     primary_word = candidate_words[0]
-    support_word = candidate_words[1] if len(candidate_words) > 1 else "cogent"
+    support_word = candidate_words[1] if len(candidate_words) > 1 else "robust"
     root = primary_word[:4]
     lesson_lines = [
         "ENGLISH POWER",
@@ -236,14 +377,24 @@ def _article_driven_lesson(topic: str, candidate_words: list[str]) -> tuple[str,
 
 def english_coach_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
+    recent = _recent_vocab()
     rag_chunks = retrieve_for_node("english_coach_node", topic)
     rag_context = format_retrieved_context(rag_chunks)
+    lesson_candidates = _candidate_words_from_lesson(state)
     article_candidates = _candidate_words_from_articles(state)
+    preferred_candidates: list[str] = []
+    for word in lesson_candidates + article_candidates:
+        clean = str(word).strip().lower()
+        if clean and clean not in preferred_candidates:
+            preferred_candidates.append(clean)
     default_lesson, default_words, default_roots = _heuristic_english_lesson(topic, rag_context)
-    if article_candidates:
-        default_lesson, default_words, default_roots = _article_driven_lesson(topic, article_candidates)
+    if preferred_candidates:
+        default_lesson, default_words, default_roots = _article_driven_lesson(topic, preferred_candidates)
+    fallback_pool = [item["word"] for item in _fresh_word_pool()]
+    default_words = _dedupe_fresh_words(default_words, recent, fallback_pool)
+    default_roots = [word[:4] for word in default_words[:2]] or default_roots
 
-    if not rag_context and not article_candidates:
+    if not rag_context and not preferred_candidates:
         state["english_lesson"] = default_lesson
         state["vocab_words"] = default_words
         state["word_roots"] = default_roots
@@ -260,10 +411,11 @@ def english_coach_node(state: dict) -> dict:
         "Return JSON only with keys: english_lesson, vocab_words, word_roots.\n"
         "Teach 3-5 useful words or roots and connect them to speaking, argument precision, or specification knowledge.\n"
         "Do not repeat stale words from recent lessons if fresh article-derived words are available.\n"
-        "Prefer high-utility debate words that appear in strong prose from today's article context.\n"
+        "Prefer high-utility debate words that already appear in today's drafted lesson material before reaching for generic vocabulary.\n"
         "The english_lesson should include lines starting with Word:, Meaning:, Upgrade:, Debate line:, Bonus word:, Root:.\n\n"
         f"Topic: {topic}\n"
         f"Recent words to avoid: {sorted(_recent_vocab())[:20]}\n"
+        f"Candidate lesson-native words: {lesson_candidates}\n"
         f"Candidate fresh words from article/research: {article_candidates}\n"
         f"Curated vocabulary notes from vocab lane: {state.get('vocab_context_notes', [])}\n"
         f"Today's article context:\n" + "\n\n".join(article_context) + "\n\n"
@@ -278,23 +430,40 @@ def english_coach_node(state: dict) -> dict:
         parsed = json.loads(str(content))
         state["english_lesson"] = parsed.get("english_lesson") or default_lesson
         vocab_words = parsed.get("vocab_words") or default_words
-        if article_candidates:
+        if preferred_candidates:
             deduped = []
-            for word in list(vocab_words) + article_candidates:
+            for word in list(vocab_words) + preferred_candidates:
                 clean = str(word).strip().lower()
                 if clean and clean not in deduped:
                     deduped.append(clean)
                 if len(deduped) >= 3:
                     break
             vocab_words = deduped
-        state["vocab_words"] = vocab_words
-        state["word_roots"] = parsed.get("word_roots") or default_roots
+        vocab_words = _dedupe_fresh_words(vocab_words, recent, fallback_pool)
+        state["vocab_words"] = vocab_words or default_words
+        parsed_roots = parsed.get("word_roots") or []
+        state["word_roots"] = parsed_roots or [word[:4] for word in (vocab_words or default_words)[:2]] or default_roots
     except Exception:
         state["english_lesson"] = default_lesson
-        if article_candidates:
-            state["vocab_words"] = (article_candidates + default_words)[:3]
+        if preferred_candidates:
+            state["vocab_words"] = _dedupe_fresh_words(preferred_candidates + default_words, recent, fallback_pool)
         else:
             state["vocab_words"] = default_words
-        state["word_roots"] = default_roots
+        state["word_roots"] = [word[:4] for word in state["vocab_words"][:2]] or default_roots
+
+    if state.get("vocab_words"):
+        primary_word = state["vocab_words"][0]
+        support_word = state["vocab_words"][1] if len(state["vocab_words"]) > 1 else "robust"
+        root = (state.get("word_roots") or [primary_word[:4]])[0]
+        lesson_lines = [
+            "ENGLISH POWER",
+            f"Word: {primary_word}",
+            f"Meaning: {_guess_meaning(primary_word)}",
+            f"Upgrade: Use '{primary_word}' when you want your explanation to sound more analytical and debate-ready.",
+            f"Debate line: In {topic}, your claim is not {support_word} unless you prove the mechanism and comparative impact.",
+            f"Bonus word: {support_word} = {_guess_meaning(support_word)}",
+            f"Root: {root} -> notice the root family and reuse one related word tomorrow.",
+        ]
+        state["english_lesson"] = "\n".join(lesson_lines)
 
     return state

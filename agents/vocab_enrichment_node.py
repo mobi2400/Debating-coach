@@ -6,6 +6,7 @@ import re
 from core.fallback import get_llm_with_fallback
 from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
+from memory.weekly_store import load_log
 from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
 from tools.tavily_tool import tavily_search
 
@@ -58,6 +59,23 @@ def _extract_words(text: str, limit: int = 10) -> list[str]:
     return seen
 
 
+def _recent_vocab(limit_days: int = 10) -> set[str]:
+    log = load_log()
+    recent: set[str] = set()
+    days_seen = 0
+    for day in sorted(log.keys(), reverse=True):
+        entries = log.get(day, [])
+        for entry in entries:
+            for word in entry.get("vocab_words", []) or []:
+                clean = str(word).strip().lower()
+                if clean:
+                    recent.add(clean)
+        days_seen += 1
+        if days_seen >= limit_days:
+            break
+    return recent
+
+
 def _context_lines(lead_case: dict, companion_articles: list[dict], rag_context: str) -> tuple[list[str], list[str]]:
     lines: list[str] = []
     candidate_words: list[str] = []
@@ -86,7 +104,36 @@ def _context_lines(lead_case: dict, companion_articles: list[dict], rag_context:
 
 
 def _heuristic_vocab(topic: str, candidates: list[str]) -> tuple[list[str], list[str]]:
-    selected = candidates[:3] or ["cogent", "nuance", "lucid"]
+    recent = _recent_vocab()
+    fallback_pool = [
+        "tenuous",
+        "coercive",
+        "credible",
+        "escalatory",
+        "deterrent",
+        "robust",
+        "coherent",
+        "plausible",
+        "normative",
+        "asymmetry",
+        "precarious",
+        "empirical",
+        "instrumental",
+        "contingent",
+    ]
+    selected: list[str] = []
+    for source in (candidates, fallback_pool):
+        for word in source:
+            clean = str(word).strip().lower()
+            if not clean or clean in selected or clean in recent:
+                continue
+            selected.append(clean)
+            if len(selected) >= 3:
+                break
+        if len(selected) >= 3:
+            break
+    if not selected:
+        selected = ["tenuous", "robust", "credible"]
     notes = []
     for word in selected[:3]:
         notes.append(
@@ -99,10 +146,12 @@ def vocab_enrichment_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
     lead_case = state.get("lead_case", {}) or {}
     title = str(lead_case.get("title", "")).strip()
+    recent = _recent_vocab()
 
     companion_articles = tavily_search(f"{title or topic} debate analysis mechanism implications language")[:3]
     debate_rag = format_retrieved_context(retrieve_for_node("coach_node", f"{topic} {title} debate language framing"))
     context_lines, candidate_words = _context_lines(lead_case, companion_articles, debate_rag)
+    candidate_words = [word for word in candidate_words if word not in recent]
     fallback_words, fallback_notes = _heuristic_vocab(topic, candidate_words)
 
     if not context_lines:
@@ -147,7 +196,8 @@ def vocab_enrichment_node(state: dict) -> dict:
             if len(cleaned_notes) >= 3:
                 break
 
-        state["vocab_candidates"] = cleaned_words or fallback_words
+        fresh_words = [word for word in cleaned_words if word not in recent]
+        state["vocab_candidates"] = fresh_words or fallback_words
         state["vocab_context_notes"] = cleaned_notes or fallback_notes
     except Exception:
         state["vocab_candidates"] = fallback_words
