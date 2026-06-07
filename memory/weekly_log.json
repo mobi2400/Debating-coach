@@ -1580,5 +1580,234 @@
       "timestamp": "2026-06-05T17:31:48+00:00",
       "english_quiz_score": 90
     }
+  ],
+  "2026-06-06": [
+    {
+      "topic": "feminism",
+      "selector_reason": "",
+      "pre_knowledge": [
+        "Why this matters: Gender rounds are won by debaters who distinguish theory, mechanism, and implementation.",
+        "Framework: Liberal feminism focuses on equal rights within institutions."
+      ],
+      "top_articles": [
+        "Sample article one",
+        "Sample article two"
+      ],
+      "summaries": [
+        "- Equality and access matter. - Framing determines the round."
+      ],
+      "arguments": {
+        "for": [
+          "It expands autonomy."
+        ],
+        "against": [
+          "It can trigger backlash."
+        ],
+        "middle": "Support the principle, scrutinize the mechanism."
+      },
+      "key_facts": [
+        "Participation rates shape autonomy."
+      ],
+      "concepts": [
+        "Structural inequality"
+      ],
+      "debate_angle": "UNIQUE ANGLE: Win on implementation quality.",
+      "english_lesson": "ENGLISH POWER Word set: lucid, precise, nuance",
+      "vocab_words": [
+        "lucid",
+        "precise",
+        "nuance"
+      ],
+      "word_roots": [
+        "dict",
+        "cred"
+      ],
+      "studied": false,
+      "quiz_score": null,
+      "timestamp": "2026-06-05T21:07:03+00:00"
+    },
+    {
+      "topic": "international relations",
+      "selector_reason": "",
+      "pre_knowledge": [
+        "Feminism is a movement aimed at establishing equality across genders."
+      ],
+      "top_articles": [
+        "Mechanism vs impact framing in policy debate",
+        "Feminism debates focus on autonomy and access"
+      ],
+      "summaries": [
+        "SUMMARY: - point one - point two - point three",
+        "SUMMARY: - point one - point two - point three"
+      ],
+      "arguments": {
+        "for": [
+          "A1"
+        ],
+        "against": [
+          "B1"
+        ],
+        "middle": "Both sides have weight; depend on mechanism."
+      },
+      "key_facts": [
+        "Participation rates shape outcomes.",
+        "Participation rates shape outcomes."
+      ],
+      "concepts": [
+        "Structural inequality",
+        "Structural inequality"
+      ],
+      "debate_angle": "UNIQUE ANGLE: Frame international relations as a clash between principle and implementation, then win on whichever side has better long-term incentives. VALUE CLASH: The deepest clash is between principle and implementation in international relations. BURDEN OF PROOF: Your burden is to prove not just that the principle sounds attractive, but that the mechanism survives contact with power, incentives, and precedent. MECHANISM: Track who has incentives to defect, who enforces the norm, and why that enforcement sti...",
+      "english_lesson": "ENGLISH POWER Word: incisive Meaning: sharp, direct, and analytically strong Upgrade: Use 'incisive' instead of vague words like 'smart'. Debate line: An incisive rebuttal attacks the warrant, not just the wording. Bonus word: nuance = a subtle but important distinction Root: cid -> learn the root and use one word from it in tomorrow's speech.",
+      "vocab_words": [
+        "incisive",
+        "nuance"
+      ],
+      "word_roots": [
+        "cid",
+        "nua"
+      ],
+      "studied": false,
+      "quiz_score": null,
+      "timestamp": "2026-06-05T21:16:06+00:00"
+    },
+    {
+      "topic": "geopolitics",
+      "selector_reason": "Manual topic override.",
+      "pre_knowledge": [
+        "Page: China\u2013United States trade war Summary: An economic conflict between China and the United States has been ongoing since January 2018, when US president Donald Trump began imposing tariffs and other trade barriers...",
+        "The first Trump administration stated that these practices may contribute to the US\u2013China trade deficit, and that the Chinese government requires the transfer of American technology to China."
+      ],
+      "top_articles": [
+        "Mapping U.S.\u2013China Technology Decoupling - DigiChina",
+        "\"U.S.-China Technology Decoupling\" Series Report (III): U.S. Sanctions Against China-Guanghua Thought Leadership"
+      ],
+      "summaries": [
+        "SUMMARY: - The United States and China are creating policies that are causing them to separate their technology industries, with the US targeting China specifically and China aiming for broader security and domestic i...",
+        "SUMMARY: - The U.S. is using sanctions against China to try to separate their technology industries, which is called \"decoupling\". - Sanctions on different parts of the industry (upstream or downstream) can have diffe..."
+      ],
+      "arguments": {
+        "for": [
+          "Defend geopolitics by showing why this structure protects legitimacy, fairness, or long-term stability."
+        ],
+        "against": [
+          "Challenge geopolitics by showing where implementation, incentives, or power asymmetry breaks the ideal story."
+        ],
+        "middle": "Use the live case 'US-China tech decoupling \u2014 mechanisms, costs, and whether it is achievable' to accept the principle but dispute who should bear the cost, who enforces the norm, and what precedent it sets."
+      },
+      "key_facts": [
+        "The US and China are undertaking a wide array of policy actions that are increasing the separation of their high-tech environments, with many of these actions being undertaken with specific concerns in mind and decoup...",
+        "Sanctions targeting upstream industries can harm downstream enterprises' performance."
+      ],
+      "concepts": [
+        "Decoupling, which refers to the process of separating or disentangling the technology industries of two or more countries, in this case,...",
+        "Decoupling, which refers to the separation of the U.S. and China's technology industries, particularly in terms of trade and integration...",
+        "Decoupling, which refers to the separation of two economies, in this case, the US and China, and is different from de-risking, which invo..."
+      ],
+      "debate_angle": "UNIQUE ANGLE: Treat 'de\u2011risking' as a pragmatic, reversible risk\u2011management tool rather than a euphemistic veneer for full\u2011blown decoupling, and argue that conflating the two undermines the value of strategic autonomy while inflating security rhetoric. VALUE CLASH: Legitimacy of international order (fair, rules\u2011based trade) vs. National security & stability (protecting supply\u2011chain sovereignty). The clash pits the value of open, mutually beneficial interdependence against the value of sovereign control over crit...",
+      "english_lesson": "ENGLISH POWER Word: nuance Meaning: a subtle but important distinction Upgrade: Use 'nuance' instead of vague words like 'difference'. Debate line: The nuance is that harm comes from the mechanism, not the headline. Bonus word: lucid = clear and easy to follow Root: nua -> learn the root and use one word from it in tomorrow's speech.",
+      "vocab_words": [
+        "nuance",
+        "lucid"
+      ],
+      "word_roots": [
+        "nua",
+        "luc"
+      ],
+      "studied": false,
+      "quiz_score": null,
+      "timestamp": "2026-06-05T21:21:15+00:00"
+    }
+  ],
+  "2026-06-07": [
+    {
+      "topic": "feminism",
+      "selector_reason": "",
+      "pre_knowledge": [
+        "Why this matters: Gender rounds are won by debaters who distinguish theory, mechanism, and implementation.",
+        "Framework: Liberal feminism focuses on equal rights within institutions."
+      ],
+      "top_articles": [
+        "Sample article one",
+        "Sample article two"
+      ],
+      "summaries": [
+        "- Equality and access matter. - Framing determines the round."
+      ],
+      "arguments": {
+        "for": [
+          "It expands autonomy."
+        ],
+        "against": [
+          "It can trigger backlash."
+        ],
+        "middle": "Support the principle, scrutinize the mechanism."
+      },
+      "key_facts": [
+        "Participation rates shape autonomy."
+      ],
+      "concepts": [
+        "Structural inequality"
+      ],
+      "debate_angle": "UNIQUE ANGLE: Win on implementation quality.",
+      "english_lesson": "ENGLISH POWER Word set: lucid, precise, nuance",
+      "vocab_words": [
+        "lucid",
+        "precise",
+        "nuance"
+      ],
+      "word_roots": [
+        "dict",
+        "cred"
+      ],
+      "studied": false,
+      "quiz_score": null,
+      "timestamp": "2026-06-07T06:51:23+00:00"
+    },
+    {
+      "topic": "international relations",
+      "selector_reason": "",
+      "pre_knowledge": [
+        "Feminism is a movement aimed at establishing equality across genders."
+      ],
+      "top_articles": [
+        "Mechanism vs impact framing in policy debate",
+        "Feminism debates focus on autonomy and access"
+      ],
+      "summaries": [
+        "SUMMARY: - point one - point two - point three",
+        "SUMMARY: - point one - point two - point three"
+      ],
+      "arguments": {
+        "for": [
+          "A1"
+        ],
+        "against": [
+          "B1"
+        ],
+        "middle": "Both sides have weight; depend on mechanism."
+      },
+      "key_facts": [
+        "Participation rates shape outcomes.",
+        "Participation rates shape outcomes."
+      ],
+      "concepts": [
+        "Structural inequality",
+        "Structural inequality"
+      ],
+      "debate_angle": "UNIQUE ANGLE: Frame international relations as a clash between principle and implementation, then win on whichever side has better long-term incentives. VALUE CLASH: The deepest clash is between principle and implementation in international relations. BURDEN OF PROOF: Your burden is to prove not just that the principle sounds attractive, but that the mechanism survives contact with power, incentives, and precedent. MECHANISM: Track who has incentives to defect, who enforces the norm, and why that enforcement sti...",
+      "english_lesson": "ENGLISH POWER Word: incisive Meaning: sharp, direct, and analytically strong Upgrade: Use 'incisive' instead of vague words like 'smart'. Debate line: An incisive rebuttal attacks the warrant, not just the wording. Bonus word: lucid = clear and easy to follow Root: cid -> learn the root and use one word from it in tomorrow's speech.",
+      "vocab_words": [
+        "incisive",
+        "lucid"
+      ],
+      "word_roots": [
+        "cid",
+        "luc"
+      ],
+      "studied": false,
+      "quiz_score": null,
+      "timestamp": "2026-06-07T06:51:24+00:00"
+    }
   ]
 }

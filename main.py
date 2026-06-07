@@ -106,31 +106,7 @@ def _lookup_topic_info(topic_override: str, priority_entries: list[str | dict]) 
     return best_match if best_score > 0 else {}
 
 
-_PRIVACY_BANNER_PRINTED = False
-
-
-def _print_privacy_banner_once():
-    """Loud reminder that scheduler.yml commits weekly_log.json back to the
-    repo. If the repo is public, your daily debate prep, vocabulary work,
-    and per-day study scores end up in public git history. We can't enforce
-    repo visibility from code, so we shout once per process start instead."""
-    global _PRIVACY_BANNER_PRINTED
-    if _PRIVACY_BANNER_PRINTED:
-        return
-    _PRIVACY_BANNER_PRINTED = True
-    print(
-        "\n=== DebateIQ privacy reminder ===\n"
-        "weekly_log.json is committed back to the repo by .github/workflows/scheduler.yml.\n"
-        "Keep this repository PRIVATE on GitHub. Topics, quiz scores, coaching prose,\n"
-        "and vocabulary work will otherwise be visible in the commit history.\n"
-        "Set DEBATEIQ_SILENCE_PRIVACY=1 to suppress this banner once you've confirmed.\n"
-        "=================================\n"
-    )
-
-
 def run_daily(topic_override: str | None = None):
-    if not os.getenv("DEBATEIQ_SILENCE_PRIVACY"):
-        _print_privacy_banner_once()
     topics, topics_metadata = _load_topics_config()
 
     priority_entries = topics_metadata.get("priority_topics", topics)

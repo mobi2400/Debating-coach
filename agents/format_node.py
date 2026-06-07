@@ -315,18 +315,30 @@ def _coach_note(state: dict) -> str:
 def _rebuttal_drills(state: dict) -> list[str]:
     arguments = state.get("arguments", {}) or {}
     coach_sections = _extract_coach_sections(state)
+    article_title, article_examples = _article_example_context(state)
+    article_tag = f"in today's case about {article_title}" if article_title else "in today's case"
     drills: list[str] = []
-    if arguments.get("against"):
+
+    against_args = arguments.get("against", [])[:3]
+    for_args = arguments.get("for", [])[:3]
+
+    if against_args:
+        example = _trim_block(article_examples[0], 150) if article_examples else "one concrete case detail"
         drills.append(
-            f"If they say this against you: {_trim_block(arguments['against'][0], 130)} | Reply by forcing them to prove feasibility, comparative world, and reversibility."
+            f"If they say this against you: {_trim_block(against_args[0], 130)} | Reply by asking exactly where their feasibility objection kicks in, then anchor the answer {article_tag} with {example}."
         )
-    if arguments.get("for"):
+    if len(against_args) > 1:
         drills.append(
-            f"If they say this for you and you are opposing: {_trim_block(arguments['for'][0], 130)} | Reply by attacking the mechanism, incentive structure, and precedent."
+            f"If they push this second opposition line: {_trim_block(against_args[1], 130)} | Force them to explain what incentive changes would actually make actors behave differently, instead of just asserting collapse."
         )
-    if coach_sections.get("top_rebuttal"):
+    if for_args:
+        example = _trim_block(article_examples[1], 150) if len(article_examples) > 1 else (_trim_block(article_examples[0], 150) if article_examples else "the article's strongest factual detail")
+        drills.append(
+            f"If they say this for you and you are opposing: {_trim_block(for_args[0], 130)} | Reply by attacking the mechanism, asking who pays the cost first, and showing why {example} weakens their precedent claim."
+        )
+    if coach_sections.get("top_rebuttal") and len(drills) < 4:
         drills.append(f"Detailed rebuttal script: {_trim_block(coach_sections['top_rebuttal'], 260)}")
-    return drills[:3]
+    return drills[:4]
 
 
 def _weight_language_lines() -> list[str]:
@@ -369,7 +381,7 @@ def _article_takeaway(state: dict, article_lines: list[str]) -> str:
     return "Turn the case into a mechanism, not just an event summary."
 
 
-def _article_example_context(state: dict) -> tuple[str, str]:
+def _article_example_context(state: dict) -> tuple[str, list[str]]:
     article_lines, article = _article_section(state)
     title = ""
     if article is not None:
@@ -377,38 +389,86 @@ def _article_example_context(state: dict) -> tuple[str, str]:
     if not title and article_lines:
         title = _trim_block(article_lines[0], 90)
 
+    examples: list[str] = []
     key_facts = state.get("key_facts", []) or []
-    example = ""
-    if key_facts:
-        example = _trim_block(key_facts[0], 180)
-    elif len(article_lines) > 1:
-        example = _trim_block(article_lines[1], 180)
-    return title, example
+    for fact in key_facts[:3]:
+        clean = _trim_block(fact, 180)
+        if clean and clean not in examples:
+            examples.append(clean)
+
+    for line in article_lines[1:5]:
+        clean = _trim_block(line, 180)
+        if clean and clean not in examples:
+            examples.append(clean)
+        if len(examples) >= 4:
+            break
+
+    deep_dive = state.get("case_deep_dive", []) or []
+    for item in deep_dive[:2]:
+        clean = _trim_block(item, 180)
+        if clean and clean not in examples:
+            examples.append(clean)
+        if len(examples) >= 5:
+            break
+    return title, examples[:5]
+
+
+def _argument_explanation(side: str, index: int) -> str:
+    if side == "for":
+        explanations = [
+            "Why this matters: Lead with the principle or institutional good you are protecting. Show why the rule itself creates legitimacy, predictability, or durable cooperation.",
+            "Why this matters: This is your mechanism argument. Explain the chain clearly: what actors want, what incentives they face, and why that produces the outcome you are claiming.",
+            "Why this matters: This is your comparative-world argument. Show why your world allocates costs, risks, or opportunities better than the alternative world.",
+        ]
+    else:
+        explanations = [
+            "Why this matters: Attack the feasibility of their story. Ask where the model breaks once real actors face cost, fear, domestic pressure, or power asymmetry.",
+            "Why this matters: This is your incentive critique. Show why even well-worded principles fail when states or institutions have reasons to defect or selectively comply.",
+            "Why this matters: This is your second-order-effects argument. Prove that even if their first-order benefit exists, it triggers longer-term harms, backlash, or bad precedent.",
+        ]
+    return explanations[min(index, len(explanations) - 1)]
+
+
+def _argument_case_example(argument: str, article_tag: str, examples: list[str], index: int) -> str:
+    if not examples:
+        return ""
+
+    chosen = examples[min(index, len(examples) - 1)]
+    lower = argument.lower()
+
+    if any(token in lower for token in ("legitim", "norm", "fair", "rights", "order")):
+        lens = "Use this to show how legitimacy or norm enforcement plays out in practice"
+    elif any(token in lower for token in ("mechan", "incent", "deterren", "security", "power", "coerc")):
+        lens = "Use this to walk the judge through the incentive chain step by step"
+    elif any(token in lower for token in ("middle power", "compar", "world", "tradeoff", "cost", "precedent")):
+        lens = "Use this as a comparative example to show who benefits, who pays, and what precedent follows"
+    else:
+        lens = "Use this concrete case detail to anchor the abstract claim"
+
+    return f"Example: {lens} {article_tag}: {_trim_block(chosen, 200)}"
 
 
 def _explain_debate_lines(state: dict) -> list[str]:
     arguments = state.get("arguments", {}) or {}
     coach_sections = _extract_coach_sections(state)
-    article_title, article_example = _article_example_context(state)
+    article_title, article_examples = _article_example_context(state)
     article_tag = f"in today's case about {article_title}" if article_title else "in today's case"
 
     lines: list[str] = []
 
     for index, item in enumerate(arguments.get("for", [])[:3], 1):
         lines.append(f"For argument {index}: {_trim_block(item, 230)}")
-        lines.append(
-            f"Why this matters: This is your affirmative warrant. You are saying the world gets something valuable out of this principle or structure, not just a nice slogan."
-        )
-        if article_example:
-            lines.append(f"Example: {article_tag}, {_trim_block(article_example, 200)}")
+        lines.append(_argument_explanation("for", index - 1))
+        example = _argument_case_example(item, article_tag, article_examples, index - 1)
+        if example:
+            lines.append(example)
 
     for index, item in enumerate(arguments.get("against", [])[:3], 1):
         lines.append(f"Against argument {index}: {_trim_block(item, 230)}")
-        lines.append(
-            "Why this matters: This is your negative pressure point. You are testing where incentives break, who pays the cost, or why the mechanism collapses in practice."
-        )
-        if article_example:
-            lines.append(f"Example: {article_tag}, {_trim_block(article_example, 200)}")
+        lines.append(_argument_explanation("against", index - 1))
+        example = _argument_case_example(item, article_tag, article_examples, index + 1)
+        if example:
+            lines.append(example)
 
     middle = arguments.get("middle")
     if middle:
@@ -425,9 +485,9 @@ def _explain_debate_lines(state: dict) -> list[str]:
         lines.append(f"Burden of proof: {_trim_block(coach_sections['burden_of_proof'], 280)}")
     if coach_sections.get("mechanism"):
         lines.append(f"Mechanism to explain: {_trim_block(coach_sections['mechanism'], 280)}")
-        if article_example:
+        if article_examples:
             lines.append(
-                f"Mechanism example: Use {article_tag} to show the step-by-step chain, not just the outcome. Start from actor incentives, then show how that produced {_trim_block(article_example, 170)}"
+                f"Mechanism example: Use {article_tag} to show the step-by-step chain, not just the outcome. Start from actor incentives, then show how that produced {_trim_block(article_examples[0], 170)}"
             )
     if coach_sections.get("claim_warrant_impact"):
         lines.append(f"Why this wins: {_trim_block(coach_sections['claim_warrant_impact'], 320)}")

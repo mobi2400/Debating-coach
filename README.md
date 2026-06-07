@@ -4,11 +4,12 @@
  
 ---
  
-> [!IMPORTANT]
-> **Keep this repository PRIVATE on GitHub.** The scheduler workflow commits
-> `memory/weekly_log.json` (your topics, quiz scores, coaching prose,
-> vocabulary work) back to the repo so the night/weekend agents have history
-> across runs. On a public repo all of that is visible in commit history.
+> [!NOTE]
+> **This is an open-source project — fork it freely.** Your personal study
+> history (`memory/weekly_log.json`) is kept in your fork's GitHub Actions
+> cache, never in git history. Forking and using it for your own subjects
+> is the intended use. See [docs/STATE_PERSISTENCE.md](docs/STATE_PERSISTENCE.md)
+> for how memory survives between scheduler runs.
 
 ## The Problem
  

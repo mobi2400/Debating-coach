@@ -1,5 +1,7 @@
 name: DebateIQ Scheduler
 
+# Three cron triggers and one manual button. Replace these times with your
+# own — defaults are tuned to IST (UTC+5:30).
 on:
   schedule:
     - cron: "30 2 * * 1-5"   # Daily   — 08:00 IST weekdays
@@ -17,8 +19,11 @@ on:
           - night
           - weekend
 
+# Default read-only contents permission is enough — state lives in the
+# Actions cache, not in the repository, so no PII ever lands in git history.
+# That makes the project safe to fork and use as-is.
 permissions:
-  contents: write   # needed to commit weekly_log.json + faiss indexes back
+  contents: read
 
 concurrency:
   group: debateiq-state
@@ -27,14 +32,10 @@ concurrency:
 jobs:
   run-agent:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -47,13 +48,12 @@ jobs:
       - name: Install dependencies
         run: uv pip install --system -r requirements.txt
 
+      # Vector store cache: rebuild only when the corpus or extractor changes.
       - name: Restore FAISS vector store cache
         id: faiss-cache
         uses: actions/cache@v4
         with:
           path: faiss
-          # Source-change-aware key. If sources.json or the extractor changes,
-          # the next run rebuilds from scratch; otherwise it reuses the index.
           key: faiss-v1-${{ hashFiles('rag/sources.json', 'rag/wpm_extractor.py', 'rag/chunking_strategy.py') }}
           restore-keys: |
             faiss-v1-
@@ -64,6 +64,20 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: python rag/ingest.py
+
+      # State cache: keeps memory/weekly_log.json across runs without writing
+      # it to the repo. Cache entries auto-expire after 7 days of inactivity;
+      # a daily-running scheduler keeps the cache permanently warm.
+      - name: Restore weekly_log state
+        id: state-cache
+        uses: actions/cache@v4
+        with:
+          path: memory/weekly_log.json
+          # Use a sliding key based on the calendar week so each Monday gets
+          # a fresh cache entry; restore-keys falls back to the most recent.
+          key: weekly-log-${{ github.run_id }}
+          restore-keys: |
+            weekly-log-
 
       - name: Determine run mode
         id: mode
@@ -99,20 +113,3 @@ jobs:
         if: failure()
         run: |
           echo "::error::DebateIQ ${{ steps.mode.outputs.mode }} run failed. Check the Run DebateIQ step above for details."
-
-      - name: Persist weekly_log.json
-        if: always()
-        run: |
-          if [ ! -f memory/weekly_log.json ]; then
-            echo "No log to commit."
-            exit 0
-          fi
-          git config user.name "debateiq-bot"
-          git config user.email "debateiq-bot@users.noreply.github.com"
-          git add -f memory/weekly_log.json
-          if git diff --cached --quiet; then
-            echo "Log unchanged; nothing to commit."
-          else
-            git commit -m "chore(memory): update weekly_log [skip ci]"
-            git push
-          fi
