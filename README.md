@@ -7,9 +7,12 @@
 > [!NOTE]
 > **This is an open-source project — fork it freely.** Your personal study
 > history (`memory/weekly_log.json`) is kept in your fork's GitHub Actions
-> cache, never in git history. Forking and using it for your own subjects
-> is the intended use. See [docs/STATE_PERSISTENCE.md](docs/STATE_PERSISTENCE.md)
-> for how memory survives between scheduler runs.
+> cache, never in git history.
+>
+> **New here? Start with [docs/FORKING_GUIDE.md](docs/FORKING_GUIDE.md)** — a
+> complete walkthrough from "click Fork" to "messages arriving on my phone
+> every morning", including how to rewrite topics for your subject and load
+> your own PDFs into the RAG pipeline.
 
 ## The Problem
  

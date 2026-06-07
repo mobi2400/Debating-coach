@@ -1808,6 +1808,53 @@
       "studied": false,
       "quiz_score": null,
       "timestamp": "2026-06-07T06:51:24+00:00"
+    },
+    {
+      "topic": "geopolitics",
+      "selector_reason": "Manual topic override.",
+      "pre_knowledge": [
+        "Page: Democratic backsliding in the United States Summary: Democratic backsliding has been identified as a trend in the United States at the state and national levels in various indices and analyses, primarily during...",
+        "It is \"a process of regime change towards autocracy that makes the exercise of political power more arbitrary and repressive, and that restricts the space for public contestation and political participation in the pro..."
+      ],
+      "top_articles": [
+        "Why are Armenia\u2019s elections being so keenly watched abroad?",
+        "China holds \u2018special operation\u2019 near Taiwan after Japan-Philippines sea border talks"
+      ],
+      "summaries": [
+        "SUMMARY: - Armenia's elections are being closely watched by other countries because of the country's strategic location and the influence of big powers like Russia, the United States, and the European Union. - These c...",
+        "SUMMARY: - China has conducted a special maritime operation near Taiwan, which involves enforcing maritime traffic laws. - This operation was carried out by maritime police from two coastal provinces in China, Fujian..."
+      ],
+      "arguments": {
+        "for": [
+          "Defend geopolitics by showing why this structure protects legitimacy, fairness, or long-term stability."
+        ],
+        "against": [
+          "Challenge geopolitics by showing where implementation, incentives, or power asymmetry breaks the ideal story."
+        ],
+        "middle": "Use the live case 'US-China tech decoupling \u2014 mechanisms, costs, and whether it is achievable' to accept the principle but dispute who should bear the cost, who enforces the norm, and what precedent it sets."
+      },
+      "key_facts": [
+        "Russia, the United States, and the European Union all have interests in Armenia's elections.",
+        "The operation was conducted in waters east of Taiwan Island."
+      ],
+      "concepts": [
+        "Geopolitics, which refers to the study of how geography and politics interact to influence the behavior of nations and other actors on th...",
+        "Maritime law enforcement, which refers to the regulation and policing of activities at sea, is an important aspect of a country's territo...",
+        "Decoupling, which refers to the process of the US and China becoming more separated in terms of technology and reducing their technologic..."
+      ],
+      "debate_angle": "UNIQUE ANGLE: Armenia as the geopolitical hinge\u2011point where Eurasian great\u2011power rivalries, the South\u2011Caucasus security architecture, and the future of the Nagorno\u2011Karabakh status\u2011quo intersect \u2013 making its elections a proxy battle for regional dominance. VALUE CLASH: Sovereign democratic self\u2011determination vs. strategic stability of the wider region (great\u2011power security, energy corridors, and conflict containment). BURDEN OF PROOF: The pro side must demonstrate that external interest is driven by concrete geop...",
+      "english_lesson": "ENGLISH POWER Word: cogent Meaning: clear, logical, and convincing Upgrade: Use 'cogent' instead of vague words like 'good'. Debate line: Your model is not cogent unless you prove why states comply. Bonus word: salient = most important or most noticeable Root: cogn -> learn the root and use one word from it in tomorrow's speech.",
+      "vocab_words": [
+        "cogent",
+        "salient"
+      ],
+      "word_roots": [
+        "cogn",
+        "sal"
+      ],
+      "studied": false,
+      "quiz_score": null,
+      "timestamp": "2026-06-07T06:53:58+00:00"
     }
   ]
 }
