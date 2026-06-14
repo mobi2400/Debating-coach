@@ -24,8 +24,10 @@ try:
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
     Chroma = None
 
+from rag.context_packer import pack_retrieved_context, reorder_for_long_context
 from rag.embeddings import EMBEDDING_MAP, embeddings_available
 from rag.query_planner import build_query_plan
+from rag.reranker import chunk_content, rerank_chunks
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DIR = BASE_DIR / "chroma"
@@ -157,84 +159,6 @@ def _build_retriever(store_name: str, config: dict):
     return vector_store.as_retriever(search_type=mode, search_kwargs=search_kwargs)
 
 
-def _coerce_utility(metadata: dict) -> list[str]:
-    utilities = metadata.get("debate_utility") or []
-    if isinstance(utilities, list):
-        return [str(item).strip().lower() for item in utilities if str(item).strip()]
-    if isinstance(utilities, str):
-        return [utilities.strip().lower()] if utilities.strip() else []
-    return []
-
-
-def _chunk_score(chunk, query: str, plan: dict | None, store_name: str) -> int:
-    content, metadata = _chunk_content(chunk)
-    score = 0
-    lowered_content = content.lower()
-    query_terms = [term for term in query.lower().split() if len(term) > 3]
-
-    for term in query_terms[:8]:
-        if term in lowered_content:
-            score += 2
-
-    if not plan:
-        return score
-
-    hints = plan.get("metadata_hints", {}) or {}
-    preferred_stores = plan.get("preferred_stores", []) or []
-    if store_name in preferred_stores:
-        score += 2
-
-    source_class = str(metadata.get("source_class", "")).strip().lower()
-    if source_class and source_class in {item.lower() for item in hints.get("source_classes", []) or []}:
-        score += 3
-
-    topic_family = str(metadata.get("topic_family", "")).strip().lower()
-    hinted_family = str(hints.get("topic_family", "")).strip().lower()
-    if topic_family and hinted_family and topic_family == hinted_family:
-        score += 2
-
-    time_scope = str(metadata.get("time_scope", "")).strip().lower()
-    hinted_scope = str(hints.get("time_scope", "")).strip().lower()
-    if time_scope and hinted_scope and time_scope == hinted_scope:
-        score += 1
-
-    utilities = set(_coerce_utility(metadata))
-    desired_utilities = {str(item).strip().lower() for item in hints.get("debate_utility", []) or []}
-    score += len(utilities & desired_utilities) * 2
-
-    quality = str(metadata.get("source_quality", "")).strip().lower()
-    if quality == "high":
-        score += 2
-    elif quality == "medium":
-        score += 1
-
-    return score
-
-
-def _postprocess_chunks(chunks: list, query: str, plan: dict | None, store_name: str, limit: int) -> list:
-    if not chunks:
-        return []
-
-    ranked = sorted(
-        chunks,
-        key=lambda chunk: _chunk_score(chunk, query, plan, store_name),
-        reverse=True,
-    )
-
-    deduped = []
-    seen = set()
-    for chunk in ranked:
-        content, _ = _chunk_content(chunk)
-        signature = " ".join(content.lower().split())[:220]
-        if not signature or signature in seen:
-            continue
-        seen.add(signature)
-        deduped.append(chunk)
-        if len(deduped) >= limit:
-            break
-    return deduped
-
-
 def retrieve_for_node(node_name: str, query: str, state: dict | None = None, plan: dict | None = None) -> dict:
     """Returns {store_name: [chunks, ...]} so callers can preserve lane labels.
 
@@ -264,7 +188,8 @@ def retrieve_for_node(node_name: str, query: str, state: dict | None = None, pla
             store_query = ((plan or {}).get("store_queries", {}) or {}).get(store_name, query)
             raw_chunks = retriever.invoke(store_query)
             limit = int(config.get("k") or len(raw_chunks) or 0)
-            retrieved[store_name] = _postprocess_chunks(raw_chunks, store_query, plan, store_name, limit or len(raw_chunks))
+            reranked = rerank_chunks(raw_chunks, store_query, plan, store_name, limit or len(raw_chunks))
+            retrieved[store_name] = reorder_for_long_context(reranked, store_query, plan, store_name)
         except Exception as exc:
             print(f"[Retrieval] {store_name} failed for {node_name}: {exc}")
             BROKEN_STORES.add(store_name)
@@ -303,12 +228,6 @@ def format_retrieved_context(chunks) -> str:
     headers the prompts depend on) or a flat list (legacy callers).
     """
     if isinstance(chunks, dict):
-        sections = []
-        for store_name, store_chunks in chunks.items():
-            label = STORE_SECTION_LABELS.get(store_name, store_name.upper())
-            block = _format_lane(label, store_chunks)
-            if block:
-                sections.append(block)
-        return "\n\n".join(sections).strip()
+        return pack_retrieved_context(chunks, labels=STORE_SECTION_LABELS)
 
     return _format_lane("RETRIEVED CONTEXT", list(chunks)).strip()

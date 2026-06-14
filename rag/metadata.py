@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from urllib.parse import urlparse
 
 from core.topic_utils import TOPIC_KEYWORDS
@@ -96,6 +97,7 @@ def build_metadata(doc_type: str, source_ref: str, extra: dict | None = None) ->
 
     metadata = {
         "doc_type": doc_type,
+        "document_id": make_document_id(doc_type, source_ref),
         "source_class": DOC_SOURCE_CLASS.get(doc_type, "reference"),
         "time_scope": DOC_TIME_SCOPE.get(doc_type, "durable"),
         "debate_utility": DOC_DEBATE_UTILITY.get(doc_type, ["reference"]),
@@ -109,3 +111,9 @@ def build_metadata(doc_type: str, source_ref: str, extra: dict | None = None) ->
 
     metadata.update(extra)
     return metadata
+
+
+def make_document_id(doc_type: str, source_ref: str) -> str:
+    seed = f"{str(doc_type or '').strip().lower()}::{str(source_ref or '').strip().lower()}"
+    digest = hashlib.sha1(seed.encode("utf-8")).hexdigest()[:16]
+    return f"doc_{digest}"
