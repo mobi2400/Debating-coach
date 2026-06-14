@@ -52,6 +52,19 @@ def chunk_score(chunk, query: str, plan: dict | None, store_name: str) -> int:
     desired_utilities = {str(item).strip().lower() for item in hints.get("debate_utility", []) or []}
     score += len(utilities & desired_utilities) * 2
 
+    source_ref = str(
+        metadata.get("source_path")
+        or metadata.get("url")
+        or metadata.get("video_id")
+        or ""
+    ).strip()
+    preferred_sources = {str(item).strip() for item in hints.get("preferred_sources", []) or []}
+    weak_sources = {str(item).strip() for item in hints.get("weak_sources", []) or []}
+    if source_ref and source_ref in preferred_sources:
+        score += 4
+    if source_ref and source_ref in weak_sources:
+        score -= 3
+
     quality = str(metadata.get("source_quality", "")).strip().lower()
     if quality == "high":
         score += 2

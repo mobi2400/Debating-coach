@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from core.topic_utils import topic_keywords, topic_name
 from rag.metadata import infer_topic_family
+from rag.retrieval_memory import recall_retrieval_memory, source_performance_summary
 
 
 def _topic_info_list(topic_info: dict, key: str, limit: int = 3) -> list[str]:
@@ -14,6 +15,29 @@ def _topic_info_list(topic_info: dict, key: str, limit: int = 3) -> list[str]:
 
 def _join_nonempty(parts: list[str]) -> str:
     return " ".join(part.strip() for part in parts if str(part).strip()).strip()
+
+
+def _augment_with_memory(topic: str, node_name: str, store_queries: dict[str, str]) -> dict[str, str]:
+    memory = recall_retrieval_memory(topic, node_name)
+    if not memory:
+        return store_queries
+
+    remembered_queries = memory.get("store_queries", {}) or {}
+    remembered_terms = " ".join(memory.get("key_terms", [])[:6])
+    augmented: dict[str, str] = {}
+
+    for store_name, query in (store_queries or {}).items():
+        memory_query = str(remembered_queries.get(store_name, "")).strip()
+        augmented[store_name] = _join_nonempty([query, memory_query, remembered_terms])
+    return augmented
+
+
+def _memory_source_hints(topic: str, node_name: str) -> dict:
+    summary = source_performance_summary(topic, node_name)
+    return {
+        "preferred_sources": summary.get("preferred_sources", []),
+        "weak_sources": summary.get("weak_sources", []),
+    }
 
 
 def _base_terms(topic: str, lead_title: str, topic_info: dict) -> dict:
@@ -48,6 +72,8 @@ def build_query_plan(node_name: str, state: dict) -> dict:
         "source_classes": [],
         "time_scope": None,
         "debate_utility": [],
+        "preferred_sources": [],
+        "weak_sources": [],
     }
     plan = {
         "node_name": node_name,
@@ -80,6 +106,8 @@ def build_query_plan(node_name: str, state: dict) -> dict:
                 [topic, " ".join(terms["frameworks"]), " ".join(terms["mechanisms"]), "debate theory mechanism"]
             ),
         }
+        plan["store_queries"] = _augment_with_memory(topic, node_name, plan["store_queries"])
+        plan["metadata_hints"].update(_memory_source_hints(topic, node_name))
         return plan
 
     if node_name == "argue_node":
@@ -107,6 +135,8 @@ def build_query_plan(node_name: str, state: dict) -> dict:
             ),
             "style_db": _join_nonempty([topic, lead_title, "framing weighing extension rebuttal"]),
         }
+        plan["store_queries"] = _augment_with_memory(topic, node_name, plan["store_queries"])
+        plan["metadata_hints"].update(_memory_source_hints(topic, node_name))
         return plan
 
     if node_name == "coach_node":
@@ -125,6 +155,8 @@ def build_query_plan(node_name: str, state: dict) -> dict:
             ),
             "style_db": _join_nonempty([topic, "judge language framing weighing extension"]),
         }
+        plan["store_queries"] = _augment_with_memory(topic, node_name, plan["store_queries"])
+        plan["metadata_hints"].update(_memory_source_hints(topic, node_name))
         return plan
 
     if node_name == "english_coach_node":
@@ -142,8 +174,12 @@ def build_query_plan(node_name: str, state: dict) -> dict:
                 [topic, lead_title, "debate language precision rhetoric argument vocabulary"]
             )
         }
+        plan["store_queries"] = _augment_with_memory(topic, node_name, plan["store_queries"])
+        plan["metadata_hints"].update(_memory_source_hints(topic, node_name))
         return plan
 
     plan["preferred_stores"] = ["knowledge_db"]
     plan["store_queries"] = {"knowledge_db": base_topic}
+    plan["store_queries"] = _augment_with_memory(topic, node_name, plan["store_queries"])
+    plan["metadata_hints"].update(_memory_source_hints(topic, node_name))
     return plan
