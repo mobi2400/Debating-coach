@@ -63,6 +63,10 @@
     {
       "channel_url": "https://www.youtube.com/@westernaustraliandebatingl4328",
       "channel_type": "youtube_debate"
+    },
+    {
+      "channel_url": "https://www.youtube.com/@australiandebatingcouncil",
+      "channel_type": "youtube_debate"
     }
   ]
 }
