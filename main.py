@@ -14,7 +14,12 @@ from agents.weekend_agent import weekend_agent_node
 from core.network_utils import clear_broken_local_proxies
 from core.topic_utils import topic_name
 from delivery.telegram import send_digest
+from evals.rag.fixtures import RETRIEVAL_EVAL_CASES
+from evals.rag.real_trace_eval import evaluate_recent_traces
+from evals.rag.retrieval_eval import evaluate_query_plan, evaluate_structured_evidence
 from graph import build_daily_graph, build_night_graph, build_weekend_graph
+from rag.metadata import build_metadata
+from rag.query_planner import build_query_plan
 
 
 _CLEARED_PROXIES = clear_broken_local_proxies()
@@ -283,9 +288,94 @@ def run_weekend_smoke():
     print(f"Contains weekly header: {'WEEKLY BRAIN UPLOAD' in result['final_doc']}")
 
 
+def run_retrieval_eval():
+    print("Running retrieval evaluation harness...")
+    print("")
+
+    total_scores: list[float] = []
+    for case in RETRIEVAL_EVAL_CASES:
+        plan = build_query_plan(case["node_name"], case["state"])
+        score = evaluate_query_plan(plan, case["expected"])
+        total_scores.append(score["total_score"])
+        print(f"[{case['name']}] total={score['total_score']:.3f}")
+        print(
+            "  "
+            f"stores={score['store_score']:.3f} "
+            f"terms={score['term_score']:.3f} "
+            f"utility={score['utility_score']:.3f} "
+            f"classes={score['class_score']:.3f}"
+        )
+
+    definition_meta = build_metadata(
+        "wikipedia",
+        "https://example.com/wiki",
+        {"url": "https://example.com/wiki", "title": "Sovereignty"},
+    )
+    mechanism_meta = build_metadata(
+        "debate_theory",
+        "knowledge_base/pdfs/debate.pdf",
+        {"source_path": "knowledge_base/pdfs/debate.pdf"},
+    )
+    example_meta = build_metadata(
+        "news",
+        "https://example.com/news",
+        {"url": "https://example.com/news", "title": "Ukraine case"},
+    )
+    sample_chunks = {
+        "knowledge_db": [
+            {"page_content": "Sovereignty refers to supreme authority within a territory.", "metadata": definition_meta},
+            {"page_content": "Ukraine creates a live example of sovereignty pressure.", "metadata": example_meta},
+        ],
+        "reasoning_db": [
+            {"page_content": "The security dilemma explains why deterrence can produce escalation.", "metadata": mechanism_meta},
+        ],
+    }
+    evidence_score = evaluate_structured_evidence(
+        sample_chunks,
+        expected_sections=["definitions", "mechanisms", "examples"],
+    )
+    print("")
+    print(
+        "[structured_evidence] "
+        f"section_score={evidence_score['section_score']:.3f} "
+        f"present={', '.join(evidence_score['present_sections'])}"
+    )
+    print("")
+    average = sum(total_scores) / len(total_scores) if total_scores else 0.0
+    print(f"Average planner score: {average:.3f}")
+
+
+def run_real_retrieval_eval():
+    report = evaluate_recent_traces(limit_days=7)
+    print("Running real retrieval trace evaluation...")
+    print("")
+    print(f"Days scanned: {report['days_scanned']}")
+    print(f"Lessons scored: {report['lessons_scored']}")
+    print(f"Average score: {report['average_score']:.3f}")
+    print(f"Node coverage: {report['node_coverage']}")
+    print(f"Score bands: {report['score_bands']}")
+    if report["low_scoring_topics"]:
+        print("Low-scoring topics:")
+        for topic in report["low_scoring_topics"][:5]:
+            print(f"  - {topic}")
+    if report["repeated_sources"]:
+        print("Repeated weak source refs:")
+        for source, count in report["repeated_sources"]:
+            print(f"  - {source} ({count})")
+    print("")
+    for lesson in report["lesson_scores"][:5]:
+        print(
+            f"[{lesson['date']}] {lesson['topic']} total={lesson['total_score']:.3f} "
+            f"memory={lesson['memory_present']:.3f} "
+            f"sources={lesson['source_diversity_score']:.3f} "
+            f"terms={lesson['term_coverage_score']:.3f} "
+            f"vocab={lesson['vocab_score']:.3f}"
+        )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["daily", "night", "weekend", "summarize-smoke", "argue-smoke", "coach-smoke", "english-smoke", "english-quiz", "english-quiz-smoke", "format-smoke", "night-smoke", "weekend-smoke"], required=True)
+    parser.add_argument("--mode", choices=["daily", "night", "weekend", "summarize-smoke", "argue-smoke", "coach-smoke", "english-smoke", "english-quiz", "english-quiz-smoke", "format-smoke", "night-smoke", "weekend-smoke", "retrieval-eval", "real-retrieval-eval"], required=True)
     parser.add_argument("--topic", type=str, default=None)
     args = parser.parse_args()
 
@@ -313,3 +403,7 @@ if __name__ == "__main__":
         run_night_smoke()
     elif args.mode == "weekend-smoke":
         run_weekend_smoke()
+    elif args.mode == "retrieval-eval":
+        run_retrieval_eval()
+    elif args.mode == "real-retrieval-eval":
+        run_real_retrieval_eval()

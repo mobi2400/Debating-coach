@@ -56,14 +56,24 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
     YouTubeTranscriptApi = None
 
 from rag.chunking_strategy import get_splitter
+from rag.article_extractor import extract_article_text
 from rag.document_index import build_document_summary_index, save_document_summary_index
 from rag.embeddings import EMBEDDING_MAP
 from rag.metadata import build_metadata
+from rag.youtube_cache import (
+    classify_channel_inventory,
+    load_channel_cache,
+    mark_transcript_status,
+    merge_channel_inventory,
+    parse_channel_inventory,
+    save_channel_cache,
+)
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DIR = BASE_DIR / "chroma"
 FAISS_DIR = BASE_DIR / "faiss"
 DOCUMENT_INDEX_FILE = FAISS_DIR / "document_index" / "document_summaries.json"
+YOUTUBE_CACHE_DIR = BASE_DIR / "cache" / "youtube_channels"
 SOURCES_FILE = BASE_DIR / "rag" / "sources.json"
 
 STORE_ROUTING = {
@@ -143,17 +153,47 @@ def list_channel_videos(channel_url: str, limit: int = CHANNEL_VIDEO_LIMIT) -> l
         print(f"[Ingest YouTube] Channel fetch failed for {channel_url}: {exc}")
         return []
 
-    seen = []
-    for match in re.finditer(r'"videoId":"([A-Za-z0-9_-]{11})"', response.text):
-        vid = match.group(1)
-        if vid not in seen:
-            seen.append(vid)
-        if len(seen) >= limit:
-            break
-    return seen
+    cache_payload = load_channel_cache(YOUTUBE_CACHE_DIR, channel_url)
+    discovered = parse_channel_inventory(response.text, channel_url, limit=limit)
+    merged_payload, _new_items = merge_channel_inventory(cache_payload, discovered)
+    save_channel_cache(YOUTUBE_CACHE_DIR, channel_url, merged_payload)
+    return [str(item.get("video_id")) for item in discovered if str(item.get("video_id")).strip()]
 
 
-def ingest_youtube(video_id: str, channel_type: str) -> list:
+def list_selected_channel_videos(channel_url: str, channel_type: str, limit: int = CHANNEL_VIDEO_LIMIT) -> list[str]:
+    if requests is None:
+        return []
+
+    url = channel_url.rstrip("/")
+    if not url.endswith("/videos"):
+        url = f"{url}/videos"
+
+    try:
+        response = requests.get(
+            url,
+            timeout=20,
+            headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "en-US,en;q=0.9"},
+        )
+        response.raise_for_status()
+    except Exception as exc:
+        print(f"[Ingest YouTube] Channel fetch failed for {channel_url}: {exc}")
+        return []
+
+    cache_payload = load_channel_cache(YOUTUBE_CACHE_DIR, channel_url)
+    discovered = parse_channel_inventory(response.text, channel_url, limit=limit)
+    classified = classify_channel_inventory(discovered, channel_type)
+    merged_payload, _new_items = merge_channel_inventory(cache_payload, classified)
+    save_channel_cache(YOUTUBE_CACHE_DIR, channel_url, merged_payload)
+
+    selected = [
+        str(item.get("video_id"))
+        for item in merged_payload.get("videos", [])
+        if str(item.get("selection_status")) == "selected" and str(item.get("video_id")).strip()
+    ]
+    return selected[:limit]
+
+
+def ingest_youtube(video_id: str, channel_type: str, channel_url: str | None = None) -> list:
     if YouTubeTranscriptApi is None:
         return []
 
@@ -181,6 +221,12 @@ def ingest_youtube(video_id: str, channel_type: str) -> list:
     except Exception as exc:
         print(f"[Ingest YouTube] Error for {video_id}: {exc}")
         return []
+    finally:
+        if channel_url:
+            try:
+                mark_transcript_status(YOUTUBE_CACHE_DIR, channel_url, video_id, fetched=bool(text.strip()) if "text" in locals() else False)
+            except Exception as exc:
+                print(f"[Ingest YouTube] Cache update failed for {video_id}: {exc}")
 
 
 def ingest_website(url: str, site_type: str) -> list:
@@ -191,7 +237,7 @@ def ingest_website(url: str, site_type: str) -> list:
         response = requests.get(url, timeout=20)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
-        text = soup.get_text(separator=" ", strip=True)
+        text = extract_article_text(soup)
         metadata = build_metadata(
             site_type,
             url,
@@ -381,7 +427,7 @@ def run_ingest(only: set[str] | None = None) -> dict:
         if "video_id" in video:
             video_ids = [video["video_id"]]
         elif "channel_url" in video:
-            video_ids = list_channel_videos(video["channel_url"])
+            video_ids = list_selected_channel_videos(video["channel_url"], channel_type)
             if not video_ids:
                 print(f"[Sources] No videos found for channel {video['channel_url']}")
         else:
@@ -391,7 +437,7 @@ def run_ingest(only: set[str] | None = None) -> dict:
             all_docs.append(
                 {
                     "doc_type": channel_type,
-                    "documents": ingest_youtube(vid, channel_type),
+                    "documents": ingest_youtube(vid, channel_type, channel_url=video.get("channel_url")),
                 }
             )
 

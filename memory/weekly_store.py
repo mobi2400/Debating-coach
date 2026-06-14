@@ -82,6 +82,20 @@ def save_daily_digest(topic: str, content_dict: dict):
         if title:
             top_articles.append(_shorten_text(title, 140))
 
+    retrieval_memory = {}
+    for node_name, node_memory in (content_dict.get("retrieval_memory") or {}).items():
+        if not isinstance(node_memory, dict):
+            continue
+        retrieval_memory[node_name] = {
+            "store_queries": {
+                str(store_name): _shorten_text(query, 180)
+                for store_name, query in (node_memory.get("store_queries") or {}).items()
+                if str(query).strip()
+            },
+            "key_terms": _compact_list(node_memory.get("key_terms", []), 8, 24),
+            "source_refs": _compact_list(node_memory.get("source_refs", []), 4, 120),
+        }
+
     new_entry = {
         "topic": topic,
         "selector_reason": _shorten_text(content_dict.get("selector_reason", ""), 140),
@@ -95,6 +109,7 @@ def save_daily_digest(topic: str, content_dict: dict):
         "english_lesson": _shorten_text(content_dict.get("english_lesson", ""), 420),
         "vocab_words": _compact_list(content_dict.get("vocab_words", []), 3, 32),
         "word_roots": _compact_list(content_dict.get("word_roots", []), 2, 24),
+        "retrieval_memory": retrieval_memory,
         "studied": False,
         "quiz_score": None,
         "timestamp": _now_iso(),

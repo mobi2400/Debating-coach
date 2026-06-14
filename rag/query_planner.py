@@ -3,6 +3,7 @@ from __future__ import annotations
 from core.topic_utils import topic_keywords, topic_name
 from rag.metadata import infer_topic_family
 from rag.retrieval_memory import recall_retrieval_memory, source_performance_summary
+from rag.query_router import route_query
 
 
 def _topic_info_list(topic_info: dict, key: str, limit: int = 3) -> list[str]:
@@ -75,22 +76,22 @@ def build_query_plan(node_name: str, state: dict) -> dict:
         "preferred_sources": [],
         "weak_sources": [],
     }
+    route = route_query(node_name, state.get("task_type"))
     plan = {
         "node_name": node_name,
-        "intent": "reference",
+        "intent": route.get("intent", "reference"),
         "topic": topic,
         "lead_title": lead_title,
         "topic_family": metadata_hints["topic_family"],
-        "preferred_stores": [],
+        "preferred_stores": route.get("stores", []),
         "store_queries": {},
         "metadata_hints": metadata_hints,
+        "route": route,
     }
 
     base_topic = _join_nonempty([topic, lead_title, " ".join(terms["keywords"][:4])])
 
     if node_name == "rag_enrich_node":
-        plan["intent"] = "background"
-        plan["preferred_stores"] = ["knowledge_db", "reasoning_db"]
         plan["metadata_hints"].update(
             {
                 "source_classes": ["domain_reference", "encyclopedic_background", "debate_theory"],
@@ -111,8 +112,6 @@ def build_query_plan(node_name: str, state: dict) -> dict:
         return plan
 
     if node_name == "argue_node":
-        plan["intent"] = "argument_generation"
-        plan["preferred_stores"] = ["reasoning_db", "knowledge_db", "style_db"]
         plan["metadata_hints"].update(
             {
                 "source_classes": ["debate_theory", "domain_reference", "article", "personal_style", "debate_style"],
@@ -140,8 +139,6 @@ def build_query_plan(node_name: str, state: dict) -> dict:
         return plan
 
     if node_name == "coach_node":
-        plan["intent"] = "coaching"
-        plan["preferred_stores"] = ["reasoning_db", "style_db", "knowledge_db"]
         plan["metadata_hints"].update(
             {
                 "source_classes": ["debate_theory", "personal_style", "debate_style", "domain_reference"],
@@ -160,8 +157,6 @@ def build_query_plan(node_name: str, state: dict) -> dict:
         return plan
 
     if node_name == "english_coach_node":
-        plan["intent"] = "vocabulary"
-        plan["preferred_stores"] = ["english_db"]
         plan["metadata_hints"].update(
             {
                 "source_classes": ["vocabulary"],
@@ -178,7 +173,6 @@ def build_query_plan(node_name: str, state: dict) -> dict:
         plan["metadata_hints"].update(_memory_source_hints(topic, node_name))
         return plan
 
-    plan["preferred_stores"] = ["knowledge_db"]
     plan["store_queries"] = {"knowledge_db": base_topic}
     plan["store_queries"] = _augment_with_memory(topic, node_name, plan["store_queries"])
     plan["metadata_hints"].update(_memory_source_hints(topic, node_name))
