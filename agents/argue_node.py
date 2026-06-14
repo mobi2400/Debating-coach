@@ -65,7 +65,7 @@ def argue_node(state: dict) -> dict:
     topic_info = state.get("topic_info", {}) or {}
     lead_title = str((state.get("lead_case") or {}).get("title", "")).strip()
     query = f"{topic} {lead_title}".strip()
-    rag_chunks = retrieve_for_node("argue_node", query)
+    rag_chunks = retrieve_for_node("argue_node", query, state=state)
     rag_context = format_retrieved_context(rag_chunks)
 
     default_arguments = _heuristic_arguments(topic, summaries, rag_context, topic_info)

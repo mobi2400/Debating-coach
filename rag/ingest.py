@@ -57,6 +57,7 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
 
 from rag.chunking_strategy import get_splitter
 from rag.embeddings import EMBEDDING_MAP
+from rag.metadata import build_metadata
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DIR = BASE_DIR / "chroma"
@@ -107,7 +108,12 @@ def ingest_pdf(path: str, doc_type: str) -> list:
     try:
         pdf = fitz.open(path)
         text = "\n".join(page.get_text() for page in pdf)
-        return _chunk_text(text, doc_type, {"source_path": path, "doc_type": doc_type})
+        metadata = build_metadata(
+            doc_type,
+            path,
+            {"source_path": path},
+        )
+        return _chunk_text(text, doc_type, metadata)
     except Exception as exc:
         print(f"[Ingest PDF] Error for {path}: {exc}")
         return []
@@ -160,10 +166,15 @@ def ingest_youtube(video_id: str, channel_type: str) -> list:
                 transcript_obj = transcript_list.find_generated_transcript(["en"])
             transcript = transcript_obj.fetch()
         text = " ".join(chunk.get("text", "") for chunk in transcript)
+        metadata = build_metadata(
+            channel_type,
+            video_id,
+            {"video_id": video_id},
+        )
         return _chunk_text(
             text,
             channel_type,
-            {"video_id": video_id, "doc_type": channel_type},
+            metadata,
         )
     except Exception as exc:
         print(f"[Ingest YouTube] Error for {video_id}: {exc}")
@@ -179,7 +190,12 @@ def ingest_website(url: str, site_type: str) -> list:
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
         text = soup.get_text(separator=" ", strip=True)
-        return _chunk_text(text, site_type, {"url": url, "doc_type": site_type})
+        metadata = build_metadata(
+            site_type,
+            url,
+            {"url": url},
+        )
+        return _chunk_text(text, site_type, metadata)
     except Exception as exc:
         print(f"[Ingest Website] Error for {url}: {exc}")
         return []

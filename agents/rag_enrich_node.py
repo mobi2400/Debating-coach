@@ -4,7 +4,7 @@ from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
 
 def rag_enrich_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
-    chunks = retrieve_for_node("rag_enrich_node", topic)
+    chunks = retrieve_for_node("rag_enrich_node", topic, state=state)
     rag_context = format_retrieved_context(chunks)
     reference_background = str(state.get("reference_background", "")).strip()
     if reference_background and rag_context:

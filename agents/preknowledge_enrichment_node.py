@@ -28,7 +28,7 @@ def preknowledge_enrichment_node(state: dict) -> dict:
         reference_background = str(state.get("reference_background", "")).strip()
 
     rag_query = f"{topic} prerequisites concepts framework {lead_title}".strip()
-    rag_chunks = retrieve_for_node("rag_enrich_node", rag_query)
+    rag_chunks = retrieve_for_node("rag_enrich_node", rag_query, state=state)
     rag_context = format_retrieved_context(rag_chunks)
 
     state["reference_background"] = reference_background[:2000]

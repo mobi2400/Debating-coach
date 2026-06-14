@@ -149,7 +149,9 @@ def vocab_enrichment_node(state: dict) -> dict:
     recent = _recent_vocab()
 
     companion_articles = tavily_search(f"{title or topic} debate analysis mechanism implications language")[:3]
-    debate_rag = format_retrieved_context(retrieve_for_node("coach_node", f"{topic} {title} debate language framing"))
+    debate_rag = format_retrieved_context(
+        retrieve_for_node("coach_node", f"{topic} {title} debate language framing", state=state)
+    )
     context_lines, candidate_words = _context_lines(lead_case, companion_articles, debate_rag)
     candidate_words = [word for word in candidate_words if word not in recent]
     fallback_words, fallback_notes = _heuristic_vocab(topic, candidate_words)

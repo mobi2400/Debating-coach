@@ -121,7 +121,7 @@ def coach_node(state: dict) -> dict:
     query = _build_debate_query(topic, topic_info, summaries, state.get("arguments", {}))
     if lead_title:
         query = f"{query} {lead_title}".strip()
-    rag_chunks = retrieve_for_node("coach_node", query)
+    rag_chunks = retrieve_for_node("coach_node", query, state=state)
     rag_context = format_retrieved_context(rag_chunks)
 
     default_packet = _heuristic_debate_packet(

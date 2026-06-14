@@ -378,7 +378,7 @@ def _article_driven_lesson(topic: str, candidate_words: list[str]) -> tuple[str,
 def english_coach_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
     recent = _recent_vocab()
-    rag_chunks = retrieve_for_node("english_coach_node", topic)
+    rag_chunks = retrieve_for_node("english_coach_node", topic, state=state)
     rag_context = format_retrieved_context(rag_chunks)
     lesson_candidates = _candidate_words_from_lesson(state)
     article_candidates = _candidate_words_from_articles(state)
