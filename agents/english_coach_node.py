@@ -5,7 +5,7 @@ from core.fallback import get_llm_with_fallback
 from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
 from memory.weekly_store import load_log
-from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
+from rag.retrieval_pipeline import format_retrieved_context, retrieve_bundle_for_node
 from tools.tavily_tool import tavily_search
 
 
@@ -378,8 +378,11 @@ def _article_driven_lesson(topic: str, candidate_words: list[str]) -> tuple[str,
 def english_coach_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
     recent = _recent_vocab()
-    rag_chunks = retrieve_for_node("english_coach_node", topic)
+    bundle = retrieve_bundle_for_node("english_coach_node", topic, state=state)
+    rag_chunks = bundle["chunks"]
     rag_context = format_retrieved_context(rag_chunks)
+    state.setdefault("retrieval_plans", {})["english_coach_node"] = bundle["plan"] or {}
+    state.setdefault("retrieval_traces", {})["english_coach_node"] = bundle["trace"]
     lesson_candidates = _candidate_words_from_lesson(state)
     article_candidates = _candidate_words_from_articles(state)
     preferred_candidates: list[str] = []

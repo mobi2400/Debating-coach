@@ -3,6 +3,7 @@ from __future__ import annotations
 from agents.rank_node import _is_explainer_article, _is_news_article, _is_reference_article
 from core.topic_utils import topic_name
 from memory.weekly_store import save_daily_digest
+from rag.retrieval_memory import compact_retrieval_snapshot
 
 
 FINAL_DOC_CHAR_LIMIT = 12000
@@ -586,6 +587,7 @@ def format_node(state: dict) -> dict:
             "english_lesson": state.get("english_lesson", ""),
             "vocab_words": state.get("vocab_words", []),
             "word_roots": state.get("word_roots", []),
+            "retrieval_memory": compact_retrieval_snapshot(state),
         },
     )
 

@@ -45,6 +45,8 @@ class AgentState(TypedDict):
     # Router control
     task_type: str
     article_length: int
+    retrieval_plans: dict
+    retrieval_traces: dict
 
     # Night agent
     studied_today: Optional[bool]

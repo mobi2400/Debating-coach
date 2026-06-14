@@ -24,11 +24,16 @@ try:
 except ImportError:  # pragma: no cover - exercised in bootstrap environments
     Chroma = None
 
+from rag.context_packer import pack_retrieved_context, reorder_for_long_context
+from rag.document_index import load_document_summary_index, select_document_ids
 from rag.embeddings import EMBEDDING_MAP, embeddings_available
+from rag.query_planner import build_query_plan
+from rag.reranker import chunk_content, rerank_chunks
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DIR = BASE_DIR / "chroma"
 FAISS_DIR = BASE_DIR / "faiss"
+DOCUMENT_INDEX_FILE = FAISS_DIR / "document_index" / "document_summaries.json"
 
 RETRIEVAL_CONFIG = {
     "rag_enrich_node": {
@@ -80,6 +85,11 @@ def _load_vector_store(store_name: str):
             )
 
     return None
+
+
+@lru_cache(maxsize=1)
+def _load_document_index() -> dict[str, list[dict]]:
+    return load_document_summary_index(DOCUMENT_INDEX_FILE)
 
 
 STORE_SECTION_LABELS = {
@@ -156,28 +166,114 @@ def _build_retriever(store_name: str, config: dict):
     return vector_store.as_retriever(search_type=mode, search_kwargs=search_kwargs)
 
 
-def retrieve_for_node(node_name: str, query: str) -> dict:
+def _oversampled_config(config: dict) -> dict:
+    expanded = dict(config)
+    base_k = int(config.get("k") or 4)
+    expanded["k"] = max(base_k * 4, int(config.get("fetch_k") or 0), 12)
+    if expanded.get("mode") == "mmr":
+        expanded["fetch_k"] = max(int(config.get("fetch_k") or 0), expanded["k"])
+    return expanded
+
+
+def _filter_chunks_to_documents(chunks: list, candidate_document_ids: list[str]) -> list:
+    if not candidate_document_ids:
+        return list(chunks or [])
+
+    allowed = set(candidate_document_ids)
+    filtered = []
+    for chunk in chunks or []:
+        _, metadata = chunk_content(chunk)
+        if str(metadata.get("document_id") or "") in allowed:
+            filtered.append(chunk)
+    return filtered
+
+
+def retrieve_for_node(node_name: str, query: str, state: dict | None = None, plan: dict | None = None) -> dict:
     """Returns {store_name: [chunks, ...]} so callers can preserve lane labels.
 
     Plain list iteration still works because `format_retrieved_context` accepts
     either a dict-of-lanes or a flat list.
     """
+    if plan is None and state is not None:
+        try:
+            plan = build_query_plan(node_name, state)
+        except Exception as exc:
+            print(f"[Retrieval] query plan failed for {node_name}: {exc}")
+            plan = None
+
     node_config = RETRIEVAL_CONFIG.get(node_name, {})
     retrieved: dict[str, list] = {}
 
     for store_name, config in node_config.items():
-        retriever = _build_retriever(store_name, config)
+        preferred_stores = (plan or {}).get("preferred_stores", []) or []
+        if preferred_stores and store_name not in preferred_stores:
+            continue
+
+        retriever = _build_retriever(store_name, _oversampled_config(config))
         if retriever is None:
             continue
 
         try:
-            retrieved[store_name] = retriever.invoke(query)
+            store_query = ((plan or {}).get("store_queries", {}) or {}).get(store_name, query)
+            candidate_document_ids = select_document_ids(
+                _load_document_index(),
+                store_name,
+                store_query,
+                plan=plan,
+                limit=max(int(config.get("k") or 4), 4),
+            )
+            raw_chunks = retriever.invoke(store_query)
+            filtered_chunks = _filter_chunks_to_documents(raw_chunks, candidate_document_ids)
+            if filtered_chunks:
+                raw_chunks = filtered_chunks
+            limit = int(config.get("k") or len(raw_chunks) or 0)
+            reranked = rerank_chunks(raw_chunks, store_query, plan, store_name, limit or len(raw_chunks))
+            retrieved[store_name] = reorder_for_long_context(reranked, store_query, plan, store_name)
         except Exception as exc:
             print(f"[Retrieval] {store_name} failed for {node_name}: {exc}")
             BROKEN_STORES.add(store_name)
             retrieved[store_name] = []
 
     return retrieved
+
+
+def build_retrieval_trace(chunks: dict[str, list], query_plan: dict | None = None) -> dict:
+    trace: dict[str, list[dict]] = {}
+    queries = (query_plan or {}).get("store_queries", {}) or {}
+
+    for store_name, store_chunks in (chunks or {}).items():
+        store_trace: list[dict] = []
+        for chunk in store_chunks[:5]:
+            content, metadata = chunk_content(chunk)
+            store_trace.append(
+                {
+                    "source_ref": metadata.get("source_path")
+                    or metadata.get("url")
+                    or metadata.get("video_id")
+                    or "unknown",
+                    "document_id": metadata.get("document_id"),
+                    "source_class": metadata.get("source_class"),
+                    "topic_family": metadata.get("topic_family"),
+                    "debate_utility": metadata.get("debate_utility"),
+                    "query": queries.get(store_name, ""),
+                    "preview": " ".join(content.split())[:180],
+                }
+            )
+        trace[store_name] = store_trace
+    return trace
+
+
+def retrieve_bundle_for_node(node_name: str, query: str, state: dict | None = None, plan: dict | None = None) -> dict:
+    if plan is None and state is not None:
+        try:
+            plan = build_query_plan(node_name, state)
+        except Exception as exc:
+            print(f"[Retrieval] query plan failed for {node_name}: {exc}")
+            plan = None
+
+    chunks = retrieve_for_node(node_name, query, state=state, plan=plan)
+    trace = build_retrieval_trace(chunks, query_plan=plan)
+    return {"chunks": chunks, "plan": plan, "trace": trace}
 
 
 def _chunk_content(chunk) -> tuple[str, dict]:
@@ -210,12 +306,6 @@ def format_retrieved_context(chunks) -> str:
     headers the prompts depend on) or a flat list (legacy callers).
     """
     if isinstance(chunks, dict):
-        sections = []
-        for store_name, store_chunks in chunks.items():
-            label = STORE_SECTION_LABELS.get(store_name, store_name.upper())
-            block = _format_lane(label, store_chunks)
-            if block:
-                sections.append(block)
-        return "\n\n".join(sections).strip()
+        return pack_retrieved_context(chunks, labels=STORE_SECTION_LABELS)
 
     return _format_lane("RETRIEVED CONTEXT", list(chunks)).strip()
