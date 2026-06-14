@@ -3,6 +3,7 @@ import json
 from core.fallback import get_llm_with_fallback
 from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
+from rag.evidence_organizer import format_structured_evidence, organize_evidence
 from rag.retrieval_pipeline import format_retrieved_context, retrieve_bundle_for_node
 
 
@@ -68,8 +69,11 @@ def argue_node(state: dict) -> dict:
     bundle = retrieve_bundle_for_node("argue_node", query, state=state)
     rag_chunks = bundle["chunks"]
     rag_context = format_retrieved_context(rag_chunks)
+    structured_evidence = organize_evidence(rag_chunks)
+    structured_context = format_structured_evidence(structured_evidence, per_section=2)
     state.setdefault("retrieval_plans", {})["argue_node"] = bundle["plan"] or {}
     state.setdefault("retrieval_traces", {})["argue_node"] = bundle["trace"]
+    state["argument_evidence"] = structured_evidence
 
     default_arguments = _heuristic_arguments(topic, summaries, rag_context, topic_info)
 
@@ -85,7 +89,8 @@ def argue_node(state: dict) -> dict:
         f"Topic: {topic}\n"
         f"Lead case: {lead_title}\n"
         f"Summaries: {json.dumps(summaries, ensure_ascii=False)}\n"
-        f"RAG context: {rag_context[:MAX_RAG_CHARS]}"
+        f"Structured evidence:\n{structured_context[:MAX_RAG_CHARS]}\n\n"
+        f"Fallback RAG context: {rag_context[:MAX_RAG_CHARS]}"
     )
 
     def _normalize_arg_list(value, fallback: list[str]) -> list[str]:

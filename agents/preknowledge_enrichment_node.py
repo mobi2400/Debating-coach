@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from core.topic_utils import topic_name
+from rag.evidence_organizer import format_structured_evidence, organize_evidence
 from rag.retrieval_pipeline import format_retrieved_context, retrieve_bundle_for_node
 from tools.wiki_tool import wiki_search
 
@@ -31,10 +32,14 @@ def preknowledge_enrichment_node(state: dict) -> dict:
     bundle = retrieve_bundle_for_node("rag_enrich_node", rag_query, state=state)
     rag_chunks = bundle["chunks"]
     rag_context = format_retrieved_context(rag_chunks)
+    structured_evidence = organize_evidence(rag_chunks)
+    structured_context = format_structured_evidence(structured_evidence, per_section=2)
     state.setdefault("retrieval_plans", {})["preknowledge_enrichment_node"] = bundle["plan"] or {}
     state.setdefault("retrieval_traces", {})["preknowledge_enrichment_node"] = bundle["trace"]
 
     state["reference_background"] = reference_background[:2000]
     state["enriched_context"] = rag_context
+    state["preknowledge_evidence"] = structured_evidence
+    state["preknowledge_context"] = structured_context
     state["preknowledge_notes"] = _background_sentences(reference_background, limit=3)
     return state

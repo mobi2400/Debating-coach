@@ -56,12 +56,14 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
     YouTubeTranscriptApi = None
 
 from rag.chunking_strategy import get_splitter
+from rag.document_index import build_document_summary_index, save_document_summary_index
 from rag.embeddings import EMBEDDING_MAP
 from rag.metadata import build_metadata
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DIR = BASE_DIR / "chroma"
 FAISS_DIR = BASE_DIR / "faiss"
+DOCUMENT_INDEX_FILE = FAISS_DIR / "document_index" / "document_summaries.json"
 SOURCES_FILE = BASE_DIR / "rag" / "sources.json"
 
 STORE_ROUTING = {
@@ -254,6 +256,11 @@ def build_knowledge_base(all_docs: list[dict]) -> dict:
     grouped_docs = {"knowledge_db": [], "style_db": [], "reasoning_db": [], "english_db": []}
     for doc in all_docs:
         grouped_docs[_resolve_store_name(doc["doc_type"])].extend(doc["documents"])
+
+    save_document_summary_index(
+        build_document_summary_index(grouped_docs),
+        DOCUMENT_INDEX_FILE,
+    )
 
     stores = {}
     for store_name, documents in grouped_docs.items():

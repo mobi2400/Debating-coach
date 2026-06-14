@@ -3,6 +3,7 @@ import json
 from core.fallback import get_llm_with_fallback
 from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
+from rag.evidence_organizer import format_structured_evidence, organize_evidence
 from rag.retrieval_pipeline import format_retrieved_context, retrieve_bundle_for_node
 
 
@@ -124,8 +125,11 @@ def coach_node(state: dict) -> dict:
     bundle = retrieve_bundle_for_node("coach_node", query, state=state)
     rag_chunks = bundle["chunks"]
     rag_context = format_retrieved_context(rag_chunks)
+    structured_evidence = organize_evidence(rag_chunks)
+    structured_context = format_structured_evidence(structured_evidence, per_section=2)
     state.setdefault("retrieval_plans", {})["coach_node"] = bundle["plan"] or {}
     state.setdefault("retrieval_traces", {})["coach_node"] = bundle["trace"]
+    state["coach_evidence"] = structured_evidence
 
     default_packet = _heuristic_debate_packet(
         topic,
@@ -151,6 +155,7 @@ def coach_node(state: dict) -> dict:
         f"Summaries: {summaries}\n"
         f"Arguments: {state.get('arguments', {})}\n"
         f"Topic info: {topic_info}\n"
+        f"Structured evidence:\n{structured_context[:MAX_RAG_CHARS]}\n\n"
         f"Style RAG context: {rag_context[:MAX_RAG_CHARS]}"
     )
 

@@ -25,6 +25,7 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
     Chroma = None
 
 from rag.context_packer import pack_retrieved_context, reorder_for_long_context
+from rag.document_index import load_document_summary_index, select_document_ids
 from rag.embeddings import EMBEDDING_MAP, embeddings_available
 from rag.query_planner import build_query_plan
 from rag.reranker import chunk_content, rerank_chunks
@@ -32,6 +33,7 @@ from rag.reranker import chunk_content, rerank_chunks
 BASE_DIR = Path(__file__).resolve().parents[1]
 CHROMA_DIR = BASE_DIR / "chroma"
 FAISS_DIR = BASE_DIR / "faiss"
+DOCUMENT_INDEX_FILE = FAISS_DIR / "document_index" / "document_summaries.json"
 
 RETRIEVAL_CONFIG = {
     "rag_enrich_node": {
@@ -83,6 +85,11 @@ def _load_vector_store(store_name: str):
             )
 
     return None
+
+
+@lru_cache(maxsize=1)
+def _load_document_index() -> dict[str, list[dict]]:
+    return load_document_summary_index(DOCUMENT_INDEX_FILE)
 
 
 STORE_SECTION_LABELS = {
@@ -159,6 +166,28 @@ def _build_retriever(store_name: str, config: dict):
     return vector_store.as_retriever(search_type=mode, search_kwargs=search_kwargs)
 
 
+def _oversampled_config(config: dict) -> dict:
+    expanded = dict(config)
+    base_k = int(config.get("k") or 4)
+    expanded["k"] = max(base_k * 4, int(config.get("fetch_k") or 0), 12)
+    if expanded.get("mode") == "mmr":
+        expanded["fetch_k"] = max(int(config.get("fetch_k") or 0), expanded["k"])
+    return expanded
+
+
+def _filter_chunks_to_documents(chunks: list, candidate_document_ids: list[str]) -> list:
+    if not candidate_document_ids:
+        return list(chunks or [])
+
+    allowed = set(candidate_document_ids)
+    filtered = []
+    for chunk in chunks or []:
+        _, metadata = chunk_content(chunk)
+        if str(metadata.get("document_id") or "") in allowed:
+            filtered.append(chunk)
+    return filtered
+
+
 def retrieve_for_node(node_name: str, query: str, state: dict | None = None, plan: dict | None = None) -> dict:
     """Returns {store_name: [chunks, ...]} so callers can preserve lane labels.
 
@@ -180,13 +209,23 @@ def retrieve_for_node(node_name: str, query: str, state: dict | None = None, pla
         if preferred_stores and store_name not in preferred_stores:
             continue
 
-        retriever = _build_retriever(store_name, config)
+        retriever = _build_retriever(store_name, _oversampled_config(config))
         if retriever is None:
             continue
 
         try:
             store_query = ((plan or {}).get("store_queries", {}) or {}).get(store_name, query)
+            candidate_document_ids = select_document_ids(
+                _load_document_index(),
+                store_name,
+                store_query,
+                plan=plan,
+                limit=max(int(config.get("k") or 4), 4),
+            )
             raw_chunks = retriever.invoke(store_query)
+            filtered_chunks = _filter_chunks_to_documents(raw_chunks, candidate_document_ids)
+            if filtered_chunks:
+                raw_chunks = filtered_chunks
             limit = int(config.get("k") or len(raw_chunks) or 0)
             reranked = rerank_chunks(raw_chunks, store_query, plan, store_name, limit or len(raw_chunks))
             retrieved[store_name] = reorder_for_long_context(reranked, store_query, plan, store_name)
