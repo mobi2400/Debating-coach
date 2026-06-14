@@ -10,6 +10,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from rag.context_packer import reorder_for_long_context
 from rag.document_index import build_document_summary_records
 from rag.metadata import build_metadata
+from rag.retrieval_pipeline import build_retrieval_trace
 
 
 def _chunk(text: str, metadata: dict) -> dict:
@@ -52,3 +53,15 @@ def test_document_summary_records_group_by_document_id():
     assert len(records) == 1
     assert records[0]["document_id"] == meta["document_id"]
     assert records[0]["chunk_count"] == 2
+
+
+def test_build_retrieval_trace_keeps_source_and_query_context():
+    meta = build_metadata("news", "https://example.com/story", {"url": "https://example.com/story", "title": "Ukraine sovereignty"})
+    chunks = {"knowledge_db": [_chunk("Evidence about sovereignty and deterrence.", meta)]}
+    plan = {"store_queries": {"knowledge_db": "ukraine sovereignty deterrence"}}
+
+    trace = build_retrieval_trace(chunks, query_plan=plan)
+
+    assert "knowledge_db" in trace
+    assert trace["knowledge_db"][0]["source_ref"] == "https://example.com/story"
+    assert "ukraine sovereignty deterrence" in trace["knowledge_db"][0]["query"]

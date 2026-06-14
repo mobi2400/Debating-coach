@@ -7,7 +7,7 @@ from core.fallback import get_llm_with_fallback
 from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
 from memory.weekly_store import load_log
-from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
+from rag.retrieval_pipeline import format_retrieved_context, retrieve_bundle_for_node
 from tools.tavily_tool import tavily_search
 
 
@@ -149,9 +149,10 @@ def vocab_enrichment_node(state: dict) -> dict:
     recent = _recent_vocab()
 
     companion_articles = tavily_search(f"{title or topic} debate analysis mechanism implications language")[:3]
-    debate_rag = format_retrieved_context(
-        retrieve_for_node("coach_node", f"{topic} {title} debate language framing", state=state)
-    )
+    bundle = retrieve_bundle_for_node("coach_node", f"{topic} {title} debate language framing", state=state)
+    debate_rag = format_retrieved_context(bundle["chunks"])
+    state.setdefault("retrieval_plans", {})["vocab_enrichment_node"] = bundle["plan"] or {}
+    state.setdefault("retrieval_traces", {})["vocab_enrichment_node"] = bundle["trace"]
     context_lines, candidate_words = _context_lines(lead_case, companion_articles, debate_rag)
     candidate_words = [word for word in candidate_words if word not in recent]
     fallback_words, fallback_notes = _heuristic_vocab(topic, candidate_words)

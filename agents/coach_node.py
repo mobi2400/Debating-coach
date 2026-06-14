@@ -3,7 +3,7 @@ import json
 from core.fallback import get_llm_with_fallback
 from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
-from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
+from rag.retrieval_pipeline import format_retrieved_context, retrieve_bundle_for_node
 
 
 MAX_RAG_CHARS = 900
@@ -121,8 +121,11 @@ def coach_node(state: dict) -> dict:
     query = _build_debate_query(topic, topic_info, summaries, state.get("arguments", {}))
     if lead_title:
         query = f"{query} {lead_title}".strip()
-    rag_chunks = retrieve_for_node("coach_node", query, state=state)
+    bundle = retrieve_bundle_for_node("coach_node", query, state=state)
+    rag_chunks = bundle["chunks"]
     rag_context = format_retrieved_context(rag_chunks)
+    state.setdefault("retrieval_plans", {})["coach_node"] = bundle["plan"] or {}
+    state.setdefault("retrieval_traces", {})["coach_node"] = bundle["trace"]
 
     default_packet = _heuristic_debate_packet(
         topic,

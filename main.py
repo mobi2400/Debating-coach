@@ -80,6 +80,8 @@ def _initial_state(topic: str | dict) -> dict:
         "article_length": 0,
         "studied_today": None,
         "quiz_score": None,
+        "retrieval_plans": {},
+        "retrieval_traces": {},
     }
 
 

@@ -198,6 +198,45 @@ def retrieve_for_node(node_name: str, query: str, state: dict | None = None, pla
     return retrieved
 
 
+def build_retrieval_trace(chunks: dict[str, list], query_plan: dict | None = None) -> dict:
+    trace: dict[str, list[dict]] = {}
+    queries = (query_plan or {}).get("store_queries", {}) or {}
+
+    for store_name, store_chunks in (chunks or {}).items():
+        store_trace: list[dict] = []
+        for chunk in store_chunks[:5]:
+            content, metadata = chunk_content(chunk)
+            store_trace.append(
+                {
+                    "source_ref": metadata.get("source_path")
+                    or metadata.get("url")
+                    or metadata.get("video_id")
+                    or "unknown",
+                    "document_id": metadata.get("document_id"),
+                    "source_class": metadata.get("source_class"),
+                    "topic_family": metadata.get("topic_family"),
+                    "debate_utility": metadata.get("debate_utility"),
+                    "query": queries.get(store_name, ""),
+                    "preview": " ".join(content.split())[:180],
+                }
+            )
+        trace[store_name] = store_trace
+    return trace
+
+
+def retrieve_bundle_for_node(node_name: str, query: str, state: dict | None = None, plan: dict | None = None) -> dict:
+    if plan is None and state is not None:
+        try:
+            plan = build_query_plan(node_name, state)
+        except Exception as exc:
+            print(f"[Retrieval] query plan failed for {node_name}: {exc}")
+            plan = None
+
+    chunks = retrieve_for_node(node_name, query, state=state, plan=plan)
+    trace = build_retrieval_trace(chunks, query_plan=plan)
+    return {"chunks": chunks, "plan": plan, "trace": trace}
+
+
 def _chunk_content(chunk) -> tuple[str, dict]:
     if hasattr(chunk, "page_content"):
         return chunk.page_content, getattr(chunk, "metadata", {}) or {}

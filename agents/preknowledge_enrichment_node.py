@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from core.topic_utils import topic_name
-from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
+from rag.retrieval_pipeline import format_retrieved_context, retrieve_bundle_for_node
 from tools.wiki_tool import wiki_search
 
 
@@ -28,8 +28,11 @@ def preknowledge_enrichment_node(state: dict) -> dict:
         reference_background = str(state.get("reference_background", "")).strip()
 
     rag_query = f"{topic} prerequisites concepts framework {lead_title}".strip()
-    rag_chunks = retrieve_for_node("rag_enrich_node", rag_query, state=state)
+    bundle = retrieve_bundle_for_node("rag_enrich_node", rag_query, state=state)
+    rag_chunks = bundle["chunks"]
     rag_context = format_retrieved_context(rag_chunks)
+    state.setdefault("retrieval_plans", {})["preknowledge_enrichment_node"] = bundle["plan"] or {}
+    state.setdefault("retrieval_traces", {})["preknowledge_enrichment_node"] = bundle["trace"]
 
     state["reference_background"] = reference_background[:2000]
     state["enriched_context"] = rag_context

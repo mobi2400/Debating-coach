@@ -3,7 +3,7 @@ import json
 from core.fallback import get_llm_with_fallback
 from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
-from rag.retrieval_pipeline import format_retrieved_context, retrieve_for_node
+from rag.retrieval_pipeline import format_retrieved_context, retrieve_bundle_for_node
 
 
 MAX_RAG_CHARS = 1000
@@ -65,8 +65,11 @@ def argue_node(state: dict) -> dict:
     topic_info = state.get("topic_info", {}) or {}
     lead_title = str((state.get("lead_case") or {}).get("title", "")).strip()
     query = f"{topic} {lead_title}".strip()
-    rag_chunks = retrieve_for_node("argue_node", query, state=state)
+    bundle = retrieve_bundle_for_node("argue_node", query, state=state)
+    rag_chunks = bundle["chunks"]
     rag_context = format_retrieved_context(rag_chunks)
+    state.setdefault("retrieval_plans", {})["argue_node"] = bundle["plan"] or {}
+    state.setdefault("retrieval_traces", {})["argue_node"] = bundle["trace"]
 
     default_arguments = _heuristic_arguments(topic, summaries, rag_context, topic_info)
 
