@@ -59,7 +59,7 @@ def _heuristic_debate_packet(topic: str, arguments: dict, summaries: list[str], 
     unique_angle = (
         missed_angles[0]
         if missed_angles
-        else (f"Frame the round around the generated motion {motion_text!r} and win the comparison on incentives, legitimacy, and reversibility." if motion_text else f"Frame {topic} as a clash between principle and implementation, then win on whichever side has better long-term incentives.")
+        else (f"Frame the round around the generated motion '{motion_text}' and win the comparison on incentives, legitimacy, and reversibility." if motion_text else f"Frame {topic} as a clash between principle and implementation, then win on whichever side has better long-term incentives.")
     )
     opening_line = (
         f"{opening} Use {live_cases[0]} as the concrete proof that this is not abstract theory."
@@ -84,19 +84,9 @@ def _heuristic_debate_packet(topic: str, arguments: dict, summaries: list[str], 
 
     return {
         "unique_angle": unique_angle,
-        "value_clash": (
-            f"The deepest clash is between {concepts[0] if concepts else 'legitimacy'} and {concepts[1] if len(concepts) > 1 else 'order'}."
-            if concepts
-            else f"The deepest clash is between principle and implementation in {topic}."
-        ),
-        "burden_of_proof": (
-            prop_burdens[0] if prop_burdens else "Your burden is to prove not just that the principle sounds attractive, but that the mechanism survives contact with power, incentives, and precedent."
-        ),
-        "mechanism": (
-            mechanisms[0]
-            if mechanisms
-            else "Track who has incentives to defect, who enforces the norm, and why that enforcement sticks."
-        ),
+        "value_clash": clash_axes[0] if clash_axes else (f"The deepest clash is between {concepts[0] if concepts else 'legitimacy'} and {concepts[1] if len(concepts) > 1 else 'order'}." if concepts else f"The deepest clash is between principle and implementation in {topic}."),
+        "burden_of_proof": prop_burdens[0] if prop_burdens else "Your burden is to prove not just that the principle sounds attractive, but that the mechanism survives contact with power, incentives, and precedent.",
+        "mechanism": mechanisms[0] if mechanisms else "Track who has incentives to defect, who enforces the norm, and why that enforcement sticks.",
         "open_with_this": (f"Start by defining the motion: {motion_text}. Then explain why the real clash is {clash_axes[0] if clash_axes else 'principle versus implementation'}." if motion_text else opening_line),
         "claim_warrant_impact": claim_block,
         "top_rebuttal": (f"If they dodge the motion wording, drag them back to the burden: {opp_burdens[0]}" if opp_burdens else rebuttal),
@@ -121,6 +111,99 @@ def _packet_to_block(packet: dict) -> str:
     )
 
 
+def _article_examples(state: dict) -> list[str]:
+    lead_case = state.get("lead_case", {}) or {}
+    article_context = state.get("article_context", {}) or {}
+    examples: list[str] = []
+    for value in (lead_case.get("title", ""), lead_case.get("content", "")):
+        clean = " ".join(str(value).split()).strip()
+        if clean:
+            examples.append(clean[:220])
+    for item in (article_context.get("notes", []) if isinstance(article_context, dict) else [])[:3]:
+        clean = " ".join(str(item).split()).strip()
+        if clean and clean not in examples:
+            examples.append(clean[:220])
+    return examples[:4]
+
+
+def _teaching_block(argument: str, side: str, index: int, drafted_motion: dict, packet: dict, examples: list[str]) -> dict:
+    motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
+    prop_burden = (drafted_motion.get("prop_burden", []) or [""])[0]
+    opp_burden = (drafted_motion.get("opp_burden", []) or [""])[0]
+    example = examples[min(index, len(examples) - 1)] if examples else "Use the strongest article detail to prove the mechanism."
+
+    if side == "for":
+        explanation = (
+            f"This is the proposition case under the motion '{motion_text}'. You are not merely praising the principle; you must show why this world solves a real structural problem better than the status quo."
+            if motion_text else
+            "This is the proposition case. You must show why your world creates a better long-term outcome, not just a nicer slogan."
+        )
+        mechanism = prop_burden or "Track the actor, the incentive change, and the downstream benefit step by step."
+        pushback = "Opposition will say your model is too idealistic, too costly, or too hard to implement consistently."
+        rebuttal = f"Answer by narrowing the mechanism: show why {example} demonstrates that the status quo already imposes costs, so action is not risk-free in the first place."
+    else:
+        explanation = (
+            f"This is the opposition case against the motion '{motion_text}'. Your job is to show where the promised gains break once real incentives, backlash, or institutional limits appear."
+            if motion_text else
+            "This is the opposition case. Your job is to show where the promised benefits collapse in practice."
+        )
+        mechanism = opp_burden or "Interrogate compliance, incentives, and second-order effects rather than accepting the framing on trust."
+        pushback = "Proposition will say the principle is too important to reject just because implementation is imperfect."
+        rebuttal = f"Answer that judges compare worlds, not slogans: use {example} to show why bad implementation changes who bears harm first and why that matters more."
+
+    return {
+        "claim": argument,
+        "explanation": explanation,
+        "mechanism": mechanism,
+        "why_it_matters": "This matters because rounds are won by proving comparative impact, reversibility of harm, and who carries the burden in the real world.",
+        "article_example": example,
+        "likely_pushback": pushback,
+        "rebuttal": rebuttal,
+    }
+
+
+def _build_debate_teaching(state: dict, packet: dict, drafted_motion: dict) -> dict:
+    arguments = state.get("arguments", {}) or {}
+    examples = _article_examples(state)
+    for_blocks = [_teaching_block(argument, "for", index, drafted_motion, packet, examples) for index, argument in enumerate((arguments.get("for") or [])[:3])]
+    against_blocks = [_teaching_block(argument, "against", index, drafted_motion, packet, examples) for index, argument in enumerate((arguments.get("against") or [])[:3])]
+
+    motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
+    clash_axes = drafted_motion.get("likely_clash_axis", []) or []
+    return {
+        "motion_explanation": (
+            f"The motion is asking you to debate whether the live case should be judged through the lens of '{clash_axes[0]}' and whether the proposed actor should carry that burden."
+            if motion_text and clash_axes else
+            f"The motion '{motion_text}' asks what standard should decide the round and who must justify the cost of acting."
+            if motion_text else
+            "The round is about what standard should decide the conflict and who must justify the cost of acting."
+        ),
+        "prop_burden": drafted_motion.get("prop_burden", []) or [packet.get("burden_of_proof", "")],
+        "opp_burden": drafted_motion.get("opp_burden", []) or ["Show why the comparative world is safer or more realistic."],
+        "for_arguments": for_blocks,
+        "against_arguments": against_blocks,
+        "core_clash": {
+            "what_the_round_is_really_about": clash_axes[0] if clash_axes else packet.get("value_clash", "principle versus implementation"),
+            "what_prop_must_win": (drafted_motion.get("prop_burden", []) or [packet.get("burden_of_proof", "")])[0],
+            "what_opp_must_win": (drafted_motion.get("opp_burden", []) or [packet.get("top_rebuttal", "")])[0],
+        },
+        "mechanism": {"step_by_step_logic": [packet.get("mechanism", ""), "Show the actor, the incentive change, the immediate effect, and the long-term consequence."]},
+        "framing": {
+            "prop_frame": packet.get("open_with_this", ""),
+            "opp_frame": packet.get("top_rebuttal", ""),
+            "strategic_note": packet.get("judge_language", ""),
+        },
+        "rebuttal_drills": [
+            {
+                "if_they_say": for_blocks[0]["likely_pushback"] if for_blocks else "They claim the principle is obviously good.",
+                "answer_with": against_blocks[0]["rebuttal"] if against_blocks else packet.get("top_rebuttal", ""),
+                "why_that_answer_works": "It drags the round back from slogans to mechanism, comparative burden, and concrete article evidence.",
+            }
+        ],
+        "coach_note": packet.get("unique_angle", ""),
+    }
+
+
 def coach_node(state: dict) -> dict:
     state["task_type"] = "debate"
     topic = topic_name(state.get("topic"))
@@ -140,18 +223,13 @@ def coach_node(state: dict) -> dict:
     state.setdefault("retrieval_traces", {})["coach_node"] = bundle["trace"]
     state["coach_evidence"] = structured_evidence
 
-    default_packet = _heuristic_debate_packet(
-        topic,
-        state.get("arguments", {}),
-        summaries,
-        topic_info,
-        drafted_motion,
-    )
+    default_packet = _heuristic_debate_packet(topic, state.get("arguments", {}), summaries, topic_info, drafted_motion)
     default_coaching = _packet_to_block(default_packet)
 
     if not summaries and not rag_context:
         state["debate_packet"] = default_packet
         state["debate_angle"] = default_coaching
+        state["debate_teaching"] = _build_debate_teaching(state, default_packet, drafted_motion)
         return state
 
     prompt = (
@@ -192,8 +270,10 @@ def coach_node(state: dict) -> dict:
         }
         state["debate_packet"] = packet
         state["debate_angle"] = _packet_to_block(packet)
+        state["debate_teaching"] = _build_debate_teaching(state, packet, drafted_motion)
     except Exception:
         state["debate_packet"] = default_packet
         state["debate_angle"] = default_coaching
+        state["debate_teaching"] = _build_debate_teaching(state, default_packet, drafted_motion)
 
     return state

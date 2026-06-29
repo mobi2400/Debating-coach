@@ -364,7 +364,7 @@ def _heuristic_english_lesson(topic: str, rag_context: str) -> tuple[str, list[s
         "ENGLISH POWER",
         f"Word: {primary_word}",
         f"Meaning: {_guess_meaning(primary_word)}",
-        f"Upgrade: Use '{primary_word}' instead of vague words like '{primary.get('upgrade_from', 'good')}'.",
+        f"Upgrade: Use '{primary_word}' instead of vague words like '{primary.get('upgrade_from', 'good')}' when explaining {topic}.",
         f"Debate line: {primary.get('example')}",
         f"Bonus word: {support_word} = {_guess_meaning(support_word)}",
         f"Root: {root} -> learn the root and use one word from it in tomorrow's speech.",
@@ -406,11 +406,16 @@ def english_coach_node(state: dict) -> dict:
         clean = str(word).strip().lower()
         if clean and clean not in preferred_candidates:
             preferred_candidates.append(clean)
+    vocabulary_output = state.get("vocabulary_output", {}) or {}
+    selected_vocab = vocabulary_output.get("selected_words", []) if isinstance(vocabulary_output, dict) else []
     default_lesson, default_words, default_roots = _heuristic_english_lesson(topic, rag_context)
-    if preferred_candidates:
+    if selected_vocab:
+        default_words = [str(item.get("word", "")).strip().lower() for item in selected_vocab if str(item.get("word", "")).strip()][:2]
+        default_roots = [word[:4] for word in default_words[:2]] or default_roots
+    elif preferred_candidates:
         default_lesson, default_words, default_roots = _article_driven_lesson(topic, preferred_candidates)
     fallback_pool = [item["word"] for item in _fresh_word_pool()]
-    default_words = _dedupe_fresh_words(default_words, recent, fallback_pool)
+    default_words = _dedupe_fresh_words(default_words, recent, fallback_pool, limit=2)[:2]
     default_roots = [word[:4] for word in default_words[:2]] or default_roots
 
     if not rag_context and not preferred_candidates:
@@ -428,7 +433,7 @@ def english_coach_node(state: dict) -> dict:
     prompt = (
         "You are teaching English for a debate student.\n"
         "Return JSON only with keys: english_lesson, vocab_words, word_roots.\n"
-        "Teach 3-5 useful words or roots and connect them to speaking, argument precision, or specification knowledge.\n"
+        "Teach 1-2 useful words only and connect them to speaking, argument precision, or specification knowledge.\n"
         "Do not repeat stale words from recent lessons if fresh article-derived words are available.\n"
         "Prefer high-utility debate words that already appear in today's drafted lesson material before reaching for generic vocabulary.\n"
         "The english_lesson should include lines starting with Word:, Meaning:, Upgrade:, Debate line:, Bonus word:, Root:.\n\n"
@@ -455,7 +460,7 @@ def english_coach_node(state: dict) -> dict:
                 clean = str(word).strip().lower()
                 if clean and clean not in deduped:
                     deduped.append(clean)
-                if len(deduped) >= 3:
+                if len(deduped) >= 2:
                     break
             vocab_words = deduped
         vocab_words = _dedupe_fresh_words(vocab_words, recent, fallback_pool)
@@ -465,9 +470,9 @@ def english_coach_node(state: dict) -> dict:
     except Exception:
         state["english_lesson"] = default_lesson
         if preferred_candidates:
-            state["vocab_words"] = _dedupe_fresh_words(preferred_candidates + default_words, recent, fallback_pool)
+            state["vocab_words"] = _dedupe_fresh_words(preferred_candidates + default_words, recent, fallback_pool, limit=2)[:2]
         else:
-            state["vocab_words"] = default_words
+            state["vocab_words"] = default_words[:2]
         state["word_roots"] = [word[:4] for word in state["vocab_words"][:2]] or default_roots
 
     if state.get("vocab_words"):

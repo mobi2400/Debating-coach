@@ -147,6 +147,8 @@ def run_daily_e2e_test():
     assert result.get("topic_motion_set"), "Phase 2 must populate topic_motion_set"
     assert result.get("motion_intelligence"), "Phase 2 must populate motion_intelligence"
     assert result.get("drafted_motion"), "Phase 2 must populate drafted_motion"
+    assert result.get("debate_teaching"), "Phase 3 must populate debate_teaching"
+    assert result.get("vocabulary_output"), "Phase 3 must populate vocabulary_output"
     assert result.get("preknowledge_notes"), "topic foundation should still populate legacy preknowledge notes"
     assert result["summaries"], "summarize_node should produce summaries"
     assert result["arguments"].get("for") and len(result["arguments"]["for"]) == 3
