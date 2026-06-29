@@ -62,6 +62,8 @@ def _initial_state(topic: str | dict) -> dict:
         "topic_info": {},
         "topic_foundation": {},
         "article_context": {},
+        "topic_motion_set": {},
+        "motion_intelligence": {},
         "drafted_motion": {},
         "debate_teaching": {},
         "vocabulary_output": {},

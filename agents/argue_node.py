@@ -18,14 +18,19 @@ def _topic_info_list(topic_info: dict, key: str, limit: int = 2) -> list[str]:
     return [str(item).strip() for item in values if str(item).strip()][:limit]
 
 
-def _heuristic_arguments(topic: str, summaries: list[str], rag_context: str, topic_info: dict | None = None) -> dict:
+def _heuristic_arguments(topic: str, summaries: list[str], rag_context: str, topic_info: dict | None = None, drafted_motion: dict | None = None) -> dict:
     topic_info = topic_info or {}
+    drafted_motion = drafted_motion or {}
     first_summary = summaries[0] if summaries else f"The topic {topic} has multiple legitimate framings."
     second_summary = summaries[1] if len(summaries) > 1 else first_summary
     frameworks = _topic_info_list(topic_info, "essential_theoretical_frameworks", 2)
     mechanisms = _topic_info_list(topic_info, "the_mechanisms_to_understand", 2)
     missed_angles = _topic_info_list(topic_info, "argument_angles_most_debaters_miss", 2)
     live_cases = _topic_info_list(topic_info, "live_case_studies_with_analytical_value", 1)
+
+    motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
+    prop_burden = drafted_motion.get("prop_burden", []) if isinstance(drafted_motion, dict) else []
+    opp_burden = drafted_motion.get("opp_burden", []) if isinstance(drafted_motion, dict) else []
 
     for_claim = frameworks[0] if frameworks else first_summary.splitlines()[0].lstrip("- ").strip()
     against_claim = mechanisms[0] if mechanisms else second_summary.splitlines()[0].lstrip("- ").strip()
@@ -46,13 +51,13 @@ def _heuristic_arguments(topic: str, summaries: list[str], rag_context: str, top
 
     return {
         "for": [
-            f"Defend {topic} by showing why this structure protects legitimacy, fairness, or long-term stability.",
-            for_claim,
+            (f"Under the motion {motion_text!r}, defend why the proposition world creates a better long-term outcome." if motion_text else f"Defend {topic} by showing why this structure protects legitimacy, fairness, or long-term stability."),
+            (prop_burden[0] if prop_burden else for_claim),
             weighing_hint,
         ],
         "against": [
-            f"Challenge {topic} by showing where implementation, incentives, or power asymmetry breaks the ideal story.",
-            against_claim,
+            (f"Challenge the motion {motion_text!r} by showing where implementation, incentives, or power asymmetry breaks the model." if motion_text else f"Challenge {topic} by showing where implementation, incentives, or power asymmetry breaks the ideal story."),
+            (opp_burden[0] if opp_burden else against_claim),
             "Interrogate second-order effects, incentives, and unintended consequences.",
         ],
         "middle": middle,
@@ -64,8 +69,10 @@ def argue_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
     summaries = state.get("summaries", [])[:MAX_SUMMARIES]
     topic_info = state.get("topic_info", {}) or {}
+    drafted_motion = state.get("drafted_motion", {}) or {}
     lead_title = str((state.get("lead_case") or {}).get("title", "")).strip()
-    query = f"{topic} {lead_title}".strip()
+    motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
+    query = f"{topic} {lead_title} {motion_text}".strip()
     bundle = retrieve_bundle_for_node("argue_node", query, state=state)
     rag_chunks = bundle["chunks"]
     rag_context = format_retrieved_context(rag_chunks)
@@ -75,7 +82,7 @@ def argue_node(state: dict) -> dict:
     state.setdefault("retrieval_traces", {})["argue_node"] = bundle["trace"]
     state["argument_evidence"] = structured_evidence
 
-    default_arguments = _heuristic_arguments(topic, summaries, rag_context, topic_info)
+    default_arguments = _heuristic_arguments(topic, summaries, rag_context, topic_info, drafted_motion)
 
     if not summaries and not rag_context:
         state["arguments"] = default_arguments
@@ -88,6 +95,7 @@ def argue_node(state: dict) -> dict:
         "'middle' must be one nuanced bridging position.\n\n"
         f"Topic: {topic}\n"
         f"Lead case: {lead_title}\n"
+        f"Generated motion: {motion_text}\n"
         f"Summaries: {json.dumps(summaries, ensure_ascii=False)}\n"
         f"Structured evidence:\n{structured_context[:MAX_RAG_CHARS]}\n\n"
         f"Fallback RAG context: {rag_context[:MAX_RAG_CHARS]}"

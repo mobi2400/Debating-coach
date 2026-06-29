@@ -393,6 +393,28 @@ def _vocab_session(state: dict, english: dict) -> list[str]:
     return lines[:5] or ["Power move: Replace a vague adjective with a precise mechanism word."]
 
 
+def _motion_section(state: dict) -> list[str]:
+    drafted_motion = state.get("drafted_motion", {}) or {}
+    motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
+    if not motion_text:
+        return []
+
+    lines = [motion_text]
+    clash_axes = drafted_motion.get("likely_clash_axis", []) or []
+    prop_burden = drafted_motion.get("prop_burden", []) or []
+    opp_burden = drafted_motion.get("opp_burden", []) or []
+    why_balanced = str(drafted_motion.get("why_this_motion_is_balanced", "")).strip()
+    if clash_axes:
+        lines.append(f"Main clash axis: {clash_axes[0]}")
+    if prop_burden:
+        lines.append(f"Proposition must prove: {_trim_block(prop_burden[0], 210)}")
+    if opp_burden:
+        lines.append(f"Opposition must prove: {_trim_block(opp_burden[0], 210)}")
+    if why_balanced:
+        lines.append(f"Why this is balanced: {_trim_block(why_balanced, 220)}")
+    return lines[:5]
+
+
 def _article_takeaway(state: dict, article_lines: list[str]) -> str:
     if len(article_lines) >= 3:
         return _trim_block(article_lines[2], 200)
@@ -544,6 +566,7 @@ def _heuristic_format(state: dict) -> str:
     english = _parse_english_lesson(state)
     pre_knowledge = _pre_knowledge_points(state)
     article_lines, _article = _article_section(state)
+    motion_lines = _motion_section(state)
     debate_lines = _explain_debate_lines(state)
     rebuttal_drills = _rebuttal_drills(state)
     weight_lines = _weight_language_lines()
@@ -591,6 +614,16 @@ def format_node(state: dict) -> dict:
     state["task_type"] = "format"
     topic = topic_name(state.get("topic"))
     pre_knowledge = _pre_knowledge_points(state)
+    pre_knowledge = _pre_knowledge_points(state)
+    article_lines, _article = _article_section(state)
+    motion_lines = _motion_section(state)
+    debate_lines = _explain_debate_lines(state)
+    state["final_sections"] = {
+        "pre_knowledge": pre_knowledge,
+        "article": article_lines,
+        "motion": motion_lines,
+        "debate": debate_lines,
+    }
     state["final_doc"] = _heuristic_format(state)
 
     save_daily_digest(
@@ -601,6 +634,8 @@ def format_node(state: dict) -> dict:
             "ranked_articles": state.get("ranked_articles", []),
             "summaries": state.get("summaries", []),
             "arguments": state.get("arguments", {}),
+            "drafted_motion": state.get("drafted_motion", {}),
+            "motion_intelligence": state.get("motion_intelligence", {}),
             "key_facts": state.get("key_facts", []),
             "concepts": state.get("concepts", []),
             "debate_angle": state.get("debate_angle", ""),

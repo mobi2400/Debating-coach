@@ -8,6 +8,8 @@ class AgentState(TypedDict):
     topic_info: dict
     topic_foundation: dict
     article_context: dict
+    topic_motion_set: dict
+    motion_intelligence: dict
     drafted_motion: dict
     debate_teaching: dict
     vocabulary_output: dict

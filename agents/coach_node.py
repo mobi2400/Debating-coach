@@ -18,11 +18,13 @@ def _topic_info_list(topic_info: dict, key: str, limit: int = 2) -> list[str]:
     return [str(item).strip() for item in values if str(item).strip()][:limit]
 
 
-def _build_debate_query(topic: str, topic_info: dict, summaries: list[str], arguments: dict) -> str:
+def _build_debate_query(topic: str, topic_info: dict, summaries: list[str], arguments: dict, drafted_motion: dict | None = None) -> str:
     live_case = _topic_info_list(topic_info, "live_case_studies_with_analytical_value", 1)
     frameworks = _topic_info_list(topic_info, "essential_theoretical_frameworks", 2)
     concepts = _topic_info_list(topic_info, "key_concepts_own_these_precisely", 2)
     recurring = _topic_info_list(topic_info, "recurring_motions_at_wudc_level", 1)
+    drafted_motion = drafted_motion or {}
+    motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
     pieces = [
         topic,
         "value clash burden of proof mechanism rebuttal weighing WUDC matter file",
@@ -32,18 +34,24 @@ def _build_debate_query(topic: str, topic_info: dict, summaries: list[str], argu
         " | ".join(frameworks),
         " | ".join(concepts),
         recurring[0] if recurring else "",
+        motion_text,
     ]
     return " ".join(piece for piece in pieces if piece).strip()
 
 
-def _heuristic_debate_packet(topic: str, arguments: dict, summaries: list[str], topic_info: dict | None = None) -> dict:
+def _heuristic_debate_packet(topic: str, arguments: dict, summaries: list[str], topic_info: dict | None = None, drafted_motion: dict | None = None) -> dict:
     topic_info = topic_info or {}
+    drafted_motion = drafted_motion or {}
     frameworks = _topic_info_list(topic_info, "essential_theoretical_frameworks", 1)
     concepts = _topic_info_list(topic_info, "key_concepts_own_these_precisely", 2)
     missed_angles = _topic_info_list(topic_info, "argument_angles_most_debaters_miss", 1)
     live_cases = _topic_info_list(topic_info, "live_case_studies_with_analytical_value", 1)
     recurring = _topic_info_list(topic_info, "recurring_motions_at_wudc_level", 1)
     mechanisms = _topic_info_list(topic_info, "the_mechanisms_to_understand", 2)
+    motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
+    prop_burdens = drafted_motion.get("prop_burden", []) if isinstance(drafted_motion, dict) else []
+    opp_burdens = drafted_motion.get("opp_burden", []) if isinstance(drafted_motion, dict) else []
+    clash_axes = drafted_motion.get("likely_clash_axis", []) if isinstance(drafted_motion, dict) else []
     opening = arguments.get("for", [f"{topic.title()} is best opened through a fairness frame."])[0]
     rebuttal_target = arguments.get("against", ["Challenge the biggest tradeoff claim."])[0]
     summary_anchor = summaries[0].splitlines()[0].lstrip("- ").strip() if summaries else f"Anchor your framing on the biggest practical consequence in {topic}."
@@ -51,7 +59,7 @@ def _heuristic_debate_packet(topic: str, arguments: dict, summaries: list[str], 
     unique_angle = (
         missed_angles[0]
         if missed_angles
-        else f"Frame {topic} as a clash between principle and implementation, then win on whichever side has better long-term incentives."
+        else (f"Frame the round around the generated motion {motion_text!r} and win the comparison on incentives, legitimacy, and reversibility." if motion_text else f"Frame {topic} as a clash between principle and implementation, then win on whichever side has better long-term incentives.")
     )
     opening_line = (
         f"{opening} Use {live_cases[0]} as the concrete proof that this is not abstract theory."
@@ -82,16 +90,16 @@ def _heuristic_debate_packet(topic: str, arguments: dict, summaries: list[str], 
             else f"The deepest clash is between principle and implementation in {topic}."
         ),
         "burden_of_proof": (
-            "Your burden is to prove not just that the principle sounds attractive, but that the mechanism survives contact with power, incentives, and precedent."
+            prop_burdens[0] if prop_burdens else "Your burden is to prove not just that the principle sounds attractive, but that the mechanism survives contact with power, incentives, and precedent."
         ),
         "mechanism": (
             mechanisms[0]
             if mechanisms
             else "Track who has incentives to defect, who enforces the norm, and why that enforcement sticks."
         ),
-        "open_with_this": opening_line,
+        "open_with_this": (f"Start by defining the motion: {motion_text}. Then explain why the real clash is {clash_axes[0] if clash_axes else 'principle versus implementation'}." if motion_text else opening_line),
         "claim_warrant_impact": claim_block,
-        "top_rebuttal": rebuttal,
+        "top_rebuttal": (f"If they dodge the motion wording, drag them back to the burden: {opp_burdens[0]}" if opp_burdens else rebuttal),
         "judge_language": "Tell the judge why your world is more likely, more stable, and less reversible in its harms.",
         "power_phrases": power_phrases,
     }
@@ -119,7 +127,8 @@ def coach_node(state: dict) -> dict:
     topic_info = state.get("topic_info", {}) or {}
     summaries = state.get("summaries", [])[:MAX_SUMMARIES]
     lead_title = str((state.get("lead_case") or {}).get("title", "")).strip()
-    query = _build_debate_query(topic, topic_info, summaries, state.get("arguments", {}))
+    drafted_motion = state.get("drafted_motion", {}) or {}
+    query = _build_debate_query(topic, topic_info, summaries, state.get("arguments", {}), drafted_motion)
     if lead_title:
         query = f"{query} {lead_title}".strip()
     bundle = retrieve_bundle_for_node("coach_node", query, state=state)
@@ -136,6 +145,7 @@ def coach_node(state: dict) -> dict:
         state.get("arguments", {}),
         summaries,
         topic_info,
+        drafted_motion,
     )
     default_coaching = _packet_to_block(default_packet)
 
@@ -152,6 +162,7 @@ def coach_node(state: dict) -> dict:
         "Think like a WUDC matter file writer: explain the value clash, the mechanism, the judge comparison, and how to answer the strongest opposition push.\n\n"
         f"Topic: {topic}\n"
         f"Lead case: {lead_title}\n"
+        f"Generated motion: {drafted_motion.get('drafted_motion', '')}\n"
         f"Summaries: {summaries}\n"
         f"Arguments: {state.get('arguments', {})}\n"
         f"Topic info: {topic_info}\n"
