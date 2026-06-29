@@ -142,6 +142,9 @@ def run_daily_e2e_test():
 
     assert result["raw_articles"], "research_node should produce raw_articles"
     assert result["ranked_articles"], "rank_node should produce ranked_articles"
+    assert result.get("topic_foundation"), "Phase 1 must populate topic_foundation"
+    assert result.get("article_context"), "Phase 1 must populate article_context"
+    assert result.get("preknowledge_notes"), "topic foundation should still populate legacy preknowledge notes"
     assert result["summaries"], "summarize_node should produce summaries"
     assert result["arguments"].get("for") and len(result["arguments"]["for"]) == 3
     assert result["arguments"].get("against") and len(result["arguments"]["against"]) == 3

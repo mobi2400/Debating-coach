@@ -69,10 +69,25 @@ def _topic_info_text(state: dict, key: str, char_limit: int = 180) -> str:
 def _pre_knowledge_points(state: dict) -> list[str]:
     points: list[str] = []
 
-    specialist_notes = state.get("preknowledge_notes", []) or []
+    topic_foundation = state.get("topic_foundation", {}) or {}
+    specialist_notes = topic_foundation.get("notes") if isinstance(topic_foundation, dict) else []
+    if not specialist_notes:
+        specialist_notes = state.get("preknowledge_notes", []) or []
     if specialist_notes:
         for note in specialist_notes[:3]:
             points.append(_trim_block(note, 220))
+
+    frameworks = topic_foundation.get("frameworks", []) if isinstance(topic_foundation, dict) else []
+    for item in frameworks[:2]:
+        clean = _clean_text(item)
+        if clean:
+            points.append(f"Framework: {clean}")
+
+    key_concepts = topic_foundation.get("key_concepts", []) if isinstance(topic_foundation, dict) else []
+    for item in key_concepts[:2]:
+        clean = _clean_text(item)
+        if clean:
+            points.append(f"Key concept: {clean}")
 
     why = _topic_info_text(state, "why_this_matters_for_debate", 280)
     if why:
@@ -241,6 +256,11 @@ def _article_section(state: dict) -> tuple[list[str], dict | None]:
     article_points = _summary_points_for_article(state, article_index)
     if not article_points:
         article_points = _sentences(article.get("content", ""), limit=3)
+    article_context = state.get("article_context", {}) or {}
+    article_notes = article_context.get("notes", []) if isinstance(article_context, dict) else []
+    if article_notes:
+        article_points.extend(str(item).strip() for item in article_notes[:2] if str(item).strip())
+
     deep_dive = state.get("case_deep_dive", []) or []
     if deep_dive:
         article_points.extend(str(item).strip() for item in deep_dive[:2] if str(item).strip())

@@ -286,6 +286,7 @@ def _candidate_words_from_lesson(state: dict) -> list[str]:
 
     for key in (
         "preknowledge_notes",
+        "article_context_notes",
         "case_deep_dive",
         "summaries",
         "key_facts",
@@ -310,6 +311,21 @@ def _candidate_words_from_lesson(state: dict) -> list[str]:
     lead_case = state.get("lead_case", {}) or {}
     lesson_texts.append(str(lead_case.get("title", "")))
     lesson_texts.append(str(lead_case.get("content", ""))[:900])
+
+    topic_foundation = state.get("topic_foundation", {}) or {}
+    article_context = state.get("article_context", {}) or {}
+    for field in ("overview", "frameworks", "key_concepts", "notes"):
+        value = topic_foundation.get(field)
+        if isinstance(value, list):
+            lesson_texts.extend(str(item) for item in value[:4] if str(item).strip())
+        elif value:
+            lesson_texts.append(str(value))
+    for field in ("overview", "stakeholders", "notes"):
+        value = article_context.get(field)
+        if isinstance(value, list):
+            lesson_texts.extend(str(item) for item in value[:4] if str(item).strip())
+        elif value:
+            lesson_texts.append(str(value))
 
     candidates: list[str] = []
     pool = " ".join(lesson_texts)

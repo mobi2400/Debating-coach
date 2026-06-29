@@ -6,6 +6,12 @@ class AgentState(TypedDict):
     topic: str
     selector_reason: str
     topic_info: dict
+    topic_foundation: dict
+    article_context: dict
+    drafted_motion: dict
+    debate_teaching: dict
+    vocabulary_output: dict
+    final_sections: dict
 
     # Research layer
     candidate_articles: list
@@ -13,13 +19,17 @@ class AgentState(TypedDict):
     lead_case_reason: str
     raw_articles: list
     reference_background: str
+    article_background: str
 
     # RAG layer
     enriched_context: str
     preknowledge_notes: list
+    article_context_notes: list
     case_deep_dive: list
     vocab_candidates: list
     vocab_context_notes: list
+    topic_motion_set: dict
+    motion_intelligence: dict
 
     # Filter + rank layer
     ranked_articles: list
