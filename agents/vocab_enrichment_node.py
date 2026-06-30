@@ -8,7 +8,6 @@ from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
 from memory.weekly_store import load_log
 from rag.retrieval_pipeline import format_retrieved_context, retrieve_bundle_for_node
-from tools.tavily_tool import tavily_search
 
 
 WORD_HINTS = {
@@ -46,7 +45,7 @@ STOPWORDS = {
 
 def _extract_words(text: str, limit: int = 10) -> list[str]:
     seen: list[str] = []
-    for token in re.findall(r"\b[a-zA-Z]{6,16}\b", text):
+    for token in re.findall(r"[a-zA-Z]{6,16}", text):
         lowered = token.lower()
         if lowered in STOPWORDS:
             continue
@@ -76,23 +75,64 @@ def _recent_vocab(limit_days: int = 10) -> set[str]:
     return recent
 
 
-def _context_lines(lead_case: dict, companion_articles: list[dict], rag_context: str) -> tuple[list[str], list[str]]:
+def _lesson_texts(state: dict) -> list[str]:
+    lesson_texts: list[str] = []
+
+    lead_case = state.get("lead_case", {}) or {}
+    lesson_texts.append(str(lead_case.get("title", "")))
+    lesson_texts.append(str(lead_case.get("content", ""))[:1200])
+
+    for mapping in (
+        state.get("topic_foundation", {}) or {},
+        state.get("article_context", {}) or {},
+        state.get("drafted_motion", {}) or {},
+        state.get("debate_teaching", {}) or {},
+    ):
+        if not isinstance(mapping, dict):
+            continue
+        for value in mapping.values():
+            if isinstance(value, list):
+                lesson_texts.extend(str(item) for item in value[:6] if str(item).strip())
+            elif isinstance(value, dict):
+                for nested in value.values():
+                    if isinstance(nested, list):
+                        lesson_texts.extend(str(item) for item in nested[:6] if str(item).strip())
+                    elif nested:
+                        lesson_texts.append(str(nested))
+            elif value:
+                lesson_texts.append(str(value))
+
+    for key in (
+        "preknowledge_notes",
+        "article_context_notes",
+        "case_deep_dive",
+        "summaries",
+        "key_facts",
+        "concepts",
+        "vocab_context_notes",
+    ):
+        values = state.get(key, []) or []
+        if isinstance(values, list):
+            lesson_texts.extend(str(item) for item in values[:6] if str(item).strip())
+
+    arguments = state.get("arguments", {}) or {}
+    for side in ("for", "against"):
+        lesson_texts.extend(str(item) for item in (arguments.get(side, []) or [])[:3] if str(item).strip())
+    middle = arguments.get("middle")
+    if middle:
+        lesson_texts.append(str(middle))
+
+    return lesson_texts
+
+
+def _context_lines(state: dict, rag_context: str) -> tuple[list[str], list[str]]:
     lines: list[str] = []
     candidate_words: list[str] = []
 
-    title = str(lead_case.get("title", "")).strip()
-    content = str(lead_case.get("content", ""))[:1200]
-    if title or content:
-        lines.append(f"LEAD CASE\nTitle: {title}\nText: {content}")
-        candidate_words.extend(_extract_words(f"{title} {content}", limit=6))
-
-    for article in companion_articles[:2]:
-        companion_title = str(article.get("title", "")).strip()
-        companion_content = str(article.get("content", ""))[:800]
-        lines.append(f"COMPANION ANALYSIS\nTitle: {companion_title}\nText: {companion_content}")
-        for word in _extract_words(f"{companion_title} {companion_content}", limit=5):
-            if word not in candidate_words:
-                candidate_words.append(word)
+    lesson_blob = "\n\n".join(text for text in _lesson_texts(state) if text)
+    if lesson_blob:
+        lines.append(f"LESSON MATERIAL\n{lesson_blob[:2800]}")
+        candidate_words.extend(_extract_words(lesson_blob, limit=8))
 
     if rag_context:
         lines.append(f"DEBATE RAG CONTEXT\n{rag_context[:1400]}")
@@ -103,22 +143,52 @@ def _context_lines(lead_case: dict, companion_articles: list[dict], rag_context:
     return lines, candidate_words[:10]
 
 
-def _heuristic_vocab(topic: str, candidates: list[str]) -> tuple[list[str], list[str]]:
+def _definition(word: str) -> str:
+    return WORD_HINTS.get(word.lower(), "a useful debate word")
+
+
+def _topic_stub(topic: str) -> str:
+    mapping = {
+        "feminism and gender": "gender reform",
+        "international relations": "international cooperation",
+        "geopolitics": "great-power competition",
+        "economics and finance": "economic policymaking",
+    }
+    return mapping.get(topic.lower(), topic)
+
+
+def _example_line(word: str, topic: str, drafted_motion: dict | None = None) -> str:
+    subject = str((drafted_motion or {}).get("case_label", "")).strip() or _topic_stub(topic)
+    templates = {
+        "coercive": f"A coercive approach to {subject} may force compliance quickly, but it can also trigger backlash if institutions do not trust the reform.",
+        "coherent": f"Your opposition case is only coherent if you explain how {subject} can improve without the policy you are rejecting.",
+        "credible": f"The reform is only credible if it changes incentives around {subject} instead of producing a symbolic announcement.",
+        "robust": f"A robust argument on {subject} survives the obvious pushback about cost, enforcement, and unintended consequences.",
+        "plausible": f"Your mechanism must be plausible: explain why real actors in {subject} would behave the way your model predicts.",
+        "normative": f"This is a normative claim about {subject}: you are arguing what institutions ought to do, not only what they currently do.",
+        "asymmetry": f"The key asymmetry in {subject} is that one side bears the risk first while the other controls the decision.",
+        "empirical": f"Make the argument empirical by pointing to a concrete detail from today's {subject} case rather than staying abstract.",
+        "contingent": f"The benefit is contingent on enforcement, which means your side must explain what happens if support weakens halfway through.",
+        "deterrent": f"A deterrent effect matters only if actors in {subject} actually believe the cost of non-compliance has risen.",
+    }
+    return templates.get(
+        word.lower(),
+        f"Use '{word}' when you explain {subject} with a sharper mechanism, clearer comparison, and more precise judge language."
+    )
+
+
+def _heuristic_vocab(topic: str, candidates: list[str], drafted_motion: dict | None = None) -> tuple[list[str], list[str], dict]:
     recent = _recent_vocab()
     fallback_pool = [
-        "tenuous",
         "coercive",
         "credible",
-        "escalatory",
         "deterrent",
         "robust",
         "coherent",
         "plausible",
         "normative",
         "asymmetry",
-        "precarious",
         "empirical",
-        "instrumental",
         "contingent",
     ]
     selected: list[str] = []
@@ -128,18 +198,28 @@ def _heuristic_vocab(topic: str, candidates: list[str]) -> tuple[list[str], list
             if not clean or clean in selected or clean in recent:
                 continue
             selected.append(clean)
-            if len(selected) >= 3:
+            if len(selected) >= 2:
                 break
-        if len(selected) >= 3:
+        if len(selected) >= 2:
             break
     if not selected:
-        selected = ["tenuous", "robust", "credible"]
+        selected = ["credible", "coherent"]
+
     notes = []
-    for word in selected[:3]:
-        notes.append(
-            f"{word}: {WORD_HINTS.get(word, 'use this for sharper analysis')} | Use it when explaining {topic} more precisely."
+    structured = []
+    for word in selected[:2]:
+        meaning = _definition(word)
+        example = _example_line(word, topic, drafted_motion)
+        notes.append(f"{word}: {meaning} | Example: {example}")
+        structured.append(
+            {
+                "word": word,
+                "meaning": meaning,
+                "why_it_helps": f"Use it when you want to make your {topic} analysis sharper and more precise.",
+                "example": example,
+            }
         )
-    return selected[:3], notes[:3]
+    return selected[:2], notes[:2], {"selected_words": structured}
 
 
 def vocab_enrichment_node(state: dict) -> dict:
@@ -147,31 +227,33 @@ def vocab_enrichment_node(state: dict) -> dict:
     lead_case = state.get("lead_case", {}) or {}
     title = str(lead_case.get("title", "")).strip()
     recent = _recent_vocab()
+    drafted_motion = state.get("drafted_motion", {}) or {}
 
-    companion_articles = tavily_search(f"{title or topic} debate analysis mechanism implications language")[:3]
     bundle = retrieve_bundle_for_node("coach_node", f"{topic} {title} debate language framing", state=state)
     debate_rag = format_retrieved_context(bundle["chunks"])
     state.setdefault("retrieval_plans", {})["vocab_enrichment_node"] = bundle["plan"] or {}
     state.setdefault("retrieval_traces", {})["vocab_enrichment_node"] = bundle["trace"]
-    context_lines, candidate_words = _context_lines(lead_case, companion_articles, debate_rag)
+
+    context_lines, candidate_words = _context_lines(state, debate_rag)
     candidate_words = [word for word in candidate_words if word not in recent]
-    fallback_words, fallback_notes = _heuristic_vocab(topic, candidate_words)
+    fallback_words, fallback_notes, fallback_output = _heuristic_vocab(topic, candidate_words, drafted_motion)
 
     if not context_lines:
         state["vocab_candidates"] = fallback_words
         state["vocab_context_notes"] = fallback_notes
+        state["vocabulary_output"] = fallback_output
         return state
 
     prompt = (
         "You are selecting vocabulary for a debate student.\n"
-        "Use the lead case, companion analysis, and debate RAG context below.\n"
+        "Use the lesson material and debate RAG context below.\n"
         "Return JSON only with keys: vocab_candidates, vocab_context_notes.\n"
-        "Pick 3 words max.\n"
-        "Each word must be genuinely useful in debate, relevant to the case, and not decorative.\n"
-        "Each note should explain why the word matters in this specific debate context.\n"
-        "Prefer words that appear in serious analytical prose, not generic dictionary words.\n\n"
+        "Pick exactly 2 words if possible, never more than 2.\n"
+        "Each word must be genuinely useful in debate, relevant to the lesson, and not decorative.\n"
+        "Each note should include a precise meaning and one example of how to use the word in this debate context.\n"
+        "Prefer words that already appear in the drafted lesson material before generic fallback vocabulary.\n\n"
         f"Topic: {topic}\n"
-        f"Candidate words already seen in source text: {candidate_words}\n\n"
+        f"Candidate words already seen in lesson material: {candidate_words}\n\n"
         + "\n\n".join(context_lines)
     )
 
@@ -188,22 +270,33 @@ def vocab_enrichment_node(state: dict) -> dict:
             clean = str(word).strip().lower()
             if clean and clean not in cleaned_words:
                 cleaned_words.append(clean)
-            if len(cleaned_words) >= 3:
+            if len(cleaned_words) >= 2:
                 break
 
-        cleaned_notes = []
-        for note in vocab_context_notes or []:
-            clean = " ".join(str(note).split()).strip()
-            if clean:
-                cleaned_notes.append(clean)
-            if len(cleaned_notes) >= 3:
-                break
+        selected_words = [word for word in cleaned_words if word not in recent] or fallback_words
+        parsed_notes = vocab_context_notes if isinstance(vocab_context_notes, list) else []
+        notes: list[str] = []
+        structured_words = []
+        for index, word in enumerate(selected_words[:2]):
+            meaning = _definition(word)
+            example = _example_line(word, topic, drafted_motion)
+            note = parsed_notes[index] if index < len(parsed_notes) and str(parsed_notes[index]).strip() else f"{word}: {meaning} | Example: {example}"
+            notes.append(" ".join(str(note).split()).strip())
+            structured_words.append(
+                {
+                    "word": word,
+                    "meaning": meaning,
+                    "why_it_helps": f"Use it when you want to make your {topic} analysis sharper and more precise.",
+                    "example": example,
+                }
+            )
 
-        fresh_words = [word for word in cleaned_words if word not in recent]
-        state["vocab_candidates"] = fresh_words or fallback_words
-        state["vocab_context_notes"] = cleaned_notes or fallback_notes
+        state["vocab_candidates"] = selected_words[:2]
+        state["vocab_context_notes"] = notes[:2] or fallback_notes
+        state["vocabulary_output"] = {"selected_words": structured_words} if structured_words else fallback_output
     except Exception:
         state["vocab_candidates"] = fallback_words
         state["vocab_context_notes"] = fallback_notes
+        state["vocabulary_output"] = fallback_output
 
     return state

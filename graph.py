@@ -5,17 +5,21 @@ except ImportError:  # pragma: no cover - exercised in bootstrap environments
     StateGraph = None
 
 from agents.argue_node import argue_node
+from agents.article_context_node import article_context_node
+from agents.case_deep_dive_node import case_deep_dive_node
 from agents.coach_node import coach_node
 from agents.english_coach_node import english_coach_node
 from agents.filter_node import filter_node
 from agents.format_node import format_node
-from agents.case_deep_dive_node import case_deep_dive_node
 from agents.lead_case_selector import lead_case_selector_node
+from agents.motion_drafting_node import motion_drafting_node
+from agents.motion_intelligence_node import motion_intelligence_node
 from agents.night_agent import night_agent_node
-from agents.preknowledge_enrichment_node import preknowledge_enrichment_node
 from agents.rank_node import rank_node
 from agents.research_node import research_node
 from agents.summarize_node import summarize_node
+from agents.topic_foundation_node import topic_foundation_node
+from agents.topic_motion_mining_node import topic_motion_mining_node
 from agents.vocab_enrichment_node import vocab_enrichment_node
 from agents.weekend_agent import weekend_agent_node
 from core.state import AgentState
@@ -32,30 +36,38 @@ class LocalSequentialGraph:
 
 
 def build_daily_graph():
+    steps = [
+        research_node,
+        filter_node,
+        rank_node,
+        lead_case_selector_node,
+        topic_foundation_node,
+        topic_motion_mining_node,
+        motion_intelligence_node,
+        article_context_node,
+        motion_drafting_node,
+        case_deep_dive_node,
+        vocab_enrichment_node,
+        summarize_node,
+        argue_node,
+        coach_node,
+        english_coach_node,
+        format_node,
+    ]
+
     if StateGraph is None:
-        return LocalSequentialGraph(
-            [
-                research_node,
-                filter_node,
-                rank_node,
-                lead_case_selector_node,
-                preknowledge_enrichment_node,
-                case_deep_dive_node,
-                vocab_enrichment_node,
-                summarize_node,
-                argue_node,
-                coach_node,
-                english_coach_node,
-                format_node,
-            ]
-        )
+        return LocalSequentialGraph(steps)
 
     graph = StateGraph(AgentState)
     graph.add_node("research", research_node)
     graph.add_node("filter", filter_node)
     graph.add_node("rank", rank_node)
     graph.add_node("lead_case_selector", lead_case_selector_node)
-    graph.add_node("preknowledge_enrichment", preknowledge_enrichment_node)
+    graph.add_node("topic_foundation", topic_foundation_node)
+    graph.add_node("topic_motion_mining", topic_motion_mining_node)
+    graph.add_node("motion_intelligence", motion_intelligence_node)
+    graph.add_node("article_context", article_context_node)
+    graph.add_node("motion_drafting", motion_drafting_node)
     graph.add_node("case_deep_dive", case_deep_dive_node)
     graph.add_node("vocab_enrichment", vocab_enrichment_node)
     graph.add_node("summarize", summarize_node)
@@ -68,8 +80,12 @@ def build_daily_graph():
     graph.add_edge("research", "filter")
     graph.add_edge("filter", "rank")
     graph.add_edge("rank", "lead_case_selector")
-    graph.add_edge("lead_case_selector", "preknowledge_enrichment")
-    graph.add_edge("preknowledge_enrichment", "case_deep_dive")
+    graph.add_edge("lead_case_selector", "topic_foundation")
+    graph.add_edge("topic_foundation", "topic_motion_mining")
+    graph.add_edge("topic_motion_mining", "motion_intelligence")
+    graph.add_edge("motion_intelligence", "article_context")
+    graph.add_edge("article_context", "motion_drafting")
+    graph.add_edge("motion_drafting", "case_deep_dive")
     graph.add_edge("case_deep_dive", "vocab_enrichment")
     graph.add_edge("vocab_enrichment", "summarize")
     graph.add_edge("summarize", "argue")

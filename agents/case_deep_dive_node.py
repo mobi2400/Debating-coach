@@ -19,8 +19,11 @@ def case_deep_dive_node(state: dict) -> dict:
     topic = topic_name(state.get("topic"))
     lead_case = state.get("lead_case", {}) or {}
     title = str(lead_case.get("title", "")).strip()
+    article_context = state.get("article_context", {}) or {}
+    context_notes = article_context.get("notes", []) if isinstance(article_context, dict) else []
+
     if not title:
-        state["case_deep_dive"] = []
+        state["case_deep_dive"] = context_notes[:4] if isinstance(context_notes, list) else []
         return state
 
     query = f"{title} {topic} analysis mechanism implications"
@@ -33,6 +36,12 @@ def case_deep_dive_node(state: dict) -> dict:
         notes.extend(_sentences(article.get("content", ""), limit=2))
         if len(notes) >= 4:
             break
+
+    if context_notes:
+        for note in context_notes[:2]:
+            clean = str(note).strip()
+            if clean and clean not in notes:
+                notes.append(clean)
 
     if not notes:
         notes = _sentences(lead_case.get("content", ""), limit=3)

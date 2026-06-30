@@ -142,6 +142,14 @@ def run_daily_e2e_test():
 
     assert result["raw_articles"], "research_node should produce raw_articles"
     assert result["ranked_articles"], "rank_node should produce ranked_articles"
+    assert result.get("topic_foundation"), "Phase 1 must populate topic_foundation"
+    assert result.get("article_context"), "Phase 1 must populate article_context"
+    assert result.get("topic_motion_set"), "Phase 2 must populate topic_motion_set"
+    assert result.get("motion_intelligence"), "Phase 2 must populate motion_intelligence"
+    assert result.get("drafted_motion"), "Phase 2 must populate drafted_motion"
+    assert result.get("debate_teaching"), "Phase 3 must populate debate_teaching"
+    assert result.get("vocabulary_output"), "Phase 3 must populate vocabulary_output"
+    assert result.get("preknowledge_notes"), "topic foundation should still populate legacy preknowledge notes"
     assert result["summaries"], "summarize_node should produce summaries"
     assert result["arguments"].get("for") and len(result["arguments"]["for"]) == 3
     assert result["arguments"].get("against") and len(result["arguments"]["against"]) == 3

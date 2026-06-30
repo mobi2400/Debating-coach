@@ -1,0 +1,707 @@
+{
+  "meta": {
+    "name": "debate_concepts",
+    "version": "2.0",
+    "purpose": "Shared debate-teaching reference for agents that generate arguments, framing, mechanisms, motions, clash, rebuttal, and coaching output.",
+    "usage_notes": [
+      "Use this file as a conceptual reference, not as output text to copy verbatim.",
+      "Prefer concrete, debate-shaped teaching over generic meta-advice.",
+      "Differentiate clearly between argument, framing, mechanism, burden, clash, rebuttal, and weighing."
+    ]
+  },
+  "core_principles": {
+    "teaching_goals": [
+      "Make a new debater able to build one complete, defensible argument (claim + mechanism + impact) within 10 minutes of prep.",
+      "Teach debaters to separate WHAT they are saying (argument) from WHY it matters (framing) and HOW it happens (mechanism), because most beginner speeches collapse all three into one vague assertion.",
+      "Train debaters to listen for clash, not just deliver pre-written speeches — a round is a conversation, not two parallel monologues.",
+      "Build comfort with uncertainty: debaters must learn to argue any side of any motion on short prep, because debate trains advocacy skill, not personal belief.",
+      "Teach weighing as the decisive skill: most rounds are lost not because a team lacked arguments but because they never told the judge why their arguments matter more."
+    ],
+    "output_goals": [
+      "Every taught argument must be reproducible by the student in a different motion, not just memorised for one case.",
+      "Every explanation should use a worked example from a real or realistic motion, never an abstract description alone.",
+      "Output should distinguish beginner mistakes from advanced mistakes so coaching is levelled appropriately."
+    ],
+    "failure_modes_to_avoid": [
+      "Teaching 'tips' in the abstract (e.g. 'be persuasive') without a concrete mechanism for HOW to be persuasive.",
+      "Conflating assertion with argument — a claim repeated loudly is not an argument until it has a mechanism and impact.",
+      "Treating rebuttal as just disagreement ('they are wrong because...') without engaging the opponent's actual mechanism.",
+      "Ignoring burden asymmetries between proposition and opposition, which leads to debaters arguing past each other.",
+      "Over-loading beginners with jargon (stock issues, kritiks, theory) before they can build one clean constructive argument."
+    ]
+  },
+  "argumentation": {
+    "definition": "An argument is a structured claim that something is true or should be done, supported by a logical or causal mechanism explaining WHY it is true, and an impact explaining WHY it matters. A bare claim ('this policy is good') is not an argument; it becomes one only once it has reasoning connecting the claim to a conclusion the judge can independently verify.",
+    "why_it_matters": "Arguments are the currency of debate. Judges are instructed to vote for the side that makes the better-explained, better-weighed arguments — not the side that sounds more confident or speaks more fluently. A debater who cannot construct a full argument cannot win a round, no matter how good their delivery is.",
+    "how_to_build_an_argument": {
+      "steps": [
+        "1. CLAIM: State in one sentence what you are arguing (e.g. 'Banning junk food advertising to children reduces childhood obesity').",
+        "2. MECHANISM: Explain the causal chain step by step from the claim to the outcome, using actors, incentives, and behaviour change — not just restating the claim.",
+        "3. EVIDENCE/EXAMPLE (if time allows): Ground the mechanism in a real-world analogy, study, or comparable case to make it credible, not just theoretically possible.",
+        "4. IMPACT: State why the outcome matters — who benefits, how much, and why the judge should care (magnitude, reversibility, number of people affected).",
+        "5. LINK TO BURDEN/FRAMING: Connect the argument back to the motion's core question and your side's burden, so the judge sees it as central, not tangential."
+      ],
+      "checks": [
+        "Can you state the argument in one sentence without the word 'because' doing all the work unexplained?",
+        "If a smart 12-year-old asked 'but WHY would that happen?' three times in a row, do you have an answer each time?",
+        "Does the impact explain magnitude (how big), probability (how likely), and reversibility (can it be undone)?",
+        "Is the argument actually about the motion, or could it be copy-pasted into a completely different debate unchanged?"
+      ],
+      "good_output_signals": [
+        "Mechanism uses real actors (parents, firms, governments, individuals) and their incentives, not passive abstractions ('society will improve').",
+        "Impact is compared in scale to something the judge can picture (e.g. 'affects 2 million children annually' rather than 'a lot of people').",
+        "Argument anticipates the most obvious counter and pre-empts it briefly."
+      ],
+      "bad_output_signals": [
+        "Claim and impact are the same sentence reworded ('this is good because it makes things better').",
+        "Mechanism skips a step ('banning ads will reduce obesity' with nothing in between).",
+        "No specific actor or behaviour change is named."
+      ]
+    },
+    "argument_types": [
+      {
+        "name": "Principled / Value Argument",
+        "definition": "An argument grounded in a moral, ethical, or rights-based claim rather than a practical consequence — e.g. autonomy, fairness, dignity, justice.",
+        "when_to_use": [
+          "When the motion has a clear values dimension (rights, justice, equality, liberty).",
+          "When empirical evidence is contested or unavailable and a principled stance is more defensible.",
+          "To set the philosophical floor of the case before adding practical arguments."
+        ],
+        "example": "On 'This House Would legalise euthanasia': individual autonomy over one's own body and death is a fundamental right, and the state overriding that right requires a strong justification it cannot provide.",
+        "anti_example": "Euthanasia is good because it is the right thing to do. (Asserts a value without explaining the principle or why it outweighs competing values like sanctity of life.)"
+      },
+      {
+        "name": "Practical / Consequentialist Argument",
+        "definition": "An argument based on real-world outcomes — costs, benefits, behaviour change, second-order effects.",
+        "when_to_use": [
+          "When the motion is policy-shaped (This House Would...) and outcomes are measurable or plausible.",
+          "To complement a principled argument with concrete stakes a judge can weigh."
+        ],
+        "example": "Legalising euthanasia reduces suffering for terminally ill patients by giving them a humane, regulated alternative to unsupervised or violent methods of ending their life.",
+        "anti_example": "Euthanasia will help people. (No mechanism for how suffering decreases or who exactly benefits.)"
+      },
+      {
+        "name": "Comparative Advantage Argument",
+        "definition": "An argument that does not claim a position is perfect, only that it is better than the status quo or the opposing side's alternative.",
+        "when_to_use": [
+          "When neither side has a flawless world, so the round is won by relative comparison, not absolute proof.",
+          "Especially useful in opposition cases that defend the status quo imperfectly but still better than the proposed change."
+        ],
+        "example": "Even if regulation is imperfect, a regulated euthanasia system with medical oversight produces fewer deaths from unsafe, unsupervised methods than the current prohibition does.",
+        "anti_example": "Our side is good. (Makes no comparison to the other side's world at all.)"
+      },
+      {
+        "name": "Structural / Systemic Argument",
+        "definition": "An argument about how an institution, incentive structure, or system behaves at scale, rather than about individual cases.",
+        "when_to_use": [
+          "When a motion involves institutions (governments, courts, markets, media) whose systemic behaviour matters more than any single example.",
+          "To pre-empt opponent's reliance on a sympathetic individual case by showing system-level effects."
+        ],
+        "example": "Allowing private funding of elections systematically biases policy toward the donor class over time, regardless of any individual donor's good intentions, because politicians rationally respond to who funds their re-election.",
+        "anti_example": "Money in politics is bad because some politicians are corrupt. (Cites isolated bad actors, not a systemic incentive.)"
+      },
+      {
+        "name": "Counterfactual Argument",
+        "definition": "An argument that compares the proposed world not to an idealised alternative but to what would realistically happen otherwise.",
+        "when_to_use": [
+          "When opponents claim a harm exists in your world, but that harm already exists, or worse, in the status quo.",
+          "To neutralise 'this will cause X' attacks by showing X is already happening or would happen anyway."
+        ],
+        "example": "Banning the activity does not stop it — it merely pushes it into an unregulated black market, which is empirically worse for safety than the regulated alternative we propose.",
+        "anti_example": "Banning things doesn't work. (No comparison to what specifically happens instead.)"
+      }
+    ],
+    "examples": {
+      "good": [
+        "On 'THW ban single-use plastics': Manufacturers currently treat plastic packaging as a free input because environmental cost is externalised onto landfills and oceans; a ban removes that option entirely, forcing a shift to reusable or biodegradable packaging within a fixed compliance window, which internalises the cost and changes firm behaviour at the design stage rather than only at the disposal stage — this matters because design-stage change prevents waste before it is created, unlike recycling schemes which only manage waste after the fact."
+      ],
+      "bad": [
+        "Plastic is bad for the environment so we should ban it. (Claim and conclusion only, no mechanism for behaviour change, no comparison to alternatives like taxation or recycling.)"
+      ]
+    }
+  },
+  "framing": {
+    "definition": "Framing is the lens through which an argument or a whole round should be understood — it tells the judge what question matters and why, shaping how impacts are interpreted before the impacts themselves are even weighed.",
+    "why_it_matters": "Two teams can present the same facts and reach opposite conclusions depending on framing. A judge without framing defaults to their own intuitions, which is dangerous and inconsistent; a debater who controls framing controls how every subsequent argument is judged.",
+    "levels": {
+      "argument_level": {
+        "definition": "Framing applied to a single argument — telling the judge how to interpret that specific piece of reasoning (e.g. as a question of rights vs. a question of outcomes).",
+        "goal": "Make one argument land in the direction you intend, pre-empting a different reading of the same facts.",
+        "how_to_generate": [
+          "Ask: 'what is this argument really a question of — rights, outcomes, fairness, or precedent?' and say that explicitly.",
+          "State the frame BEFORE the mechanism, as a one-line signpost: 'This is fundamentally a question of who bears the burden of proof.'",
+          "Pre-empt the obvious alternative frame your opponent will use and explain why yours is more appropriate to the motion."
+        ],
+        "template_shapes": [
+          "'The real question here is not X, it is Y, because...'",
+          "'Even if you accept their facts, the correct lens to view them through is...'"
+        ],
+        "example": "On free speech and hate speech bans: 'This isn't a question of whether offensive speech feels bad — it's a question of who gets to decide what counts as offensive, and history shows that power is disproportionately used against minorities.'",
+        "anti_example": "Hate speech is bad so it should be banned. (No lens offered — just a conclusion stated as if self-evident.)"
+      },
+      "round_level": {
+        "definition": "Framing applied to the entire debate — establishing what the central clash of the round is and what the judge should be deciding by the end of it.",
+        "goal": "Control the metric by which the whole round is judged, so that your side's strongest material is what decides the outcome.",
+        "how_to_generate": [
+          "Identify the single biggest question the round turns on (e.g. 'is this about practicality or about principle?') and state it explicitly in your speech.",
+          "Offer the judge a decision rule: 'You should vote for whoever better protects the most vulnerable group in this scenario.'",
+          "Revisit and reinforce this frame in every speech so it is not forgotten by the final whip speech."
+        ],
+        "template_shapes": [
+          "'By the end of this round, you should be asking yourselves one question: ...'",
+          "'This debate comes down to a clash between [value A] and [value B], and we win because...'"
+        ],
+        "example": "On 'THW abolish the monarchy': 'This round isn't about whether the Queen is a nice person — it's about whether unelected hereditary power has any place in a modern democracy. Once you see it that way, our side wins regardless of individual royals' popularity.'",
+        "anti_example": "We just think the monarchy is outdated. (No decision rule offered to the judge, no articulation of the central clash.)"
+      }
+    },
+    "common_framing_modes": [
+      {
+        "name": "Rights-based framing",
+        "definition": "Frames the round around whether an entity has an inviolable entitlement that should not be overridden by aggregate benefit.",
+        "when_to_use": ["Motions involving bodily autonomy, free speech, privacy, or fundamental freedoms."],
+        "judge_question_it_answers": "Does someone have a right here that shouldn't be traded away even if doing so produces a 'better' outcome?",
+        "example": "On surveillance: 'Privacy is not something that should be auctioned off for marginal security gains — it is a baseline right.'"
+      },
+      {
+        "name": "Consequentialist / harm-reduction framing",
+        "definition": "Frames the round around which side produces the best aggregate outcome, regardless of underlying principle.",
+        "when_to_use": ["Policy motions where measurable harms and benefits can be compared."],
+        "judge_question_it_answers": "Which world has fewer net harms or more net benefit?",
+        "example": "On drug decriminalisation: 'The question is simple — does criminalisation or decriminalisation save more lives? The evidence points one way.'"
+      },
+      {
+        "name": "Status quo bias / burden-of-proof framing",
+        "definition": "Frames the round around who has to prove their case — usually placing the burden of proof on whoever proposes change.",
+        "when_to_use": ["When opposition wants to avoid having to construct a full alternative and instead just needs to cast doubt."],
+        "judge_question_it_answers": "Has the side proposing change met the burden required to justify upending the status quo?",
+        "example": "On a radical policy change: 'Proposition needs to prove this works, not just that it might. Uncertainty favours opposition.'"
+      },
+      {
+        "name": "Most-vulnerable-first framing",
+        "definition": "Frames the round around impact to the most marginalised or least powerful group affected by the motion.",
+        "when_to_use": ["Motions with clear power asymmetries between groups affected."],
+        "judge_question_it_answers": "Which side better protects those least able to protect themselves?",
+        "example": "On labour regulation: 'This debate should centre on gig workers with no bargaining power, not on the platforms that already have plenty.'"
+      }
+    ],
+    "failure_modes": [
+      "Asserting a frame without justifying why it is the correct one for this motion.",
+      "Choosing a frame in the first speech and abandoning it later when it becomes inconvenient.",
+      "Confusing framing with simply restating your side's conclusion in fancier language.",
+      "Offering a frame so narrow it excludes your own team's later arguments."
+    ]
+  },
+  "mechanism": {
+    "definition": "A mechanism is the causal chain — step by step — that explains HOW a claim leads to its stated outcome. It is the connective tissue between assertion and impact; without it, an argument is just an opinion stated with confidence.",
+    "why_it_matters": "Judges are trained to discount unexplained assertions. A team that says 'X causes Y' without showing the steps in between loses that argument to a team that explains 'X causes A, which causes B, which causes Y' even if the second team's claim sounds less dramatic.",
+    "levels": {
+      "argument_level": {
+        "definition": "The causal chain underlying a single argument.",
+        "required_chain_parts": [
+          "Starting condition (what changes as a direct result of the motion)",
+          "Actor(s) affected and their incentives or constraints",
+          "Behaviour change (what the actor does differently as a result)",
+          "Resulting outcome (the effect of that behaviour change)",
+          "Why that outcome is likely, not just possible (probability/realism check)"
+        ],
+        "how_to_generate": [
+          "Write the claim, then ask 'and then what happens?' at least three times, writing down each answer as a discrete step.",
+          "Name the actor at each step — never let the chain run on a passive, actor-less verb like 'this leads to improvement.'",
+          "Stress-test by asking what would have to be false for this step not to happen, and address it briefly."
+        ],
+        "example": "Claim: 'A sugar tax reduces obesity.' Mechanism: Government raises the price of sugary drinks (step 1) → price-sensitive consumers, especially lower-income households who buy these drinks most, respond to price signals by reducing consumption or switching to substitutes (step 2, citing price elasticity of demand for sugary drinks) → reduced sugar intake across a large population lowers average caloric surplus (step 3) → over time, this reduces obesity rates at the population level, an effect actually observed in jurisdictions like Mexico and the UK after similar taxes (step 4).",
+        "anti_example": "A sugar tax reduces obesity because it makes sugar more expensive. (Jumps from price to outcome with no behavioural step in between.)"
+      },
+      "motion_level": {
+        "definition": "The causal logic that explains how the entire motion, if enacted, changes the world from the status quo to the proposed end-state.",
+        "required_chain_parts": [
+          "What concretely changes on day one of the motion passing (the mechanism of implementation)",
+          "Who is responsible for enforcing or carrying out the change",
+          "What short-term and long-term effects follow from that implementation",
+          "How this differs from simply restating the motion as already-achieved"
+        ],
+        "how_to_generate": [
+          "Before any individual arguments, build a one-paragraph 'model' of how the motion would actually be implemented in the real world.",
+          "Identify the actor responsible for enforcement (state, court, individuals, market) and their realistic capacity to do so.",
+          "Distinguish between immediate effects (legal/structural change) and downstream effects (behavioural/social change)."
+        ],
+        "example": "On 'THW introduce a universal basic income': implementation model — government replaces a subset of existing means-tested welfare programs with a flat unconditional payment funded via a mix of taxation and reallocated welfare spending; this is administered through existing tax authority infrastructure already used for benefit payments, meaning the structural mechanism for delivery already exists and does not require new bureaucracy.",
+        "anti_example": "We would just give everyone UBI and things would get better. (No model of funding, administration, or who is responsible for delivery.)"
+      }
+    },
+    "mechanism_checks": [
+      "Does every step name an actor and their incentive, rather than relying on passive change?",
+      "Is each step a plausible response to the previous step, not just a desirable one?",
+      "Would the mechanism survive a sceptical 'but why would they actually do that?' from the judge?",
+      "Is the mechanism distinguishable from simply restating the claim in more words?"
+    ],
+    "failure_modes": [
+      "Mechanism collapse: skipping from cause directly to desired outcome with no intermediate steps.",
+      "Wishful mechanism: assuming the most convenient possible response from actors rather than the most realistic one.",
+      "Passive voice mechanism: describing change happening 'to society' with no actor driving it.",
+      "Mechanism without scale: explaining how something could happen once, without showing why it happens broadly enough to matter."
+    ]
+  },
+  "burdens": {
+    "definition": "A burden is what a side is obligated to prove in order to win the round, given the motion and their assigned position. Burdens differ from arguments — an argument is a tool used to meet a burden, but the burden itself is the underlying obligation set by the structure of the debate.",
+    "why_it_matters": "Misunderstanding your burden leads to winning arguments that don't actually win the round, because they don't address what you were required to prove. Judges vote based on who met their burden better, not who 'sounded right' in isolation.",
+    "types": {
+      "proposition_burden": {
+        "definition": "The obligation, usually held by the side proposing the motion, to construct and defend a coherent model of change and show that it is a net improvement over the status quo (or over the opposition's defended alternative).",
+        "what_it_must_prove": [
+          "A clear, implementable model of what the motion actually means in practice.",
+          "That the proposed change produces a meaningful improvement, not just a theoretical one.",
+          "That the change is achievable by the relevant actor(s) named in the model.",
+          "That the benefits outweigh any costs or trade-offs the change introduces."
+        ],
+        "common_mistakes": [
+          "Proposing a model so vague it cannot be attacked or evaluated ('we would just make things fairer').",
+          "Proving the motion is theoretically nice without proving it is better than the realistic status quo.",
+          "Forgetting that 'better than nothing' is not the same as 'better than the opposition's alternative.'"
+        ],
+        "example": "On 'THW ban private schools': proposition must show how abolition is implemented (timeline, transition for existing students, redirection of resources into public education) and that this produces a fairer, better-funded public system overall — not just that private schools have some downsides."
+      },
+      "opposition_burden": {
+        "definition": "The obligation, usually held by the side opposing the motion, to show that the status quo (or a clearly articulated alternative) is preferable to the proposition's model — either by defending the status quo, proposing a comparative alternative, or showing the proposition's model fails or backfires.",
+        "what_it_must_prove": [
+          "That the proposition's model either does not work as claimed, produces worse outcomes, or is unnecessary given existing alternatives.",
+          "A coherent account of why the status quo (or their preferred alternative) is preferable on balance.",
+          "Engagement with the actual mechanism proposition offers, not just a generic defence of 'things as they are.'"
+        ],
+        "common_mistakes": [
+          "Simply asserting the status quo is fine without explaining why it outperforms the proposed change.",
+          "Running pure rejection ('this won't work') without offering any comparative world for the judge to weigh against.",
+          "Conceding the proposition's mechanism by accident while trying to argue impact alone."
+        ],
+        "example": "On 'THW ban private schools': opposition must show either that private schools provide value the public system cannot replicate (e.g. specialised resources funding broader innovation) or that abolition causes worse harms (capital flight, teacher shortages) than it solves."
+      }
+    }
+  },
+  "motions": {
+    "definition": "A motion is the formal topic statement debated in a round, typically phrased as 'This House Would...', 'This House Believes That...', or 'This House Regrets...', each implying a different kind of burden and debate structure.",
+    "why_it_matters": "The exact phrasing of a motion determines what must be proven, what burdens apply, and what kind of clash is expected. Misreading a motion's type leads to entire teams preparing the wrong kind of case.",
+    "motion_types": [
+      {
+        "name": "Policy motion (This House Would...)",
+        "definition": "Calls for a specific action or policy change to be enacted by a named or implied actor.",
+        "structure": "THW [actor] [action]. Proposition must build an implementation model; opposition compares it to status quo or an alternative policy.",
+        "when_to_use": ["When testing debaters' ability to build and defend concrete policy mechanisms."],
+        "example": "This House Would legalise all recreational drugs.",
+        "anti_example": "This House Would be happier if drugs didn't exist. (No actor, no concrete policy action — closer to a values motion mis-phrased as policy.)"
+      },
+      {
+        "name": "Value/belief motion (This House Believes That...)",
+        "definition": "Calls for a judgement on whether a state of affairs, trend, or belief is true, good, or justified, without necessarily requiring a specific policy mechanism.",
+        "structure": "THBT [claim about the world]. Both sides argue the truth or desirability of the claim itself.",
+        "when_to_use": ["When testing debaters' ability to argue values, philosophy, and broad societal trends rather than narrow policy detail."],
+        "example": "This House Believes That social media has done more harm than good to democracy.",
+        "anti_example": "This House Believes social media is bad. (Too vague — 'bad' compared to what, and bad for whom, is undefined.)"
+      },
+      {
+        "name": "Regret motion (This House Regrets...)",
+        "definition": "Calls for an evaluation of a historical or ongoing decision, trend, or actor's choice, focused on retrospective judgement rather than future action.",
+        "structure": "THR [decision/event/actor's choice]. Proposition argues the regretted thing was net negative; opposition argues it was justified or net positive.",
+        "when_to_use": ["When testing the ability to evaluate real or hypothetical historical decisions with full hindsight."],
+        "example": "This House Regrets the rise of the gig economy.",
+        "anti_example": "This House Regrets bad companies. (No specific decision, actor, or trend identified.)"
+      },
+      {
+        "name": "Actor motion",
+        "definition": "A motion that specifies debating from the perspective of a particular actor (a government, a named institution, a hypothetical character) rather than an abstract 'House'.",
+        "structure": "This House, as [actor], would/believes [claim], requiring debaters to argue within that actor's realistic interests and constraints.",
+        "when_to_use": ["To test role-play and strategic reasoning from a specific stakeholder's perspective, not just abstract morality."],
+        "example": "This House, as the President of the United States, would withdraw all troops from foreign military bases.",
+        "anti_example": "This House would withdraw troops. (Drops the actor-specific framing that changes what arguments are legitimate.)"
+      }
+    ],
+    "balanced_motion_design": {
+      "definition": "A well-designed motion gives both sides roughly equal access to strong, preparable material, so the outcome of the round is determined by debating skill, not by which side got the objectively easier position.",
+      "factors_to_consider": [
+        "Does each side have at least two to three independent, substantive lines of argument available, not just one obvious case?",
+        "Is the motion specific enough to avoid definitional debates eating into substantive clash time?",
+        "Does the motion avoid being so one-sided that a competent opposition cannot construct a real case (or vice versa)?",
+        "Is the context accessible to the intended skill level/audience without requiring obscure specialist knowledge?"
+      ],
+      "checks_for_balance": [
+        "Could a reasonably informed debater construct a 7-minute case for BOTH sides, not just one?",
+        "Does neither side have a 'free win' via an obvious, undisputed factual claim?",
+        "Is the burden of proof distributed sensibly given the phrasing (e.g. not asking opposition to prove a negative with no comparative world)?"
+      ],
+      "signs_of_unbalanced_motion": [
+        "One side has overwhelming empirical consensus while the other can only argue from abstract principle with no real-world support.",
+        "The motion's phrasing already presupposes the answer (a loaded motion).",
+        "One side requires highly specialised knowledge the other does not."
+      ],
+      "example_of_balanced_motion": "This House Would ban targeted political advertising on social media. (Both sides have rich material: free expression and political engagement vs. misinformation and manipulation.)",
+      "example_of_unbalanced_motion": "This House Believes that genocide is wrong. (No genuine opposition case exists; this is not a debatable motion.)"
+    },
+    "motion_drafting_process": {
+      "steps": [
+        "1. Identify the core tension or question you want debated (the 'spark').",
+        "2. Choose the motion type (policy, value, regret, actor) that best matches the kind of clash you want to test.",
+        "3. Draft the wording precisely, naming the actor and action/claim explicitly to avoid ambiguity.",
+        "4. Brainstorm at least two to three lines of argument for EACH side before finalising.",
+        "5. Pressure-test for balance, definitional traps, and accessibility to the intended audience.",
+        "6. Finalise wording and write brief background/context notes if needed for less common topics."
+      ],
+      "inputs_needed": [
+        "A clear sense of the audience's skill level and general knowledge.",
+        "Awareness of what topics have been recently debated, to avoid repetition.",
+        "A genuine open question — not a settled moral consensus."
+      ],
+      "mistakes_to_avoid": [
+        "Writing a motion before checking that both sides have real material.",
+        "Using vague or emotionally loaded language that pre-judges the answer.",
+        "Failing to specify the actor, leading to definitional debates instead of substantive ones."
+      ]
+    }
+  },
+  "clash": {
+    "definition": "Clash is the direct, explicit point of disagreement between the two sides' arguments — the place where one side's claim and the other side's claim cannot both be true, and where the round is actually decided.",
+    "why_it_matters": "A round without clash is just two unconnected speeches; judges cannot compare arguments that never engage each other. Identifying and winning clash is what separates a debate from a pair of monologues.",
+    "how_to_identify": {
+      "steps": [
+        "List each side's core arguments side by side.",
+        "For each pair, ask: do these directly contradict each other, or are they about different things entirely (non-engagement)?",
+        "Identify whether the clash is about facts (what will happen), values (what should matter), or both.",
+        "Rank clashes by centrality — which disagreement, if resolved, would most decide the round?"
+      ],
+      "signals": [
+        "Both sides make claims about the same actor's likely behaviour but reach opposite conclusions.",
+        "Both sides agree on the facts but disagree on how to weigh them (values clash).",
+        "One side's mechanism, if true, would directly disprove the other's mechanism."
+      ],
+      "questions_to_ask": [
+        "What does each side need the judge to believe, and are those beliefs mutually exclusive?",
+        "Which clash, if left unaddressed, will the judge default to whoever spoke about it most clearly?"
+      ]
+    },
+    "clash_types": [
+      {
+        "name": "Factual/empirical clash",
+        "definition": "Disagreement over what will actually happen or has happened in the world.",
+        "what_each_side_usually_says": {
+          "proposition": ["This policy will produce X measurable effect, based on similar precedents."],
+          "opposition": ["The evidence/precedent doesn't transfer, or the effect will be smaller/reversed due to factor Y."]
+        },
+        "example": "On minimum wage increases: proposition argues it raises worker income without significant job loss; opposition argues it causes disemployment among low-skill workers."
+      },
+      {
+        "name": "Values clash",
+        "definition": "Disagreement over which competing principle or value should take priority when both sides agree on the underlying facts.",
+        "what_each_side_usually_says": {
+          "proposition": ["Even granting their facts, the value of autonomy/fairness/liberty outweighs the cost they describe."],
+          "opposition": ["Even granting their facts, the value of safety/equality/collective welfare outweighs the benefit they describe."]
+        },
+        "example": "On assisted dying: both sides may agree it reduces suffering for some, but disagree on whether the risk of coercion to vulnerable patients outweighs that benefit."
+      },
+      {
+        "name": "Comparative-world clash",
+        "definition": "Disagreement over which side's overall model of the world (not just a single argument) is preferable on balance.",
+        "what_each_side_usually_says": {
+          "proposition": ["Our model, even with its flaws, is a net improvement over the status quo opposition defends."],
+          "opposition": ["Our world (status quo or alternative) avoids your flaws while keeping more of the existing benefits."]
+        },
+        "example": "On replacing first-past-the-post voting with proportional representation: clash over whether more representative outcomes are worth the trade-off in governing stability."
+      }
+    ],
+    "how_to_explain_clash": {
+      "steps": [
+        "Name the clash explicitly: 'This is where we disagree with the opposition.'",
+        "State both sides' positions accurately and fairly before responding (steelman, don't strawman).",
+        "Explain why your side wins this specific clash, using mechanism and evidence, not just repetition of your claim.",
+        "Explain why winning this clash matters more than the clash(es) your opponent is trying to centre."
+      ],
+      "good_output_shape": [
+        "'They say X will happen because Y. We disagree, because Z actually prevents Y from occurring, as shown by [mechanism/example].'"
+      ],
+      "bad_output_shape": [
+        "'They are wrong.' (No engagement with the actual mechanism behind their claim.)"
+      ]
+    },
+    "how_to_win_clash": {
+      "steps": [
+        "Engage the strongest version of the opponent's argument, not a weaker misreading of it.",
+        "Use mechanism-level rebuttal: show where their causal chain breaks down, not just that you disagree with the conclusion.",
+        "Bring independent evidence or analogy that supports your side of the clash.",
+        "Weigh why your side of the clash matters more to the judge's decision than the opponent's competing clash."
+      ],
+      "judge_comparison_methods": [
+        "Magnitude: which side's outcome affects more people or more severely?",
+        "Probability: which side's mechanism is more likely to actually occur?",
+        "Reversibility: which side's harm, if wrong, is easier to undo?",
+        "Timeframe: which side's effect happens sooner and is therefore more certain?"
+      ],
+      "example": "On a clash over whether a carbon tax causes job losses: winning side shows that historical carbon tax implementations (e.g. British Columbia) produced negligible net job loss because revenue recycling offset costs — addressing the opponent's mechanism directly rather than just asserting the tax is 'worth it.'"
+    }
+  },
+  "rebuttal": {
+    "definition": "Rebuttal is the act of directly responding to and undermining an opponent's specific argument, by attacking its claim, mechanism, evidence, framing, or impact — as opposed to simply presenting your own separate arguments and hoping they overshadow the opponent's.",
+    "why_it_matters": "A round is not won by who has more arguments in isolation; unanswered opposing arguments are typically treated by judges as conceded and true. Rebuttal is what actually changes the judge's mind about what to believe.",
+    "rebuttal_types": [
+      {
+        "name": "Mechanism attack",
+        "definition": "Showing that the causal chain in the opponent's argument breaks down at a specific step.",
+        "when_to_use": ["When the opponent's argument has a clear logical gap or relies on an unrealistic actor response."],
+        "example": "'They say a tax will reduce consumption — but they haven't shown demand for this good is price-sensitive; in fact it's a necessity good, so consumption barely changes and the tax just becomes a regressive burden.'",
+        "anti_example": "'Their argument is just wrong.' (No specific step identified as flawed.)"
+      },
+      {
+        "name": "Impact attack",
+        "definition": "Conceding the mechanism may occur but arguing the resulting impact is smaller, less likely, or less important than claimed.",
+        "when_to_use": ["When the opponent's causal chain is plausible but they have overstated its significance."],
+        "example": "'Even if some jobs are lost, as they claim, the number affected is a small fraction of the workforce compared to the much larger group who benefit from higher wages.'",
+        "anti_example": "'That doesn't matter.' (No comparative magnitude offered.)"
+      },
+      {
+        "name": "Turn (argument flip)",
+        "definition": "Showing that the opponent's own argument, if true, actually supports your side rather than theirs.",
+        "when_to_use": ["When an opponent's mechanism can be shown to cut in your favour once followed to its logical end."],
+        "example": "'They say private schools foster innovation that benefits everyone — but that very innovation requires the funding and talent drain we're describing, which is exactly the harm to the public system we're warning about.'",
+        "anti_example": "Simply restating your own original argument without explicitly engaging theirs as the source of the turn."
+      },
+      {
+        "name": "Counter-example / disanalogy",
+        "definition": "Showing that the precedent or analogy the opponent relies on does not transfer to this context.",
+        "when_to_use": ["When the opponent leans heavily on a specific case study or comparison that has key disanalogous features."],
+        "example": "'They cite Country X's success with this policy, but Country X has a far smaller informal economy than ours, which is exactly the mechanism their policy depends on — so the comparison doesn't hold here.'",
+        "anti_example": "'That example doesn't count.' (No explanation of why it's disanalogous.)"
+      },
+      {
+        "name": "Framing rebuttal",
+        "definition": "Disputing the lens through which the opponent wants the judge to evaluate the argument, rather than the facts themselves.",
+        "when_to_use": ["When the opponent's facts may be correct, but their framing misdirects the judge's evaluation."],
+        "example": "'They've framed this as a question of individual liberty, but the real issue is collective safety, since the choice in question directly endangers third parties, not just the individual making it.'",
+        "anti_example": "Disputing facts when the actual disagreement is really about framing, leading to talking past each other."
+      }
+    ],
+    "how_to_answer": {
+      "steps": [
+        "Identify precisely which part of the opponent's argument you are attacking: claim, mechanism, evidence, impact, or framing.",
+        "State their argument accurately first, to show you understood it (and to avoid strawmanning).",
+        "Deliver the specific rebuttal type that fits the flaw you've identified.",
+        "Explain the consequence: what does this rebuttal mean for how the judge should now view that argument or the round overall?"
+      ],
+      "checks": [
+        "Have you addressed their strongest point, not a weaker version of it?",
+        "Does your rebuttal engage their actual mechanism, or just restate your side's opposite claim?",
+        "Have you explained why this rebuttal matters to the outcome of the round, not just to this isolated argument?"
+      ],
+      "example": "Opponent argument: 'Raising the minimum wage will cause unemployment.' Rebuttal: 'They claim higher wages cause unemployment, relying on a simple supply-and-demand model — but that model assumes a perfectly competitive labour market. In reality, employers in low-wage sectors often have wage-setting power (monopsony), meaning a wage increase can be absorbed without job losses, as observed in multiple empirical minimum wage studies. So even granting their model's logic, it doesn't apply to the actual labour markets in question.'"
+    },
+    "rebuttal_drills": {
+      "patterns": [
+        "Take any random claim and practice three different rebuttal types against it (mechanism attack, impact attack, turn) to build flexibility.",
+        "Practice 'steelmanning' an opponent's argument out loud before rebutting it, to build the habit of fair engagement.",
+        "Time-boxed rebuttal: respond to an argument in under 30 seconds using the claim-mechanism-impact structure in reverse (attack impact, then mechanism, then claim)."
+      ],
+      "answer_shapes": [
+        "'They say [accurate restatement]. This fails because [specific flaw]. Even if you don't buy that, [secondary reason/impact comparison].'"
+      ]
+    },
+    "failure_modes": [
+      "Strawmanning: rebutting a weaker, exaggerated version of the opponent's actual argument.",
+      "Dropping: failing to respond to an argument at all, which judges typically treat as a concession.",
+      "Restating instead of rebutting: simply repeating your own case louder rather than engaging theirs.",
+      "Rebutting irrelevant details while leaving the core mechanism of the opponent's argument untouched."
+    ]
+  },
+  "weighing": {
+    "definition": "Weighing is the explicit act of comparing the relative importance of competing arguments or impacts across both sides, telling the judge which matters more and why, rather than leaving the judge to decide unprompted.",
+    "why_it_matters": "Most rounds at a high level are not lost because one side had no arguments — they are lost because neither side told the judge how to compare their arguments to the other side's, leaving the decision to the judge's personal intuition rather than the debaters' reasoning.",
+    "weighing_dimensions": [
+      {
+        "name": "Magnitude",
+        "definition": "How large or severe the impact is — how many people affected, and how significantly.",
+        "when_to_use": ["When comparing two impacts of different scale (e.g. economic inconvenience vs. loss of life)."],
+        "example": "'Even if their economic argument is true, it affects marginal efficiency, while our argument is about preventable deaths — a categorically larger magnitude.'"
+      },
+      {
+        "name": "Probability",
+        "definition": "How likely the impact is to actually occur, given the mechanism behind it.",
+        "when_to_use": ["When one side's impact, though large, depends on a speculative or unlikely mechanism."],
+        "example": "'Their worst-case scenario requires three separate unlikely events to align; our harm is already observed happening under similar conditions today.'"
+      },
+      {
+        "name": "Reversibility",
+        "definition": "Whether the impact, if it occurs, can be undone or corrected later.",
+        "when_to_use": ["When comparing a temporary, correctable harm against a permanent, irreversible one."],
+        "example": "'Even if our policy has short-term costs, those costs are reversible through future amendment; their harm — loss of biodiversity — is permanent.'"
+      },
+      {
+        "name": "Timeframe",
+        "definition": "How soon the impact occurs relative to the opponent's impact.",
+        "when_to_use": ["When one side's benefit is immediate and the other's is distant or speculative."],
+        "example": "'Our benefits accrue immediately upon implementation; their predicted harms are long-term and contingent on conditions that may not hold.'"
+      },
+      {
+        "name": "Centrality to the motion",
+        "definition": "How directly the impact relates to the core question the motion is asking, versus being a tangential side-effect.",
+        "when_to_use": ["When an opponent's impact, while real, is not actually what the motion is fundamentally about."],
+        "example": "'Their argument about administrative cost is real but secondary; the motion is fundamentally about whether this is a just policy, which our principled argument addresses directly.'"
+      }
+    ],
+    "how_to_compare_worlds": {
+      "steps": [
+        "Identify the core impacts on each side that the round will be decided on (usually two to three per side, not every argument made).",
+        "Select the weighing dimension(s) most relevant to comparing those specific impacts.",
+        "Explicitly state the comparison out loud — never assume the judge will do this work themselves.",
+        "Pre-empt the opponent's likely weighing mechanism and explain why yours should take priority."
+      ],
+      "judge_language": [
+        "'Even if you give them this argument in full, it still doesn't outweigh...'",
+        "'The question for you to decide is not who has more arguments, but whose impact is larger/more certain/more central.'",
+        "'Comparing the two harms directly: ours is reversible and theirs is not, which is why you should prefer our side even granting their facts.'"
+      ],
+      "anti_patterns": [
+        "Listing more arguments without ever comparing them to the opponent's ('argument-counting').",
+        "Weighing only in the final speech, leaving no time to develop the comparison properly.",
+        "Weighing using a dimension that doesn't actually apply to the two impacts being compared (e.g. comparing magnitude when the real disagreement is about probability)."
+      ]
+    }
+  },
+  "examples": {
+    "definition": "Case examples are specific real-world or realistic illustrative instances used to make an argument's mechanism credible and concrete, rather than purely theoretical.",
+    "why_it_matters": "A mechanism that sounds plausible in the abstract becomes far more persuasive when shown to have actually happened somewhere, or to closely resemble a known case — it shifts an argument from speculation to demonstrated possibility.",
+    "how_to_use_case_examples": {
+      "steps": [
+        "Choose an example that closely matches the actors, incentives, and conditions of your mechanism — not just a vaguely related historical event.",
+        "State the example briefly: what happened, and what it demonstrates about your mechanism.",
+        "Explicitly connect the example back to the argument: 'this shows that X mechanism is not just theoretical, it has occurred before under similar conditions.'",
+        "Pre-empt obvious disanalogies the opponent might raise, briefly explaining why the comparison still holds."
+      ],
+      "good_output_signals": [
+        "The example shares the key causal features of the argument's mechanism, not just superficial similarity.",
+        "The example is used to support a specific step in the mechanism, not just dropped in as decoration.",
+        "The debater acknowledges any limits of the analogy rather than overstating it."
+      ],
+      "bad_output_signals": [
+        "Example is mentioned by name with no explanation of what it actually demonstrates.",
+        "Example is used to 'prove' an entire complex policy outcome from one anecdote.",
+        "Example bears little resemblance to the actual conditions of the motion at hand."
+      ]
+    },
+    "example_types": [
+      "Historical precedent (a similar policy enacted in the past)",
+      "Comparative case (a similar situation in another country/context today)",
+      "Hypothetical illustrative scenario (a constructed but realistic example to clarify a mechanism)",
+      "Empirical study or data point (statistical evidence supporting a causal claim)"
+    ]
+  },
+  "coach_notes": {
+    "definition": "A coach note is targeted, actionable feedback given to a debater after a speech or round, intended to improve their next performance rather than simply evaluate their last one.",
+    "why_it_matters": "Debaters improve fastest with specific, structural feedback ('your mechanism skipped a step between price increase and behaviour change') rather than vague encouragement or vague criticism ('be more persuasive'), which gives no clear next action.",
+    "what_a_good_coach_note_should_do": [
+      "Identify ONE or TWO priority issues rather than overwhelming the debater with every possible critique at once.",
+      "Use the argument/framing/mechanism/clash/rebuttal/weighing vocabulary precisely so the debater learns to self-diagnose using the same framework next time.",
+      "Give a concrete example of how the flawed moment could have been said differently.",
+      "Acknowledge what was done well, specifically, not just generically ('good job') — and explain why it worked using the same vocabulary."
+    ],
+    "what_it_should_not_do": [
+      "Give purely stylistic feedback (volume, pacing) while ignoring substantive structural issues, unless style was the main limiting factor.",
+      "Overload a beginner with every level of feedback (clash, weighing, theory) when they have not yet mastered constructing a single clean argument.",
+      "Use vague, non-actionable language like 'just be more confident' or 'try harder.'"
+    ],
+    "recommended_structure": [
+      "1. One specific strength, named using the framework vocabulary.",
+      "2. One specific priority weakness, named precisely (e.g. 'mechanism skipped a step' not 'argument was weak').",
+      "3. A concrete rewritten example showing the fix in action.",
+      "4. One small, practiceable next step before the next round."
+    ],
+    "example": "Strength: Your impact on the sugar tax argument was well-scaled — you compared it to national obesity rates, which gave the judge a clear sense of magnitude. Priority fix: Your mechanism skipped from 'price increases' straight to 'people buy less,' without explaining WHY price-sensitive consumers respond that way — next time, name the specific group (lower-income households who spend a higher share of income on these goods) and explain their elasticity of demand. Rewritten example: 'Because lower-income households spend a higher proportion of income on sugary drinks, even a modest price increase changes their purchasing decisions more than wealthier households, who can absorb the cost without changing behaviour.' Next step: In your next speech, practice the 'and then what happens?' check three times on your main argument before delivering it.",
+    "anti_example": "Good speech, just needs more confidence and better eye contact. (No structural feedback, nothing the debater can concretely practice or apply to argument construction.)"
+  },
+  "debate_section_output_expectations": {
+    "argument_block": {
+      "required_parts": ["argument", "framing", "mechanism"],
+      "optional_parts": ["case example/evidence", "pre-emption of likely rebuttal", "explicit link back to burden"],
+      "rules": [
+        "Every argument block must include a one-sentence claim, a step-by-step mechanism naming actors, and an impact statement with magnitude/probability/reversibility where relevant.",
+        "Framing should be stated before or alongside the claim, not buried after the mechanism.",
+        "Mechanism must never skip directly from claim to impact without intermediate causal steps."
+      ],
+      "anti_patterns": [
+        "Argument block that is only a claim and an impact with no mechanism in between.",
+        "Framing that simply restates the claim in different words rather than offering an interpretive lens."
+      ]
+    },
+    "clash_block": {
+      "required_parts": [
+        "accurate restatement of opponent's argument",
+        "identification of the specific point of disagreement (factual, values, or comparative-world)",
+        "rebuttal addressing mechanism, impact, or framing specifically",
+        "explicit weighing of why this side of the clash matters more"
+      ],
+      "rules": [
+        "Must engage the opponent's actual mechanism, not a strawmanned or generic version of their argument.",
+        "Must end with a weighing statement, not just a rebuttal, so the judge knows what to do with the disagreement."
+      ]
+    },
+    "coach_block": {
+      "required_parts": [
+        "one specific strength using framework vocabulary",
+        "one specific priority weakness using framework vocabulary",
+        "a concrete rewritten example",
+        "one practiceable next step"
+      ],
+      "rules": [
+        "Must use precise debate vocabulary (claim, mechanism, impact, framing, clash, weighing) rather than generic praise/criticism.",
+        "Must be levelled to the debater's current skill stage — do not introduce advanced concepts (theory, kritiks) before basic argument construction is solid."
+      ]
+    }
+  },
+  "quality_rubric": {
+    "strong_output_signals": [
+      "Claims are always paired with a step-by-step mechanism naming specific actors and incentives.",
+      "Framing is stated explicitly and used consistently across the case, not introduced once and forgotten.",
+      "Rebuttal engages the opponent's strongest version of their argument, addressing mechanism or impact specifically.",
+      "Weighing is explicit, comparative, and uses a named dimension (magnitude, probability, reversibility, timeframe, centrality).",
+      "Examples are connected explicitly back to the mechanism they are meant to support."
+    ],
+    "weak_output_signals": [
+      "Arguments that are claim-and-impact only, with the mechanism implied but never stated.",
+      "Rebuttal that restates one's own case rather than engaging the opponent's specific reasoning.",
+      "Framing introduced once at the start and never reinforced or used to interpret later material.",
+      "Weighing left implicit, assuming the judge will independently rank impacts correctly."
+    ],
+    "red_flags": [
+      "Confusing assertion (stated with confidence) for argument (supported with mechanism).",
+      "Treating burdens as symmetrical when the motion's phrasing creates an asymmetry between sides.",
+      "Strawmanning the opponent's position to make rebuttal artificially easy.",
+      "Dropping (failing to respond to) a central opposing argument entirely."
+    ]
+  },
+  "term_differences": [
+    {
+      "term": "argument",
+      "not_the_same_as": ["assertion", "framing", "evidence"],
+      "difference": "An argument is a complete unit of claim + mechanism + impact. An assertion is just the claim with no mechanism. Framing is the lens used to interpret an argument, not the argument itself. Evidence/examples support an argument's mechanism but are not arguments on their own."
+    },
+    {
+      "term": "framing",
+      "not_the_same_as": ["argument", "claim", "weighing"],
+      "difference": "Framing tells the judge HOW to interpret an argument or the round; it does not itself prove anything the way an argument does. It is distinct from weighing, which compares already-established impacts, whereas framing shapes how those impacts are understood in the first place."
+    },
+    {
+      "term": "mechanism",
+      "not_the_same_as": ["claim", "impact", "evidence"],
+      "difference": "Mechanism is the causal chain connecting claim to impact. It is not the claim itself (the starting assertion) nor the impact (the end consequence), and it is not the same as evidence, which supports the mechanism's plausibility but isn't the reasoning chain itself."
+    },
+    {
+      "term": "clash",
+      "not_the_same_as": ["rebuttal", "disagreement in general"],
+      "difference": "Clash is the identified POINT of direct contradiction between two sides' claims. Rebuttal is the ACT of responding to and attacking that point. General disagreement that doesn't engage the same underlying claim (two unconnected arguments) is not clash at all, just non-engagement."
+    },
+    {
+      "term": "burden",
+      "not_the_same_as": ["argument", "motion"],
+      "difference": "A burden is the underlying obligation a side must meet, set by the motion's structure and role. Arguments are the tools used to meet a burden, but having many arguments does not automatically mean a burden has been met if they don't address what was actually required."
+    },
+    {
+      "term": "rebuttal",
+      "not_the_same_as": ["weighing", "framing rebuttal only", "restating one's own case"],
+      "difference": "Rebuttal directly attacks a specific part of an opponent's argument (claim, mechanism, evidence, impact, or framing). Weighing, by contrast, compares the relative importance of arguments AFTER they've been made and rebutted; it doesn't attack an argument, it ranks it. Restating one's own case is not rebuttal at all, since it never engages the opponent's reasoning."
+    }
+  ]
+}

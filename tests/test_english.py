@@ -27,6 +27,7 @@ def run_english_test():
     assert "ENGLISH POWER" in lesson
     assert "geopolitics" in lesson.lower()
     assert vocab_words
+    assert len(vocab_words) <= 2
     assert word_roots
     print("English lesson checks passed.")
 
