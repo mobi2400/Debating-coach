@@ -28,7 +28,7 @@ Engineering student. Active debater. Zero time to read articles on feminism, geo
 Three pipelines run on autopilot:
 
 **Daily (08:00 IST, weekdays)**
-Research → RAG Enrich → Filter → Rank → Summarize → Argue → Coach → English Coach → Format → Telegram
+Topic Select -> Topic Foundation -> Motion Mining -> Motion Intelligence -> Motion Drafting -> Research -> RAG Enrich -> Filter -> Rank -> Summarize -> Argue -> Coach -> Vocab Enrichment -> Format -> Telegram
 
 **Nightly (22:30 IST, weekdays)**
 Night Agent pings you → `yes` triggers a 5-question MCQ quiz → `english` triggers a vocabulary quiz → `no` triggers a 100-word bedtime summary
@@ -42,22 +42,22 @@ Weekend Agent reads the full week → filters out news, keeps only concepts and 
 
 ## Agent Breakdown
 
-| Agent | LLM lane | What it does |
+| Agent | Lane | What it does |
 |---|---|---|
-| Research Agent | — (tool calls) | Pulls articles from RSS, Tavily, Wikipedia, DuckDuckGo in parallel |
-| RAG Enrich Agent | — (FAISS retrieval) | Pulls your private PDFs into the prompt context |
-| Filter Agent | Llama 3.1 8B (`fast`) | Deduplicates and removes low-quality sources |
-| Rank Agent | Llama 3.1 8B (`fast`) | Scores and picks top 5–7 articles; promotes news, demotes encyclopedia |
-| Summarize Agent | Llama 3.3 70B (`balanced`) | Per-article SUMMARY / KEY FACT / CONCEPT |
-| Argue Agent | Qwen3 32B (`reasoning`) | 3 FOR + 3 AGAINST + 1 middle-ground argument |
-| Coach Agent | GPT-OSS 120B (`best`) | Structured debate packet — unique angle, value clash, judge language, power phrases |
-| English Coach Agent | GPT-OSS 20B (`structured`) | Vocabulary lesson grounded in Word Power Made Easy chunks |
-| Format Agent | — (deterministic) | Compiles all of the above into a 9-section Telegram-ready digest |
-| Night Agent | — | Routes by reply: `yes` → debate quiz, `english` → vocab quiz, anything else → bedtime |
-| Quiz Agent | GPT-OSS 20B (`structured`) | 5-question MCQ, exact-letter scoring, saves to memory |
-| English Quiz Agent | GPT-OSS 20B (`structured`) | Vocabulary quiz from `english_db` chunks |
-| Bedtime Agent | Llama 3.3 70B (`balanced`) | Compresses today's digest into ~100 words |
-| Weekend Agent | Qwen3 32B (`reasoning`) | Distils the week into concepts, frameworks, stats, argument patterns |
+| Topic Foundation Agent | deterministic + search context | Teaches the topic before the article with frameworks, key concepts, and pre-knowledge |
+| Topic Motion Mining Agent | tool + cache | Pulls topic-relevant motions from cached sources and `debatedata.io`, then falls back to generated templates |
+| Motion Intelligence Agent | deterministic analysis | Learns common clash axes, framing patterns, and motion families from mined motions |
+| Motion Drafting Agent | guidance-driven | Drafts a live-case motion, chooses a motion type probabilistically, and explains proposition/opposition burdens |
+| Research Agent | tool calls | Pulls articles from RSS, Tavily, Wikipedia, and DuckDuckGo |
+| RAG Enrich Agent | FAISS retrieval | Brings private PDFs, theory material, transcripts, and memory into context |
+| Filter + Rank Agents | fast LLMs | Remove weak sources and select the most debate-useful article set |
+| Summarize Agent | balanced LLM | Produces summary, key facts, concepts, and article context |
+| Argue Agent | reasoning + guidance | Generates substantive FOR / AGAINST argument seeds tied to the motion and article |
+| Coach Agent | best LLM + guidance | Expands arguments into framing, mechanisms, clash, rebuttal drills, and judge-facing coaching |
+| Vocab Enrichment Agent | structured LLM + retrieval | Extracts 1-2 debate-relevant words from the actual lesson material and teaches them with definitions and examples |
+| Format Agent | deterministic | Builds the final digest with motion type, burdens, arguments, coach notes, rebuttals, vocab, and recall prompts |
+| Delivery Agent | Telegram section splitter | Sends the digest as section-aware Telegram messages instead of one long blob |
+| Night / Quiz / Weekend Agents | deterministic + structured | Handle nightly recall, english quiz, bedtime summary, and weekly distillation |
 
 ---
 
@@ -65,56 +65,39 @@ Weekend Agent reads the full week → filters out news, keeps only concepts and 
 
 | Tool | Layer | Purpose |
 |---|---|---|
-| RSS Feeds (feedparser) | Recency | Latest breaking news from BBC, Al Jazeera, Reuters, The Hindu, Indian Express |
-| Tavily Search | Depth | Full article content, multi-perspective deep search |
-| Wikipedia Tool | Background | History, definitions, foundational context |
-| DuckDuckGo Search | Fallback | Backup search, no API key, no rate limits |
+| RSS Feeds (`feedparser`) | Recency | Pull latest news from configured feeds |
+| Tavily | Depth | Pull fuller web context and multi-source article enrichment |
+| Wikipedia | Background | Pull topic foundations and article-adjacent context |
+| DuckDuckGo | Fallback | Cheap fallback search when API-backed retrieval is thin |
+| DebateData | Motion source | Supplies real debate motions for topic-level motion mining |
 
-All four run in parallel under a 20-second global timeout. Each tool's output is normalised to the same dict shape so downstream nodes don't care which source an article came from.
+The pipeline normalizes these tools into a common shape so downstream nodes can rank, summarize, and argue without caring where the source came from.
 
 ---
 
 ## RAG System
 
-What makes the lesson *personal*: four vector stores, four retrieval strategies, all served by Gemini `gemini-embedding-001` (3072-dim). FAISS on disk.
+What makes the lesson personal is not just one vector search call. The project uses multiple retrieval lanes with FAISS-backed stores, selective node retrieval, and guidance-aware prompting.
 
-### Vector Stores
+### Retrieval Stores
 
-| Store | What's in it | Retrieval style |
+| Store | What's in it | Why it exists |
 |---|---|---|
-| `knowledge_db` | Topic PDFs, news archives, Wikipedia | Hybrid: BM25 40% + Vector 60% |
-| `style_db` | Your past speeches, essays, personal notes | Similarity-score-threshold (0.72) |
-| `reasoning_db` | Theory books, rhetoric, YouTube transcripts | MMR (λ=0.65, fetch_k=25) |
-| `english_db` | *Word Power Made Easy* (session-aware extractor) | Similarity with structured metadata per chunk |
+| `knowledge_db` | Topic PDFs, curated background material, extracted articles | Factual grounding and domain knowledge |
+| `reasoning_db` | Debate theory, rhetoric, transcripts, matter-style material | Better mechanism, clash, and argument structure |
+| `style_db` | Personal writing / speeches / notes | Style transfer and tone alignment |
+| `english_db` | Vocabulary material such as *Word Power Made Easy* | Vocabulary teaching and english quiz support |
 
-### Why four retrieval styles
+### Retrieval Strategy
 
-- **Hybrid on `knowledge_db`** — BM25 catches exact terms like *CEDAW* or *Article 370*. Vectors catch related concepts. Together you never miss a fact or a related idea.
-- **Similarity-threshold on `style_db`** — Style is tone and pattern, not keywords. *"I strongly contend"* and *"The evidence compels us"* are the same style — only vector catches that.
-- **MMR on `reasoning_db`** — Prevents returning five chunks that all argue the same point. Forces diverse perspectives for richer FOR/AGAINST generation.
-- **Structured similarity on `english_db`** — Each chunk carries metadata (session number, section type) so the english quiz can ask for etymology specifically.
+- Different nodes retrieve different mixes of stores instead of sharing one generic context blob.
+- `argue_node` and `coach_node` receive targeted debate guidance slices from `debate_concepts.json` and `debate_output_contract.json` in addition to retrieved evidence.
+- Retrieval memory is compacted and reused so the system can keep high-value context without exploding prompt size.
+- FAISS indexes are cached in GitHub Actions and rebuilt only when source definitions or extraction logic change.
 
-### Retrieval Ratios Per Node
+### Why this matters
 
-| Node | knowledge_db | reasoning_db | style_db |
-|---|---|---|---|
-| RAG Enrich Node | k=6 (hybrid) | k=4 (MMR) | not used |
-| Argue Node | k=3 (hybrid) | k=5 (MMR) | k=2 (threshold) |
-| Coach Node | k=2 (hybrid) | k=3 (MMR) | k=5 (threshold) |
-
-### Chunking Strategy
-
-| Content type | Chunk size | Overlap | Reason |
-|---|---|---|---|
-| Topic PDFs / news / Wikipedia | 600 chars | 100 (16%) | Facts need surrounding context |
-| Your speeches / notes | 400 chars | 80 (20%) | One argument point per chunk |
-| Debate theory books | 720 chars | 120 (16%) | Arguments span multiple sentences |
-| YouTube transcripts | 300 chars | 60 (20%) | Transcripts lack punctuation structure |
-| Word Power Made Easy | 260 chars | 40 | One vocabulary entry per chunk |
-
-### Knowledge Base Sources You Feed It
-
-Drop your PDFs into `knowledge_base/pdfs/` and register them in `rag/sources.json`. The forking guide explains [which `doc_type` routes to which store](docs/FORKING_GUIDE.md#which-doc_type-to-use).
+This makes the output less like a generic article summary and more like a debate lesson: the system can explain motion burdens, generate argument-specific framing, and pull vocabulary from the actual lesson material rather than from a static word list.
 
 ---
 
@@ -176,37 +159,32 @@ Weekly Brain Upload also reports your study stats: days studied out of 5, averag
 
 ## Memory System
 
-Flat JSON file (`memory/weekly_log.json`) — no database needed. Stores per day:
+Flat JSON file (`memory/weekly_log.json`) - no database needed. It stores daily topic, arguments, key facts, quiz results, and study state.
 
-- Topic, summaries, arguments, key facts, concepts, debate angle, english lesson
-- `studied: true/false` — set by Night Agent based on your reply
-- `quiz_score` — percentage saved after MCQ
-- `english_quiz_score` — same for vocab quiz
-- UTC timestamp — agrees across dev machines and CI runners
+Persistence model:
+- Local dev: the file lives directly in `memory/weekly_log.json`
+- GitHub Actions: the file is restored through the Actions cache and is **not** committed back into the repository
+- Writes are atomic via `os.replace`, so crashes do not corrupt the log
 
-Atomic writes via `os.replace` so a crash mid-write can't corrupt the log. Persistence between scheduler runs is via GitHub Actions cache — see [docs/STATE_PERSISTENCE.md](docs/STATE_PERSISTENCE.md).
+See [docs/STATE_PERSISTENCE.md](docs/STATE_PERSISTENCE.md) for the exact cache model and trade-offs.
 
 ---
 
 ## Tech Stack
 
-| Layer | Tool | Cost |
-|---|---|---|
-| Orchestration | LangGraph | Free |
-| LLMs | Groq (Llama, Qwen, GPT-OSS) + Google Gemini | Free tier |
-| Web search | Tavily + DuckDuckGo | Free tier / Free |
-| Encyclopedia | Wikipedia LangChain Tool | Free |
-| News | feedparser (RSS) | Free |
-| PDF parsing | PyMuPDF | Free |
-| YouTube transcripts | youtube-transcript-api | Free |
-| Web scraping | BeautifulSoup + requests | Free |
-| Embeddings | Google `gemini-embedding-001` (3072-dim) | Free tier |
-| Vector store | FAISS (local) | Free |
-| Telegram delivery | python-telegram-bot | Free |
-| Scheduler | GitHub Actions cron | Free |
-| Memory | JSON flat file + Actions cache | Free |
-
-**Total monthly cost: ₹0**
+| Layer | Tool |
+|---|---|
+| Orchestration | LangGraph |
+| LLM routing | Groq-hosted open models + Google Gemini |
+| Search | Tavily, RSS, DuckDuckGo, Wikipedia |
+| Motion source | DebateData + local motion-template fallback |
+| Debate guidance layer | `debate_concepts.json` + `debate_output_contract.json` + `core/debate_guidance.py` |
+| PDF parsing / extraction | PyMuPDF + custom chunking |
+| Embeddings | Google Gemini embeddings |
+| Vector store | FAISS |
+| Delivery | `python-telegram-bot` |
+| Scheduler | GitHub Actions cron |
+| Memory | JSON file + Actions cache |
 
 ---
 
@@ -261,63 +239,59 @@ Full setup walkthrough (creating the bot, getting the keys, configuring GitHub A
 
 ## Folder Structure
 
-```
+```text
 Debate Coach/
-├── .github/workflows/        # CI + scheduler
-│   ├── ci.yml                # runs tests on every push
-│   └── scheduler.yml         # cron: daily / night / weekend
-├── agents/                   # one file per LangGraph node
-│   ├── research_node.py
-│   ├── rag_enrich_node.py
-│   ├── filter_node.py
-│   ├── rank_node.py
-│   ├── summarize_node.py
-│   ├── argue_node.py
-│   ├── coach_node.py
-│   ├── english_coach_node.py
-│   ├── english_quiz_node.py
-│   ├── format_node.py
-│   ├── night_agent.py
-│   ├── weekend_agent.py
-│   └── topic_selector.py
-├── core/                     # shared plumbing
-│   ├── state.py              # AgentState TypedDict
-│   ├── llm_pool.py           # all model definitions in one place
-│   ├── llm_router.py         # task_type → model key
-│   ├── fallback.py           # fallback proxy
-│   ├── prompt_cache.py       # disk-backed LLM cache
-│   ├── topic_utils.py
-│   └── network_utils.py
-├── delivery/
-│   └── telegram.py           # Meta Telegram Bot API + reply polling
-├── rag/
-│   ├── ingest.py             # build FAISS indexes from sources.json
-│   ├── chunking_strategy.py
-│   ├── embeddings.py
-│   ├── retrieval_pipeline.py # hybrid / MMR / threshold dispatch
-│   ├── wpm_extractor.py      # structured Word Power Made Easy parser
-│   └── sources.json          # your PDFs, URLs, YouTube channels
-├── tools/                    # live data sources
-│   ├── tavily_tool.py
-│   ├── wiki_tool.py
-│   ├── rss_tool.py
-│   └── ddg_tool.py
-├── memory/
-│   ├── weekly_store.py       # atomic JSON writes
-│   └── weekly_log.json       # gitignored — lives in Actions cache
-├── knowledge_base/pdfs/      # your source material
-├── faiss/                    # built indexes (gitignored)
-├── tests/                    # smokes + daily e2e
-├── docs/
-│   ├── FORKING_GUIDE.md
-│   ├── TELEGRAM_SETUP.md
-│   └── STATE_PERSISTENCE.md
-├── graph.py                  # LangGraph wiring (daily / night / weekend)
-├── main.py                   # entry point — reads --mode flag
-├── topics.json               # your priority subjects
-├── requirements.txt
-├── LICENSE                   # MIT
-└── .env                      # secrets — gitignored
+|-- .github/workflows/
+|   |-- ci.yml
+|   `-- scheduler.yml
+|-- agents/
+|   |-- topic_foundation_node.py
+|   |-- topic_motion_mining_node.py
+|   |-- motion_intelligence_node.py
+|   |-- motion_drafting_node.py
+|   |-- research_node.py
+|   |-- rag_enrich_node.py
+|   |-- filter_node.py
+|   |-- rank_node.py
+|   |-- summarize_node.py
+|   |-- argue_node.py
+|   |-- coach_node.py
+|   |-- vocab_enrichment_node.py
+|   |-- format_node.py
+|   |-- night_agent.py
+|   `-- weekend_agent.py
+|-- core/
+|   |-- debate_guidance.py
+|   |-- fallback.py
+|   |-- network_utils.py
+|   |-- prompt_cache.py
+|   `-- topic_utils.py
+|-- delivery/
+|   |-- telegram.py
+|   `-- whatsapp.py
+|-- docs/
+|   |-- FORKING_GUIDE.md
+|   |-- STATE_PERSISTENCE.md
+|   `-- TELEGRAM_SETUP.md
+|-- memory/
+|   |-- weekly_store.py
+|   `-- weekly_log.json
+|-- rag/
+|   |-- ingest.py
+|   |-- retrieval_memory.py
+|   |-- retrieval_pipeline.py
+|   |-- sources.json
+|   `-- wpm_extractor.py
+|-- tools/
+|   |-- debatedata_tool.py
+|   |-- tavily_tool.py
+|   |-- wiki_tool.py
+|   |-- rss_tool.py
+|   `-- ddg_tool.py
+|-- graph.py
+|-- main.py
+|-- requirements.txt
+`-- topics.json
 ```
 
 ---
