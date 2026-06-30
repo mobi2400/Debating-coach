@@ -1,0 +1,528 @@
+{
+  "meta": {
+    "name": "debate_output_contract",
+    "version": "1.0",
+    "purpose": "Execution contract for debate-related nodes. Defines exactly what each node must do, must not do, required inputs, required outputs, and quality checks.",
+    "depends_on": [
+      "debate_concepts.json"
+    ],
+    "global_rules": [
+      "Nodes must use debate_concepts.json as the conceptual source of truth.",
+      "Nodes must generate debate-teaching content, not vague meta-advice.",
+      "Nodes must avoid repeating the motion unnecessarily.",
+      "Nodes must avoid buzzwords unless they are explained clearly.",
+      "Nodes must prefer argument-specific framing and mechanism over generic placeholders.",
+      "Nodes must produce student-facing clarity, not internal system language."
+    ]
+  },
+  "shared_definitions": {
+    "argument_block": {
+      "required_parts": [
+        "argument",
+        "framing",
+        "mechanism"
+      ],
+      "optional_parts": [
+        "example",
+        "rebuttal_hook"
+      ]
+    },
+    "clash_block": {
+      "required_parts": [
+        "main_clash",
+        "what_prop_says",
+        "what_opp_says",
+        "judge_comparison"
+      ]
+    },
+    "coach_note_block": {
+      "required_parts": [
+        "hidden_lens",
+        "what_most_debaters_miss",
+        "how_to_open",
+        "what_wins_the_judge"
+      ]
+    }
+  },
+  "pipeline_rules": {
+    "global_sequence": [
+      "topic selection",
+      "topic foundation",
+      "motion mining",
+      "motion intelligence",
+      "motion drafting",
+      "article selection",
+      "article context",
+      "argument generation",
+      "coaching and debate teaching",
+      "vocabulary extraction",
+      "formatting",
+      "delivery"
+    ],
+    "global_non_negotiables": [
+      "Every debate output must stay tied to the selected topic and selected article.",
+      "Motion must be introduced once, then reused implicitly unless clarity requires one short callback.",
+      "Only 2 proposition arguments and 2 opposition arguments should reach final delivery.",
+      "Every final argument must be debate-shaped, not article-summary-shaped.",
+      "If a node fails, downstream nodes must degrade gracefully instead of emitting broken placeholders."
+    ]
+  },
+  "nodes": {
+    "topic_foundation_node": {
+      "purpose": "Teach the student the topic before the article is read.",
+      "must_do": [
+        "Give a clean topic overview.",
+        "Identify foundational frameworks.",
+        "Identify key concepts the student must know before reading.",
+        "Use topic-level background, not case-level details.",
+        "Prefer concise conceptual clarity over too many facts."
+      ],
+      "must_not_do": [
+        "Must not drift into article analysis.",
+        "Must not generate debate arguments yet.",
+        "Must not give vague one-line definitions with no conceptual value.",
+        "Must not overload the student with unrelated theory."
+      ],
+      "required_inputs": [
+        "topic",
+        "topic_info",
+        "reference_background",
+        "retrieved topic evidence"
+      ],
+      "required_outputs": {
+        "topic_foundation": {
+          "topic": "string",
+          "overview": "string",
+          "frameworks": [
+            "string"
+          ],
+          "key_concepts": [
+            "string"
+          ],
+          "notes": [
+            "string"
+          ]
+        }
+      },
+      "quality_checks": [
+        "Overview must explain the topic, not just name it.",
+        "Frameworks must be relevant to debate on that topic.",
+        "Key concepts must be terms the student will actually need later."
+      ]
+    },
+    "article_context_node": {
+      "purpose": "Prepare the student to understand the selected article before debate teaching begins.",
+      "must_do": [
+        "Explain the article context in plain language.",
+        "Identify the relevant stakeholders.",
+        "Give the pre-context needed to understand why this article matters.",
+        "Keep focus on article understanding, not yet full debate teaching."
+      ],
+      "must_not_do": [
+        "Must not produce full proposition/opposition arguments.",
+        "Must not paste article title logic as analysis.",
+        "Must not fetch random Wikipedia titles from noisy article headlines without cleaning the query."
+      ],
+      "required_inputs": [
+        "topic",
+        "lead_case",
+        "topic_foundation",
+        "retrieved article-context evidence"
+      ],
+      "required_outputs": {
+        "article_context": {
+          "title": "string",
+          "overview": "string",
+          "stakeholders": [
+            "string"
+          ],
+          "notes": [
+            "string"
+          ]
+        }
+      },
+      "quality_checks": [
+        "Context must help the student read the article better.",
+        "Stakeholders must be real actors in the case.",
+        "Notes must not just repeat the article title."
+      ]
+    },
+    "topic_motion_mining_node": {
+      "purpose": "Study existing motions around the topic to understand how good debate motions are framed.",
+      "must_do": [
+        "Collect topic-relevant motions.",
+        "Identify recurring framing patterns.",
+        "Identify what makes motions on this topic balanced or unbalanced.",
+        "Help downstream nodes understand how the topic is typically debated competitively."
+      ],
+      "must_not_do": [
+        "Must not force one source only.",
+        "Must not treat raw scraped motions as final truth without filtering.",
+        "Must not generate the final motion directly without analysis."
+      ],
+      "required_inputs": [
+        "topic",
+        "topic_info",
+        "external motion sources"
+      ],
+      "required_outputs": {
+        "topic_motion_set": {
+          "motions": [
+            "string"
+          ],
+          "patterns": [
+            "string"
+          ],
+          "balance_notes": [
+            "string"
+          ]
+        }
+      },
+      "quality_checks": [
+        "Motions should be topically relevant.",
+        "Patterns should be analytical, not just a list.",
+        "Balance notes should help motion drafting later."
+      ]
+    },
+    "motion_intelligence_node": {
+      "purpose": "Convert mined motions into actionable motion-design intelligence.",
+      "must_do": [
+        "Identify recurring clash axes.",
+        "Identify common motion types for the topic.",
+        "Identify useful framings and burden patterns.",
+        "Teach downstream motion drafting how to remain balanced."
+      ],
+      "must_not_do": [
+        "Must not generate shallow labels without explaining their strategic use.",
+        "Must not confuse motion type with clash type.",
+        "Must not produce only abstract theory with no drafting value."
+      ],
+      "required_inputs": [
+        "topic",
+        "topic_motion_set",
+        "topic_foundation"
+      ],
+      "required_outputs": {
+        "motion_intelligence": {
+          "common_clashes": [
+            "string"
+          ],
+          "common_framings": [
+            "string"
+          ],
+          "motion_types": [
+            "string"
+          ],
+          "balance_signals": [
+            "string"
+          ]
+        }
+      },
+      "quality_checks": [
+        "Clashes should be debate-usable.",
+        "Framings should help motion construction.",
+        "Motion types should map to real debate categories."
+      ]
+    },
+    "motion_drafting_node": {
+      "purpose": "Draft a balanced motion from the topic, article, and motion intelligence.",
+      "must_do": [
+        "Draft one debate-worthy motion.",
+        "Keep the motion balanced.",
+        "Keep wording concise and debate-natural.",
+        "Generate proposition and opposition burdens.",
+        "Preserve the article as the live case while avoiding article-title bloat."
+      ],
+      "must_not_do": [
+        "Must not create an article headline disguised as a motion.",
+        "Must not produce a proposition-slanted motion.",
+        "Must not create a motion so vague that the clash disappears.",
+        "Must not overuse long article titles inside the motion."
+      ],
+      "required_inputs": [
+        "topic",
+        "lead_case",
+        "motion_intelligence",
+        "topic_motion_set"
+      ],
+      "required_outputs": {
+        "drafted_motion": {
+          "drafted_motion": "string",
+          "case_label": "string",
+          "motion_type": "string",
+          "actor": "string",
+          "prop_burden": [
+            "string"
+          ],
+          "opp_burden": [
+            "string"
+          ],
+          "likely_clash_axis": [
+            "string"
+          ],
+          "why_this_motion_is_balanced": "string"
+        }
+      },
+      "quality_checks": [
+        "Motion must sound like a real debate motion.",
+        "Motion must be one-time readable in delivery.",
+        "Burdens must reflect real burdens, not paraphrase the motion."
+      ]
+    },
+    "argue_node": {
+      "purpose": "Generate raw proposition and opposition arguments from the motion, article, and retrieved evidence.",
+      "must_do": [
+        "Generate real debate claims.",
+        "Produce 3 candidate proposition arguments and 3 candidate opposition arguments internally.",
+        "Ensure arguments are about institutions, incentives, harms, tradeoffs, or comparative worlds.",
+        "Reject motion-restatement as argument.",
+        "Reject article-summary lines as argument.",
+        "Prefer claims that can later support framing and mechanism."
+      ],
+      "must_not_do": [
+        "Must not output generic instructions pretending to be arguments.",
+        "Must not output pure definitions as arguments.",
+        "Must not output framework names alone as arguments.",
+        "Must not output weak article facts with no claim attached."
+      ],
+      "required_inputs": [
+        "topic",
+        "lead_case",
+        "summaries",
+        "drafted_motion",
+        "retrieved argument evidence"
+      ],
+      "required_outputs": {
+        "arguments": {
+          "for": [
+            "string"
+          ],
+          "against": [
+            "string"
+          ],
+          "middle": "string"
+        }
+      },
+      "quality_checks": [
+        "Each argument must make a claim, not just describe.",
+        "Each argument must be debatable.",
+        "Each argument must survive if read aloud on its own."
+      ]
+    },
+    "coach_node": {
+      "purpose": "Transform raw arguments into teachable debate material.",
+      "must_do": [
+        "Convert raw arguments into 2 proposition and 2 opposition teaching blocks.",
+        "For each argument, provide the argument itself, the framing of that exact argument, and the mechanism of that exact argument.",
+        "Generate a real clash explanation.",
+        "Generate a coach note that adds hidden strategic value.",
+        "Keep outputs student-facing and debate-specific."
+      ],
+      "must_not_do": [
+        "Must not explain what framing is instead of giving the framing.",
+        "Must not explain what mechanism is instead of giving the mechanism.",
+        "Must not reuse proposition/opposition burden as the mechanism text.",
+        "Must not keep 3 and 3 arguments in final teaching output.",
+        "Must not produce a one-line clash label without explaining both sides."
+      ],
+      "required_inputs": [
+        "arguments",
+        "drafted_motion",
+        "lead_case",
+        "topic_foundation",
+        "article_context",
+        "retrieved coach evidence"
+      ],
+      "required_outputs": {
+        "debate_teaching": {
+          "motion_explanation": "string",
+          "prop_burden": [
+            "string"
+          ],
+          "opp_burden": [
+            "string"
+          ],
+          "for_arguments": [
+            {
+              "claim": "string",
+              "framing": "string",
+              "mechanism": "string"
+            }
+          ],
+          "against_arguments": [
+            {
+              "claim": "string",
+              "framing": "string",
+              "mechanism": "string"
+            }
+          ],
+          "core_clash": {
+            "main_clash": "string",
+            "what_prop_says": "string",
+            "what_opp_says": "string",
+            "judge_comparison": "string"
+          },
+          "coach_note": {
+            "hidden_lens": "string",
+            "what_most_debaters_miss": "string",
+            "how_to_open": "string",
+            "what_wins_the_judge": "string"
+          }
+        }
+      },
+      "selection_rules": [
+        "Only keep the strongest 2 proposition arguments.",
+        "Only keep the strongest 2 opposition arguments.",
+        "Arguments kept should be distinct, not repetitive."
+      ],
+      "quality_checks": [
+        "Framing must be argument-specific.",
+        "Mechanism must be step-by-step and argument-specific.",
+        "Clash must explain both sides and what the judge compares.",
+        "Coach note must add strategic value beyond the visible argument list."
+      ]
+    },
+    "vocab_enrichment_node": {
+      "purpose": "Teach only a small number of debate-useful words drawn from the actual lesson material.",
+      "must_do": [
+        "Select 1 or 2 words only.",
+        "Prefer words already present in the lesson material.",
+        "Explain meaning clearly.",
+        "Give one real example sentence per word.",
+        "Avoid recently repeated words when possible."
+      ],
+      "must_not_do": [
+        "Must not pick decorative vocabulary with low debate value.",
+        "Must not repeat the same words every day unless necessary.",
+        "Must not use the motion text as the example sentence.",
+        "Must not produce ambiguous definitions."
+      ],
+      "required_inputs": [
+        "topic_foundation",
+        "article_context",
+        "drafted_motion",
+        "debate_teaching",
+        "lead_case",
+        "retrieved vocab evidence"
+      ],
+      "required_outputs": {
+        "vocabulary_output": {
+          "selected_words": [
+            {
+              "word": "string",
+              "meaning": "string",
+              "why_it_helps": "string",
+              "example": "string"
+            }
+          ]
+        }
+      },
+      "quality_checks": [
+        "Words should help debate speaking or writing.",
+        "Example must be a real usage example.",
+        "Definition must be student-friendly."
+      ]
+    },
+    "format_node": {
+      "purpose": "Turn all teaching content into a delivery-ready digest.",
+      "must_do": [
+        "Preserve section ordering.",
+        "Keep motion mention minimal.",
+        "Present 2 for and 2 against arguments only.",
+        "Preserve claim, framing, and mechanism distinctly.",
+        "Preserve clash explanation clearly.",
+        "Preserve coach note separately.",
+        "Keep output readable in chat delivery."
+      ],
+      "must_not_do": [
+        "Must not merge different output versions together.",
+        "Must not collapse argument, framing, and mechanism into one unreadable line.",
+        "Must not truncate key teaching content aggressively.",
+        "Must not reintroduce old format labels if the new format is active."
+      ],
+      "required_inputs": [
+        "topic_foundation",
+        "article_context",
+        "drafted_motion",
+        "debate_teaching",
+        "vocabulary_output"
+      ],
+      "required_outputs": {
+        "final_doc": "string",
+        "final_sections": {
+          "pre_knowledge": [
+            "string"
+          ],
+          "article": [
+            "string"
+          ],
+          "motion": [
+            "string"
+          ],
+          "debate": [
+            "string"
+          ],
+          "vocab": [
+            "string"
+          ]
+        }
+      },
+      "quality_checks": [
+        "Output must be sectionally stable.",
+        "Coach note must remain separate.",
+        "Clash must remain visible.",
+        "Argument blocks must stay human-readable."
+      ]
+    },
+    "delivery_node": {
+      "purpose": "Deliver the digest cleanly to chat platforms.",
+      "must_do": [
+        "Split sections safely for the destination platform.",
+        "Split each of the 4 arguments into separate messages if needed.",
+        "Keep coach note separate.",
+        "Keep clash/judge comparison separate if helpful for readability."
+      ],
+      "must_not_do": [
+        "Must not merge all debate content into one overloaded message.",
+        "Must not split mid-thought when avoidable.",
+        "Must not reorder the logic of the lesson."
+      ],
+      "required_inputs": [
+        "final_doc"
+      ],
+      "required_outputs": {
+        "message_parts": [
+          "string"
+        ]
+      },
+      "quality_checks": [
+        "Each message should be readable on its own.",
+        "Debate sequence should still feel coherent across messages."
+      ]
+    }
+  },
+  "cross_node_guardrails": {
+    "do_not_repeat": [
+      "motion wording",
+      "generic buzzwords",
+      "same vocab words across days",
+      "same teaching label without content change"
+    ],
+    "do_not_confuse": [
+      "argument with framing",
+      "framing with mechanism",
+      "burden with mechanism",
+      "clash label with clash explanation",
+      "article summary with debate argument"
+    ],
+    "required_end_state": [
+      "student understands the topic",
+      "student understands the article context",
+      "student receives a balanced motion",
+      "student gets 2 proposition and 2 opposition arguments",
+      "each argument includes clear framing and mechanism",
+      "student sees the clash and how to judge it",
+      "student receives targeted vocabulary"
+    ]
+  }
+}

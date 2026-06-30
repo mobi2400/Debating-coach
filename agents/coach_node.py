@@ -1,5 +1,6 @@
 import json
 
+from core.debate_guidance import build_targeted_context
 from core.fallback import get_llm_with_fallback
 from core.prompt_cache import cached_invoke
 from core.topic_utils import topic_name
@@ -95,6 +96,161 @@ def _heuristic_debate_packet(topic: str, arguments: dict, summaries: list[str], 
     }
 
 
+
+
+
+
+def _extract_json_object(content: str) -> dict | None:
+    text = str(content or '').strip()
+    if not text:
+        return None
+    if text.startswith('```'):
+        text = text.split('```', 2)[1]
+        if text.startswith('json'):
+            text = text[4:]
+        text = text.strip()
+    try:
+        parsed = json.loads(text)
+        return parsed if isinstance(parsed, dict) else None
+    except Exception:
+        pass
+    start = text.find('{')
+    end = text.rfind('}')
+    if start != -1 and end != -1 and end > start:
+        snippet = text[start:end + 1]
+        try:
+            parsed = json.loads(snippet)
+            return parsed if isinstance(parsed, dict) else None
+        except Exception:
+            return None
+    return None
+
+
+def _heuristic_framing_example(argument: str, framing: str) -> str:
+    lower = argument.lower()
+    if 'access' in lower or 'representation' in lower:
+        return 'Say: this round is not about abstract sympathy; it is about whether excluded groups gain real entry into the institutions that write the rules.'
+    if 'network' in lower or 'elite' in lower or 'pipeline' in lower:
+        return 'Say: the real issue is not one biased decision but a structure that keeps reproducing the same people in power.'
+    if 'poverty' in lower or 'violence' in lower or 'health' in lower:
+        return 'Say: judge this as a long-term social-investment question, not a short-term budget question.'
+    if 'symbolic' in lower or 'optics' in lower:
+        return 'Say: the question is whether the reform changes lived outcomes or just improves the optics of the institution.'
+    if 'backlash' in lower or 'compliance' in lower:
+        return 'Say: what matters is not whether the goal sounds noble, but whether the tool keeps enough legitimacy to survive real resistance.'
+    return f'Say: {framing}'
+
+
+def _heuristic_mechanism_example(argument: str, mechanism: str) -> str:
+    lower = argument.lower()
+    if 'access' in lower or 'representation' in lower:
+        return 'Example chain: more women enter leadership -> they influence rules and priorities -> bias is challenged internally -> protections become harder to reverse.'
+    if 'network' in lower or 'elite' in lower or 'pipeline' in lower:
+        return 'Example chain: change who gets selected at the top -> mentoring and promotion norms shift -> the next tier of leaders becomes more diverse.'
+    if 'poverty' in lower or 'violence' in lower or 'health' in lower:
+        return 'Example chain: invest in legal and social protection -> immediate exposure to harm falls -> long-term education and earning outcomes improve -> poverty cycles weaken.'
+    if 'symbolic' in lower or 'optics' in lower:
+        return 'Example chain: the institution hits the visible target -> public pressure drops -> deeper reforms in pay, safety, and retention are postponed.'
+    if 'backlash' in lower or 'compliance' in lower:
+        return 'Example chain: stakeholders see the reform as imposed -> resentment rises -> compliance weakens -> the policy loses staying power.'
+    return f'Example chain: {mechanism}'
+
+
+def _enrich_argument_blocks_with_llm(state: dict, drafted_motion: dict, blocks: list[dict], side: str, guidance: str) -> list[dict]:
+    if not blocks:
+        return blocks
+
+    topic = topic_name(state.get("topic"))
+    lead_case = state.get("lead_case", {}) or {}
+    lead_title = str(lead_case.get("title", "")).strip()
+    motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
+    payload = []
+    for block in blocks[:2]:
+        payload.append({
+            "claim": block.get("claim", ""),
+            "article_example": block.get("article_example", ""),
+            "existing_framing": block.get("explanation", ""),
+            "existing_mechanism": block.get("mechanism", ""),
+        })
+
+    prompt = (
+        "You are refining debate teaching blocks for a student.\n"
+        "Return JSON only with one key: blocks.\n"
+        "blocks must be an array with the same number of items as the input.\n"
+        "For each item return these keys exactly: claim, framing, framing_example, mechanism, mechanism_example.\n"
+        "framing must explain what this argument is really about in the round.\n"
+        "framing_example must be one actual line the student could say in a speech to frame this argument.\n"
+        "mechanism must explain how this exact argument works step by step.\n"
+        "mechanism_example must be one concrete example chain showing that mechanism in action.\n"
+        "Do not repeat the same framing or mechanism across different arguments unless the claims are genuinely identical.\n"
+        "Be specific to each claim.\n\n"
+        f"DEBATE GUIDANCE:\n{guidance}\n\n"
+        f"Topic: {topic}\n"
+        f"Lead case: {lead_title}\n"
+        f"Motion: {motion_text}\n"
+        f"Side: {side}\n"
+        f"INPUT BLOCKS: {json.dumps(payload, ensure_ascii=False)}"
+    )
+
+    llm = get_llm_with_fallback(state)
+    response = cached_invoke(llm, prompt, scope=f"coach_{side}_blocks")
+    parsed = _extract_json_object(str(getattr(response, 'content', response)))
+    items = parsed.get('blocks') if isinstance(parsed, dict) else None
+    if not isinstance(items, list):
+        raise ValueError('coach block enrichment returned invalid JSON')
+
+    enriched: list[dict] = []
+    for base, item in zip(blocks, items):
+        enriched.append({
+            **base,
+            "claim": str(item.get("claim") or base.get("claim", "")).strip(),
+            "explanation": str(item.get("framing") or base.get("explanation", "")).strip(),
+            "framing_example": str(item.get("framing_example") or _heuristic_framing_example(base.get("claim", ""), base.get("explanation", ""))).strip(),
+            "mechanism": str(item.get("mechanism") or base.get("mechanism", "")).strip(),
+            "mechanism_example": str(item.get("mechanism_example") or _heuristic_mechanism_example(base.get("claim", ""), base.get("mechanism", ""))).strip(),
+        })
+
+    while len(enriched) < len(blocks):
+        base = blocks[len(enriched)]
+        enriched.append({
+            **base,
+            "framing_example": _heuristic_framing_example(base.get("claim", ""), base.get("explanation", "")),
+            "mechanism_example": _heuristic_mechanism_example(base.get("claim", ""), base.get("mechanism", "")),
+        })
+    return enriched
+
+def _build_clash_block(packet: dict, drafted_motion: dict, topic: str) -> dict:
+    clash_axes = drafted_motion.get("likely_clash_axis", []) or []
+    prop_burdens = drafted_motion.get("prop_burden", []) or [packet.get("burden_of_proof", "")]
+    opp_burdens = drafted_motion.get("opp_burden", []) or [packet.get("top_rebuttal", "")]
+    main_clash = clash_axes[0] if clash_axes else packet.get("value_clash", f"principle versus implementation in {topic}")
+    what_prop = prop_burdens[0] if prop_burdens else packet.get("burden_of_proof", "")
+    what_opp = opp_burdens[0] if opp_burdens else packet.get("top_rebuttal", "")
+    judge = packet.get("judge_language", "Tell the judge why your world is more likely, more stable, and less reversible in its harms.")
+    return {
+        "main_clash": str(main_clash).strip(),
+        "what_prop_says": str(what_prop).strip(),
+        "what_opp_says": str(what_opp).strip(),
+        "judge_comparison": str(judge).strip(),
+    }
+
+
+def _build_coach_note_block(packet: dict, drafted_motion: dict, topic: str) -> dict:
+    unique_angle = str(packet.get("unique_angle", "")).strip()
+    open_with = str(packet.get("open_with_this", "")).strip()
+    rebuttal = str(packet.get("top_rebuttal", "")).strip()
+    judge = str(packet.get("judge_language", "")).strip()
+    hidden = unique_angle or f"The hidden lens in {topic} is usually whether the mechanism survives real incentives, not whether the slogan sounds attractive."
+    miss = rebuttal or "Most debaters state the value but never prove the actor chain, the incentive shift, and the comparative impact."
+    opening = open_with or f"Open by telling the judge what question actually decides the round in {topic}, then show why your side answers it better."
+    wins = judge or "Tell the judge why your world is more likely, more stable, and less reversible in its harms."
+    return {
+        "hidden_lens": hidden,
+        "what_most_debaters_miss": miss,
+        "how_to_open": opening,
+        "what_wins_the_judge": wins,
+    }
+
 def _packet_to_block(packet: dict) -> str:
     return "\n".join(
         [
@@ -126,35 +282,68 @@ def _article_examples(state: dict) -> list[str]:
     return examples[:4]
 
 
-def _teaching_block(argument: str, side: str, index: int, drafted_motion: dict, packet: dict, examples: list[str]) -> dict:
-    motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
+def _argument_framing(argument: str, side: str, example: str) -> str:
+    lower = argument.lower()
+    if side == "for":
+        if any(token in lower for token in ("rights", "equal", "access", "representation", "voice")):
+            return "Frame this as an access-and-legitimacy argument: the judge should care whether excluded groups gain real entry into institutions that shape rules, status, and opportunity."
+        if any(token in lower for token in ("network", "elite", "pipeline", "promotion", "hiring")):
+            return "Frame this as a structural-reproduction argument: the issue is not one bad decision but a system that keeps rewarding the same people again and again."
+        if any(token in lower for token in ("backlash", "delay", "speed", "reform", "voluntary")):
+            return "Frame this as an urgency argument: delaying reform is not neutral if the current arrangement keeps allocating harm and exclusion every year."
+        return "Frame this as a structural reform argument: the judge should care whether the policy changes who gets access, voice, and institutional power over time."
+
+    if any(token in lower for token in ("symbolic", "perform", "legitimacy", "shortcut", "optics")):
+        return "Frame this as a symbolic-versus-material change argument: the judge should care whether the reform actually changes lived outcomes or merely improves the institution's image."
+    if any(token in lower for token in ("backlash", "coerc", "resent", "trust", "compliance")):
+        return "Frame this as a backlash and compliance argument: the key question is whether the policy triggers resistance that weakens the very goal it claims to advance."
+    if any(token in lower for token in ("pipeline", "care", "labour", "deeper", "structural")):
+        return "Frame this as a misdiagnosis argument: the judge should care whether the reform targets the visible symptom while leaving the deeper engine of exclusion intact."
+    return "Frame this as a comparative-harm argument: the judge should care where the model misfires, who pays first, and whether the same goal can be reached with less damage."
+
+
+def _argument_mechanism(argument: str, side: str, example: str, fallback: str) -> str:
+    lower = argument.lower()
+    if side == "for":
+        if any(token in lower for token in ("network", "elite", "pipeline", "promotion", "hiring")):
+            return "Explain the chain clearly: the reform changes who gets selected at the top, that reshapes mentoring and promotion incentives below, and over time the institution stops reproducing the same elite profile."
+        if any(token in lower for token in ("rights", "equal", "access", "representation", "voice")):
+            return "Explain the chain clearly: once excluded groups gain formal access and representation, they can influence rules, challenge bias inside the institution, and secure more durable protections for those below them."
+        if any(token in lower for token in ("delay", "speed", "reform", "voluntary", "market")):
+            return "Explain the chain clearly: a binding reform forces immediate behavioural change, while voluntary change lets current gatekeepers postpone adjustment and preserve the old distribution of power."
+        return "Explain the actor, the institutional change, and the downstream effect: who changes behaviour first, what incentive shifts, and why that produces better long-term outcomes."
+
+    if any(token in lower for token in ("symbolic", "perform", "optics", "shortcut")):
+        return "Explain the chain clearly: the institution hits the visible metric, claims progress, and then loses pressure to fix the harder causes of exclusion in pay, care burdens, retention, or workplace culture."
+    if any(token in lower for token in ("backlash", "coerc", "resent", "trust", "compliance")):
+        return "Explain the chain clearly: once people see the reform as imposed rather than earned, compliance becomes thinner, resentment grows, and the policy loses both legitimacy and staying power."
+    if any(token in lower for token in ("pipeline", "care", "labour", "deeper", "structural")):
+        return "Explain the chain clearly: the reform acts at the endpoint, but the real exclusion happens earlier through schooling, care work, hiring filters, and retention, so the core inequality survives."
+    return fallback or "Show exactly where the mechanism breaks in practice: who resists, who bears the cost first, and why the promised benefit fails to materialise at scale."
+
+
+def _teaching_block_seed(argument: str, side: str, index: int, drafted_motion: dict, packet: dict, examples: list[str]) -> dict:
     prop_burden = (drafted_motion.get("prop_burden", []) or [""])[0]
     opp_burden = (drafted_motion.get("opp_burden", []) or [""])[0]
     example = examples[min(index, len(examples) - 1)] if examples else "Use the strongest article detail to prove the mechanism."
 
     if side == "for":
-        explanation = (
-            f"This is the proposition case under the motion '{motion_text}'. You are not merely praising the principle; you must show why this world solves a real structural problem better than the status quo."
-            if motion_text else
-            "This is the proposition case. You must show why your world creates a better long-term outcome, not just a nicer slogan."
-        )
-        mechanism = prop_burden or "Track the actor, the incentive change, and the downstream benefit step by step."
+        explanation = _argument_framing(argument, side, example)
+        mechanism = _argument_mechanism(argument, side, example, prop_burden)
         pushback = "Opposition will say your model is too idealistic, too costly, or too hard to implement consistently."
         rebuttal = f"Answer by narrowing the mechanism: show why {example} demonstrates that the status quo already imposes costs, so action is not risk-free in the first place."
     else:
-        explanation = (
-            f"This is the opposition case against the motion '{motion_text}'. Your job is to show where the promised gains break once real incentives, backlash, or institutional limits appear."
-            if motion_text else
-            "This is the opposition case. Your job is to show where the promised benefits collapse in practice."
-        )
-        mechanism = opp_burden or "Interrogate compliance, incentives, and second-order effects rather than accepting the framing on trust."
+        explanation = _argument_framing(argument, side, example)
+        mechanism = _argument_mechanism(argument, side, example, opp_burden)
         pushback = "Proposition will say the principle is too important to reject just because implementation is imperfect."
         rebuttal = f"Answer that judges compare worlds, not slogans: use {example} to show why bad implementation changes who bears harm first and why that matters more."
 
     return {
         "claim": argument,
         "explanation": explanation,
+        "framing_example": _heuristic_framing_example(argument, explanation),
         "mechanism": mechanism,
+        "mechanism_example": _heuristic_mechanism_example(argument, mechanism),
         "why_it_matters": "This matters because rounds are won by proving comparative impact, reversibility of harm, and who carries the burden in the real world.",
         "article_example": example,
         "likely_pushback": pushback,
@@ -162,11 +351,34 @@ def _teaching_block(argument: str, side: str, index: int, drafted_motion: dict, 
     }
 
 
+def _teaching_block(state: dict | None, argument: str, side: str, index: int, drafted_motion: dict, packet: dict, examples: list[str]) -> dict:
+    base = _teaching_block_seed(argument, side, index, drafted_motion, packet, examples)
+    if not state:
+        return base
+
+    guidance = build_targeted_context(
+        'coach_node',
+        sections=[
+            ('concepts', 'argumentation'),
+            ('concepts', 'framing'),
+            ('concepts', 'mechanism'),
+            ('contract', 'shared_definitions.argument_block'),
+            ('contract', 'nodes.coach_node'),
+        ],
+        max_chars=2400,
+    )
+    try:
+        enriched = _enrich_argument_blocks_with_llm(state, drafted_motion, [base], 'proposition' if side == 'for' else 'opposition', guidance)
+        return enriched[0] if enriched else base
+    except Exception:
+        return base
+
+
 def _build_debate_teaching(state: dict, packet: dict, drafted_motion: dict) -> dict:
     arguments = state.get("arguments", {}) or {}
     examples = _article_examples(state)
-    for_blocks = [_teaching_block(argument, "for", index, drafted_motion, packet, examples) for index, argument in enumerate((arguments.get("for") or [])[:3])]
-    against_blocks = [_teaching_block(argument, "against", index, drafted_motion, packet, examples) for index, argument in enumerate((arguments.get("against") or [])[:3])]
+    for_blocks = [_teaching_block(state, argument, "for", index, drafted_motion, packet, examples) for index, argument in enumerate((arguments.get("for") or [])[:2])]
+    against_blocks = [_teaching_block(state, argument, "against", index, drafted_motion, packet, examples) for index, argument in enumerate((arguments.get("against") or [])[:2])]
 
     motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
     clash_axes = drafted_motion.get("likely_clash_axis", []) or []
@@ -182,11 +394,7 @@ def _build_debate_teaching(state: dict, packet: dict, drafted_motion: dict) -> d
         "opp_burden": drafted_motion.get("opp_burden", []) or ["Show why the comparative world is safer or more realistic."],
         "for_arguments": for_blocks,
         "against_arguments": against_blocks,
-        "core_clash": {
-            "what_the_round_is_really_about": clash_axes[0] if clash_axes else packet.get("value_clash", "principle versus implementation"),
-            "what_prop_must_win": (drafted_motion.get("prop_burden", []) or [packet.get("burden_of_proof", "")])[0],
-            "what_opp_must_win": (drafted_motion.get("opp_burden", []) or [packet.get("top_rebuttal", "")])[0],
-        },
+        "core_clash": _build_clash_block(packet, drafted_motion, topic_name(state.get("topic"))),
         "mechanism": {"step_by_step_logic": [packet.get("mechanism", ""), "Show the actor, the incentive change, the immediate effect, and the long-term consequence."]},
         "framing": {
             "prop_frame": packet.get("open_with_this", ""),
@@ -200,7 +408,7 @@ def _build_debate_teaching(state: dict, packet: dict, drafted_motion: dict) -> d
                 "why_that_answer_works": "It drags the round back from slogans to mechanism, comparative burden, and concrete article evidence.",
             }
         ],
-        "coach_note": packet.get("unique_angle", ""),
+        "coach_note": _build_coach_note_block(packet, drafted_motion, topic_name(state.get("topic"))),
     }
 
 
@@ -231,6 +439,23 @@ def coach_node(state: dict) -> dict:
         state["debate_angle"] = default_coaching
         state["debate_teaching"] = _build_debate_teaching(state, default_packet, drafted_motion)
         return state
+
+    guidance = build_targeted_context(
+        'coach_node',
+        sections=[
+            ('concepts', 'framing'),
+            ('concepts', 'mechanism'),
+            ('concepts', 'clash'),
+            ('concepts', 'rebuttal'),
+            ('concepts', 'coach_notes'),
+            ('contract', 'shared_definitions.argument_block'),
+            ('contract', 'shared_definitions.clash_block'),
+            ('contract', 'shared_definitions.coach_note_block'),
+            ('contract', 'nodes.coach_node'),
+            ('contract', 'cross_node_guardrails'),
+        ],
+        max_chars=3200,
+    )
 
     prompt = (
         "You are a debate coach writing in the user's preferred debate style.\n"
