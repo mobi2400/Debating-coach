@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 from core.topic_utils import topic_name
+from tools.debatedata_tool import fetch_debatedata_motions
 
 
 CACHE_DIR = Path("cache") / "topic_motions"
@@ -41,6 +42,23 @@ def _seed_terms(topic_info: dict, topic: str) -> tuple[list[str], list[str], lis
     }
     actors = actor_map.get(topic.lower(), ["governments", "states", "public institutions", "regulators"])
     return live_cases, concept_terms, actors
+
+
+def _debatedata_motions(topic: str, limit: int = TARGET_MOTION_COUNT) -> list[str]:
+    try:
+        results = fetch_debatedata_motions(topic, limit=limit)
+    except Exception:
+        return []
+    motions: list[str] = []
+    seen: set[str] = set()
+    for item in results:
+        motion = " ".join(str(item.get("motion", "")).split()).strip()
+        if motion and motion.lower() not in seen:
+            seen.add(motion.lower())
+            motions.append(motion)
+        if len(motions) >= limit:
+            break
+    return motions
 
 
 def _generated_motion_templates(topic: str, topic_info: dict) -> list[str]:
@@ -104,7 +122,7 @@ def topic_motion_mining_node(state: dict) -> dict:
 
     motions_cleaned: list[str] = []
     motions_raw: list[str] = []
-    source_sites: list[str] = ["topic_info", "generated_templates"]
+    source_sites: list[str] = []
     fetched_at = datetime.utcnow().isoformat(timespec="seconds") + "Z"
 
     if cache_path.exists():
@@ -112,15 +130,24 @@ def topic_motion_mining_node(state: dict) -> dict:
             payload = json.loads(cache_path.read_text(encoding="utf-8"))
             motions_cleaned = [str(item).strip() for item in payload.get("motions_cleaned", []) if str(item).strip()]
             motions_raw = [str(item).strip() for item in payload.get("motions_raw", []) if str(item).strip()]
-            source_sites = payload.get("source_sites", source_sites)
+            source_sites = payload.get("source_sites", source_sites) or ["cache"]
             fetched_at = payload.get("fetched_at", fetched_at)
         except Exception:
             motions_cleaned = []
             motions_raw = []
 
     if not motions_cleaned:
-        motions_cleaned = _generated_motion_templates(topic, topic_info)
-        motions_raw = list(motions_cleaned)
+        debatedata_motions = _debatedata_motions(topic)
+        if debatedata_motions:
+            motions_cleaned = debatedata_motions[:TARGET_MOTION_COUNT]
+            motions_raw = list(motions_cleaned)
+            source_sites.append("debatedata")
+
+        if not motions_cleaned:
+            motions_cleaned = _generated_motion_templates(topic, topic_info)
+            motions_raw = list(motions_cleaned)
+            source_sites.extend(["topic_info", "generated_templates"])
+
         payload = {
             "topic": topic,
             "motions_raw": motions_raw,
