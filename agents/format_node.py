@@ -1,12 +1,32 @@
 from __future__ import annotations
 
 from agents.rank_node import _is_explainer_article, _is_news_article, _is_reference_article
+from core.debate_guidance import get_node_guidance
 from core.topic_utils import topic_name
 from memory.weekly_store import save_daily_digest
 from rag.retrieval_memory import compact_retrieval_snapshot
 
 
-FINAL_DOC_CHAR_LIMIT = 12000
+FINAL_DOC_CHAR_LIMIT = 15000
+
+
+def _remove_ellipses(text: str) -> str:
+    value = str(text).replace('?', '.').replace('...', '.')
+    while '..' in value:
+        value = value.replace('..', '.')
+    return value
+
+
+def _format_rules() -> dict:
+    guidance = get_node_guidance("format_node")
+    contract = guidance.get("contract", {}) or {}
+    node_rules = contract.get("nodes.format_node", {}) or {}
+    guardrails = contract.get("cross_node_guardrails", {}) or {}
+    return {
+        "must_do": [str(item).strip() for item in node_rules.get("must_do", []) if str(item).strip()],
+        "must_not_do": [str(item).strip() for item in node_rules.get("must_not_do", []) if str(item).strip()],
+        "required_end_state": [str(item).strip() for item in guardrails.get("required_end_state", []) if str(item).strip()],
+    }
 
 
 def _join_lines(lines: list[str]) -> str:
@@ -14,7 +34,7 @@ def _join_lines(lines: list[str]) -> str:
 
 
 def _clean_text(text: str) -> str:
-    value = str(text)
+    value = _remove_ellipses(str(text))
     for token in ("**", "__", "*", "`"):
         value = value.replace(token, "")
     return " ".join(value.split()).strip()
@@ -27,14 +47,28 @@ def _trim_block(text: str, char_limit: int, line_limit: int | None = None) -> st
     compact = _clean_text(" ".join(lines))
     if len(compact) <= char_limit:
         return compact
-    return compact[: char_limit - 3].rstrip() + "..."
+
+    floor = max(int(char_limit * 0.6), 40)
+    window = compact[:char_limit]
+    for marker in (". ", "! ", "? ", "; ", ": "):
+        idx = window.rfind(marker)
+        if idx >= floor:
+            clipped = window[: idx + 1].rstrip()
+            return clipped if clipped.endswith((".", "!", "?")) else clipped + "."
+
+    split_at = window.rfind(" ")
+    if split_at >= floor:
+        clipped = window[:split_at].rstrip()
+        return clipped if clipped.endswith((".", "!", "?")) else clipped + "."
+
+    return compact[:char_limit].rstrip()
 
 
 def _trim_document(text: str, char_limit: int) -> str:
     compact = str(text).strip()
     if len(compact) <= char_limit:
         return compact
-    return compact[: char_limit - 3].rstrip() + "..."
+    return _remove_ellipses(compact[:char_limit].rstrip())
 
 
 def _sentences(text: str, limit: int = 2) -> list[str]:
@@ -319,47 +353,93 @@ def _debate_section(state: dict) -> list[str]:
     return lines[:10]
 
 
-def _coach_note(state: dict) -> str:
+def _coach_note_lines(state: dict) -> list[str]:
+    teaching = state.get("debate_teaching", {}) or {}
+    coach_note = teaching.get("coach_note", {}) or {}
+    if isinstance(coach_note, dict) and coach_note:
+        lines = ["Coach note:"]
+        if coach_note.get("how_to_open"):
+            lines.append(f"Start with this: {_clean_text(coach_note['how_to_open'])}")
+        if coach_note.get("hidden_lens"):
+            lines.append(f"Hidden lens: {_clean_text(coach_note['hidden_lens'])}")
+        if coach_note.get("what_most_debaters_miss"):
+            lines.append(f"What most debaters miss: {_clean_text(coach_note['what_most_debaters_miss'])}")
+        if coach_note.get("what_wins_the_judge"):
+            lines.append(f"What wins the judge: {_clean_text(coach_note['what_wins_the_judge'])}")
+        return lines[:5]
+
     sections = _extract_coach_sections(state)
     if sections.get("unique_angle"):
-        extra = ""
+        lines = ["Coach note:"]
         if sections.get("open_with_this"):
-            extra = f" Open with something like: {sections['open_with_this']}"
-        return _trim_block(sections["unique_angle"] + extra, 560)
+            lines.append(f"Start with this: {_clean_text(sections['open_with_this'])}")
+        lines.append(f"Hidden lens: {_clean_text(sections['unique_angle'])}")
+        return lines[:3]
 
     misses = _topic_info_list(state, "argument_angles_most_debaters_miss", 1)
     if misses:
-        return _trim_block(misses[0], 280)
-    return "Do not stop at moral language. Prove the mechanism and the comparative impact."
+        return ["Coach note:", f"Hidden lens: {_clean_text(misses[0])}"]
+    return ["Coach note:", "Hidden lens: Do not stop at moral language. Prove the mechanism and the comparative impact."]
 
 
-def _rebuttal_drills(state: dict) -> list[str]:
+def _rebuttal_drills(state: dict) -> list[dict[str, str]]:
     arguments = state.get("arguments", {}) or {}
     coach_sections = _extract_coach_sections(state)
     article_title, article_examples = _article_example_context(state)
     article_tag = f"in today's case about {article_title}" if article_title else "in today's case"
-    drills: list[str] = []
+    drills: list[dict[str, str]] = []
 
     against_args = arguments.get("against", [])[:3]
     for_args = arguments.get("for", [])[:3]
 
     if against_args:
         example = _trim_block(article_examples[0], 150) if article_examples else "one concrete case detail"
-        drills.append(
-            f"If they say this against you: {_trim_block(against_args[0], 130)} | Reply by asking exactly where their feasibility objection kicks in, then anchor the answer {article_tag} with {example}."
-        )
+        drills.append({
+            "prompt": f"If they say this against you: {_trim_block(against_args[0], 170)}",
+            "answer": (
+                "Answer: Ask them to identify the exact point where their feasibility objection starts to bite. "
+                f"Then bring the round back to outcomes {article_tag} by showing how {example} proves the harm is not abstract and cannot be postponed."
+            ),
+        })
     if len(against_args) > 1:
-        drills.append(
-            f"If they push this second opposition line: {_trim_block(against_args[1], 130)} | Force them to explain what incentive changes would actually make actors behave differently, instead of just asserting collapse."
-        )
+        drills.append({
+            "prompt": f"If they push this second opposition line: {_trim_block(against_args[1], 170)}",
+            "answer": (
+                "Answer: Force them to explain what incentive changes would actually make actors behave differently. "
+                "If they cannot show that alternative mechanism, say they are describing frustration with the world as it is, not a better comparative world."
+            ),
+        })
     if for_args:
         example = _trim_block(article_examples[1], 150) if len(article_examples) > 1 else (_trim_block(article_examples[0], 150) if article_examples else "the article's strongest factual detail")
-        drills.append(
-            f"If they say this for you and you are opposing: {_trim_block(for_args[0], 130)} | Reply by attacking the mechanism, asking who pays the cost first, and showing why {example} weakens their precedent claim."
-        )
+        drills.append({
+            "prompt": f"If they say this for you and you are opposing: {_trim_block(for_args[0], 170)}",
+            "answer": (
+                "Answer: Attack the mechanism first. Ask who pays the cost immediately, who implements the policy in the real world, "
+                f"and why {example} shows their precedent is weaker than they claim."
+            ),
+        })
     if coach_sections.get("top_rebuttal") and len(drills) < 4:
-        drills.append(f"Detailed rebuttal script: {_trim_block(coach_sections['top_rebuttal'], 260)}")
+        drills.append({
+            "prompt": "Detailed rebuttal script:",
+            "answer": f"Answer: {_clean_text(coach_sections['top_rebuttal'])}",
+        })
     return drills[:4]
+
+
+def _rebuttal_drill_lines(state: dict) -> list[str]:
+    lines: list[str] = []
+    for drill in _rebuttal_drills(state):
+        prompt = _clean_text(drill.get("prompt", ""))
+        answer = _clean_text(drill.get("answer", ""))
+        if prompt:
+            lines.append(prompt)
+        if answer:
+            lines.append(answer)
+        if prompt or answer:
+            lines.append("")
+    while lines and not lines[-1].strip():
+        lines.pop()
+    return lines
 
 
 def _weight_language_lines() -> list[str]:
@@ -407,7 +487,15 @@ def _motion_section(state: dict) -> list[str]:
     clash_axes = drafted_motion.get("likely_clash_axis", []) or []
     prop_burden = drafted_motion.get("prop_burden", []) or []
     opp_burden = drafted_motion.get("opp_burden", []) or []
+    motion_type = str(drafted_motion.get("motion_type", "")).strip()
+    motion_type_explanation = drafted_motion.get("motion_type_explanation", {}) or {}
     why_balanced = str(drafted_motion.get("why_this_motion_is_balanced", "")).strip()
+    if motion_type:
+        lines.append(f"Motion type: {motion_type}")
+    if motion_type_explanation.get("what_it_means"):
+        lines.append(f"What this motion type means: {_trim_block(motion_type_explanation.get('what_it_means', ''), 260)}")
+    if motion_type_explanation.get("how_to_debate_it"):
+        lines.append(f"How to build arguments in this motion: {_trim_block(motion_type_explanation.get('how_to_debate_it', ''), 260)}")
     if clash_axes:
         lines.append(f"Main clash axis: {clash_axes[0]}")
     if prop_burden:
@@ -495,66 +583,88 @@ def _argument_case_example(argument: str, article_tag: str, examples: list[str],
     return f"Example: {lens} {article_tag}: {_trim_block(chosen, 200)}"
 
 
+def _compact_argument_block(label: str, block: dict) -> list[str]:
+    claim = _clean_text(block.get("claim", ""))
+    framing = _clean_text(block.get("explanation", ""))
+    framing_example = _clean_text(block.get("framing_example", ""))
+    mechanism = _clean_text(block.get("mechanism", ""))
+    mechanism_example = _clean_text(block.get("mechanism_example", ""))
+    lines = [f"{label}: {claim}"]
+    if framing:
+        lines.append(f"Framing: {framing}")
+    if framing_example:
+        lines.append(f"Framing example: {framing_example}")
+    if mechanism:
+        lines.append(f"Mechanism: {mechanism}")
+    if mechanism_example:
+        lines.append(f"Mechanism example: {mechanism_example}")
+    return lines
+
+
 def _explain_debate_lines(state: dict) -> list[str]:
     teaching = state.get("debate_teaching", {}) or {}
     coach_sections = _extract_coach_sections(state)
+    drafted_motion = state.get("drafted_motion", {}) or {}
+    motion_text = str(drafted_motion.get("drafted_motion", "")).strip()
+    motion_type = str(drafted_motion.get("motion_type", "")).strip()
+    motion_type_explanation = drafted_motion.get("motion_type_explanation", {}) or {}
     lines: list[str] = []
+
+    if motion_text:
+        lines.append(f"Motion we are debating: {_trim_block(motion_text, 240)}")
+    if motion_type:
+        lines.append(f"Motion type: {_trim_block(motion_type, 60)}")
+    if motion_type_explanation.get("what_it_means"):
+        lines.append(f"What this motion type means: {_trim_block(motion_type_explanation.get('what_it_means', ''), 280)}")
+    if motion_type_explanation.get("how_to_debate_it"):
+        lines.append(f"How to handle the burden in this motion: {_trim_block(motion_type_explanation.get('how_to_debate_it', ''), 280)}")
 
     motion_explanation = str(teaching.get("motion_explanation", "")).strip()
     if motion_explanation:
-        lines.append(f"Motion meaning: {_trim_block(motion_explanation, 255)}")
+        lines.append(f"What this round is really asking: {_trim_block(motion_explanation, 340)}")
 
     prop_burdens = teaching.get("prop_burden", []) or []
     if prop_burdens:
-        lines.append(f"Proposition burden: {_trim_block(prop_burdens[0], 255)}")
+        lines.append(f"If you are proposition, prove this: {_trim_block(prop_burdens[0], 250)}")
     opp_burdens = teaching.get("opp_burden", []) or []
     if opp_burdens:
-        lines.append(f"Opposition burden: {_trim_block(opp_burdens[0], 255)}")
+        lines.append(f"If you are opposition, prove this: {_trim_block(opp_burdens[0], 250)}")
 
-    for index, block in enumerate((teaching.get("for_arguments", []) or [])[:3], 1):
-        lines.append(f"For argument {index}: {_trim_block(block.get('claim', ''), 230)}")
-        lines.append(f"Explanation: {_trim_block(block.get('explanation', ''), 240)}")
-        lines.append(f"Mechanism: {_trim_block(block.get('mechanism', ''), 240)}")
-        lines.append(f"Why it matters: {_trim_block(block.get('why_it_matters', ''), 230)}")
-        lines.append(f"Example: {_trim_block(block.get('article_example', ''), 220)}")
-        lines.append(f"If pushed, answer: {_trim_block(block.get('rebuttal', ''), 230)}")
+    for index, block in enumerate((teaching.get("for_arguments", []) or [])[:2], 1):
+        lines.extend(_compact_argument_block(f"For argument {index}", block))
 
-    for index, block in enumerate((teaching.get("against_arguments", []) or [])[:3], 1):
-        lines.append(f"Against argument {index}: {_trim_block(block.get('claim', ''), 230)}")
-        lines.append(f"Explanation: {_trim_block(block.get('explanation', ''), 240)}")
-        lines.append(f"Mechanism: {_trim_block(block.get('mechanism', ''), 240)}")
-        lines.append(f"Why it matters: {_trim_block(block.get('why_it_matters', ''), 230)}")
-        lines.append(f"Example: {_trim_block(block.get('article_example', ''), 220)}")
-        lines.append(f"If pushed, answer: {_trim_block(block.get('rebuttal', ''), 230)}")
+    for index, block in enumerate((teaching.get("against_arguments", []) or [])[:2], 1):
+        lines.extend(_compact_argument_block(f"Against argument {index}", block))
 
     core_clash = teaching.get("core_clash", {}) or {}
-    if core_clash.get("what_the_round_is_really_about"):
-        lines.append(f"Main clash: {_trim_block(core_clash.get('what_the_round_is_really_about', ''), 260)}")
-        lines.append("Clash explanation: This tells you which comparison decides the round once both teams finish trading examples.")
-    if core_clash.get("what_prop_must_win"):
-        lines.append(f"What proposition must win: {_trim_block(core_clash.get('what_prop_must_win', ''), 250)}")
-    if core_clash.get("what_opp_must_win"):
-        lines.append(f"What opposition must win: {_trim_block(core_clash.get('what_opp_must_win', ''), 250)}")
+    if core_clash.get("main_clash"):
+        lines.append(f"Main clash: {_trim_block(core_clash.get('main_clash', ''), 250)}")
+    if core_clash.get("what_prop_says"):
+        lines.append(f"What proposition says matters most: {_trim_block(core_clash.get('what_prop_says', ''), 260)}")
+    if core_clash.get("what_opp_says"):
+        lines.append(f"What opposition says matters most: {_trim_block(core_clash.get('what_opp_says', ''), 260)}")
+    if core_clash.get("judge_comparison"):
+        lines.append(f"How the judge should decide: {_trim_block(core_clash.get('judge_comparison', ''), 320)}")
 
     mechanism = teaching.get("mechanism", {}) or {}
     mechanism_steps = mechanism.get("step_by_step_logic", []) if isinstance(mechanism, dict) else []
-    for step in mechanism_steps[:2]:
-        if str(step).strip():
-            lines.append(f"Mechanism to explain: {_trim_block(step, 250)}")
+    if mechanism_steps:
+        joined = " -> ".join(_trim_block(step, 120) for step in mechanism_steps[:2] if str(step).strip())
+        if joined:
+            lines.append(f"Mechanism chain to explain in your speech: {joined}")
 
     framing = teaching.get("framing", {}) or {}
     if framing.get("prop_frame"):
-        lines.append(f"How proposition should frame it: {_trim_block(framing.get('prop_frame', ''), 250)}")
+        lines.append(f"Best proposition framing: {_trim_block(framing.get('prop_frame', ''), 340)}")
     if framing.get("opp_frame"):
-        lines.append(f"How opposition should frame it: {_trim_block(framing.get('opp_frame', ''), 250)}")
+        lines.append(f"Best opposition framing: {_trim_block(framing.get('opp_frame', ''), 340)}")
     if framing.get("strategic_note"):
-        lines.append(f"Judge framing: {_trim_block(framing.get('strategic_note', ''), 250)}")
+        lines.append(f"What the judge should care about most: {_trim_block(framing.get('strategic_note', ''), 340)}")
 
     if coach_sections.get("claim_warrant_impact"):
-        lines.append(f"Why this wins: {_trim_block(coach_sections['claim_warrant_impact'], 320)}")
+        lines.append(f"Coach lens: {_trim_block(coach_sections['claim_warrant_impact'], 420)}")
 
-    return lines[:34]
-
+    return lines
 
 def _things_to_take_care(state: dict) -> list[str]:
     lines: list[str] = []
@@ -579,14 +689,16 @@ def _recall_prompt(state: dict) -> str:
 
 def _heuristic_format(state: dict) -> str:
     topic = topic_name(state.get("topic"))
+    rules = _format_rules()
     english = _parse_english_lesson(state)
     pre_knowledge = _pre_knowledge_points(state)
     article_lines, _article = _article_section(state)
     motion_lines = _motion_section(state)
     debate_lines = _explain_debate_lines(state)
-    rebuttal_drills = _rebuttal_drills(state)
+    rebuttal_drill_lines = _rebuttal_drill_lines(state)
     weight_lines = _weight_language_lines()
     vocab_lines = _vocab_session(state, english)
+    coach_note_lines = _coach_note_lines(state)
     care_lines = _things_to_take_care(state)
 
     lines = [
@@ -607,10 +719,11 @@ def _heuristic_format(state: dict) -> str:
         "",
         "⚔️ YOUR DEBATING BUILD",
         *_bullets(debate_lines, 255),
-        f"• Coach note: {_trim_block(_coach_note(state), 560)}",
+        "",
+        *coach_note_lines,
         "",
         "🛡️ REBUTTAL DRILLS",
-        *_bullets(rebuttal_drills, 255),
+        *_bullets(rebuttal_drill_lines, 320),
         "",
         "🎙️ WEIGHING LANGUAGE TO USE",
         *_bullets(weight_lines, 240),
@@ -629,7 +742,7 @@ def _heuristic_format(state: dict) -> str:
 def format_node(state: dict) -> dict:
     state["task_type"] = "format"
     topic = topic_name(state.get("topic"))
-    pre_knowledge = _pre_knowledge_points(state)
+    rules = _format_rules()
     pre_knowledge = _pre_knowledge_points(state)
     article_lines, _article = _article_section(state)
     motion_lines = _motion_section(state)
@@ -640,6 +753,7 @@ def format_node(state: dict) -> dict:
         "motion": motion_lines,
         "debate": debate_lines,
         "vocab": _vocab_session(state, _parse_english_lesson(state)),
+        "format_rules": rules,
     }
     state["final_doc"] = _heuristic_format(state)
 

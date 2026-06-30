@@ -147,11 +147,34 @@ def _definition(word: str) -> str:
     return WORD_HINTS.get(word.lower(), "a useful debate word")
 
 
+def _topic_stub(topic: str) -> str:
+    mapping = {
+        "feminism and gender": "gender reform",
+        "international relations": "international cooperation",
+        "geopolitics": "great-power competition",
+        "economics and finance": "economic policymaking",
+    }
+    return mapping.get(topic.lower(), topic)
+
+
 def _example_line(word: str, topic: str, drafted_motion: dict | None = None) -> str:
-    motion_text = str((drafted_motion or {}).get("drafted_motion", "")).strip()
-    if motion_text:
-        return f"In the motion '{motion_text}', use '{word}' when you explain the decisive comparison rather than merely restating the headline."
-    return f"Use '{word}' when you want your explanation of {topic} to sound more precise and analytical."
+    subject = str((drafted_motion or {}).get("case_label", "")).strip() or _topic_stub(topic)
+    templates = {
+        "coercive": f"A coercive approach to {subject} may force compliance quickly, but it can also trigger backlash if institutions do not trust the reform.",
+        "coherent": f"Your opposition case is only coherent if you explain how {subject} can improve without the policy you are rejecting.",
+        "credible": f"The reform is only credible if it changes incentives around {subject} instead of producing a symbolic announcement.",
+        "robust": f"A robust argument on {subject} survives the obvious pushback about cost, enforcement, and unintended consequences.",
+        "plausible": f"Your mechanism must be plausible: explain why real actors in {subject} would behave the way your model predicts.",
+        "normative": f"This is a normative claim about {subject}: you are arguing what institutions ought to do, not only what they currently do.",
+        "asymmetry": f"The key asymmetry in {subject} is that one side bears the risk first while the other controls the decision.",
+        "empirical": f"Make the argument empirical by pointing to a concrete detail from today's {subject} case rather than staying abstract.",
+        "contingent": f"The benefit is contingent on enforcement, which means your side must explain what happens if support weakens halfway through.",
+        "deterrent": f"A deterrent effect matters only if actors in {subject} actually believe the cost of non-compliance has risen.",
+    }
+    return templates.get(
+        word.lower(),
+        f"Use '{word}' when you explain {subject} with a sharper mechanism, clearer comparison, and more precise judge language."
+    )
 
 
 def _heuristic_vocab(topic: str, candidates: list[str], drafted_motion: dict | None = None) -> tuple[list[str], list[str], dict]:
